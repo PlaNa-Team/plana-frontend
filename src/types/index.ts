@@ -1,0 +1,1 @@
+// TypeScript 타입 정의 - 타입 export
