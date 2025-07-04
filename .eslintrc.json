@@ -1,0 +1,43 @@
+{
+    "extends": [
+      "react-app",
+      "react-app/jest",
+      "@typescript-eslint/recommended",
+      "prettier"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "prettier"],
+    "rules": {
+        // Prettier 관련
+      "prettier/prettier": "error",
+
+      // TypeScript 관련
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/prefer-const": "error",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "interface",
+          "format": ["PascalCase"],
+          "prefix": ["I"]
+        },
+        {
+          "selector": "typeAlias",
+          "format": ["PascalCase"]
+        },
+        {
+          "selector": "enum",
+          "format": ["PascalCase"]
+        }
+      ],
+
+      // React 관련
+      "react-hooks/rules-of-hooks": "error",
+
+      "no-magic-numbers": "warn",
+      "no-duplicate-imports": "error"
+    }
+  }
