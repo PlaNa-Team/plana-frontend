@@ -19,7 +19,7 @@ import { Project } from './pages/project';      // project/index.ts에서 export
 import Layout from './components/common/Layout';
 
 // 스타일
-import './App.css';
+import './App.scss';
 
 // 보호된 라우트 컴포넌트 (로그인이 필요한 페이지들)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
