@@ -1,146 +1,158 @@
-// =============================================================================
-// VARIABLES - 임시 설정 (팀원과 디자인 협의 후 수정 예정)
-// =============================================================================
-
 // -----------------------------------------------------------------------------
 // 색상 변수 (Color Variables)
 // -----------------------------------------------------------------------------
 
-// 메인 브랜드 색상
-$primary-color: #007bff;      // 메인 파란색 (임시)
-$primary-light: #66b3ff;      // 밝은 파란색
-$primary-dark: #0056b3;       // 어두운 파란색
+$light-color: (
+    // 색상
+    'color-xs': #ffffff, // 흰색 배경
+    'color-sm': #D9D9D9, // 연한 회색 배경
+    'color-md': #8f8f8f, // 중간 회색 배경
+    'color-lg': #535353, // 진한 회색 배경
+    'color-xl': #000000, // 검은색 배경
+);
 
-// 보조 색상
-$secondary-color: #6c757d;    // 회색 (임시)
-$secondary-light: #adb5bd;    // 밝은 회색
-$secondary-dark: #495057;     // 어두운 회색
+$dark-color: (
+    // 색상
+    'color-xs': #000000, // 검은색 배경
+    'color-sm': #535353, // 진한 회색 배경
+    'color-md': #8f8f8f, // 중간 회색 배경
+    'color-lg': #D9D9D9, // 연한 회색 배경
+    'color-xl': #ffffff, // 흰색 배경
+);
 
-// 시스템 색상
-$success-color: #28a745;      // 성공 (초록색)
-$warning-color: #ffc107;      // 경고 (노란색)
-$error-color: #dc3545;        // 에러 (빨간색)
-$info-color: #17a2b8;         // 정보 (청록색)
 
-// 배경 색상
-$background-color: #ffffff;   // 메인 배경 (흰색)
-$background-gray: #f8f9fa;    // 회색 배경
-$background-dark: #343a40;    // 어두운 배경
+// 프로젝트 모드 - state, 별 토글
 
-// 텍스트 색상
-$text-primary: #212529;       // 메인 텍스트 (어두운 회색)
-$text-secondary: #6c757d;     // 보조 텍스트 (회색)
-$text-muted: #adb5bd;         // 연한 텍스트 (밝은 회색)
-$text-white: #ffffff;         // 흰색 텍스트
 
-// 테두리 색상
-$border-color: #dee2e6;       // 기본 테두리
-$border-light: #e9ecef;       // 밝은 테두리
-$border-dark: #adb5bd;        // 어두운 테두리
+
+
 
 // -----------------------------------------------------------------------------
 // 폰트 변수 (Font Variables)
 // -----------------------------------------------------------------------------
 
-// 폰트 패밀리 (나중에 웹폰트로 변경 예정)
-$font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-$font-family-heading: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-$font-family-mono: 'Courier New', Courier, monospace;
+// 폰트 패밀리 - Pretendard
+// Pretendard 폰트 import (npm 패키지 방식)
+@import '~pretendard/dist/web/static/pretendard.css';
+$font-family-base: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 
-// 폰트 크기
-$font-size-xs: 12px;          // 매우 작은 텍스트
-$font-size-sm: 14px;          // 작은 텍스트
-$font-size-base: 16px;        // 기본 텍스트
-$font-size-lg: 18px;          // 큰 텍스트
-$font-size-xl: 20px;          // 매우 큰 텍스트
-$font-size-xxl: 24px;         // 제목용
+// 폰트 크기 (rem 기준, 1rem = 16px)
+$font-size-xs: 0.75rem;       // 12px
+$font-size-sm: 0.875rem;      // 14px
+$font-size-base: 1rem;        // 16px
+$font-size-lg: 1.125rem;      // 18px
+$font-size-xl: 1.25rem;       // 20px
+$font-size-xxl: 1.5rem;       // 24px
+$font-size-3xl: 1.875rem;     // 30px
+$font-size-4xl: 2.25rem;      // 36px
 
 // 폰트 굵기
 $font-weight-light: 300;      // 얇은 글씨
 $font-weight-normal: 400;     // 보통 글씨
 $font-weight-medium: 500;     // 중간 굵기
+$font-weight-semibold: 600;   // 세미볼드
 $font-weight-bold: 700;       // 굵은 글씨
 
 // 줄 간격
+$line-height-tight: 1.25;     // 타이트한 줄 간격
 $line-height-base: 1.5;       // 기본 줄 간격
-$line-height-sm: 1.25;        // 작은 줄 간격
-$line-height-lg: 1.75;        // 큰 줄 간격
+$line-height-relaxed: 1.75;   // 여유로운 줄 간격
 
 // -----------------------------------------------------------------------------
-// 간격 변수 (Spacing Variables)
+// 간격 변수 (Spacing Variables) - rem 기준
 // -----------------------------------------------------------------------------
 
-$spacing-xs: 4px;             // 매우 작은 간격
-$spacing-sm: 8px;             // 작은 간격
-$spacing-md: 16px;            // 중간 간격
-$spacing-lg: 24px;            // 큰 간격
-$spacing-xl: 32px;            // 매우 큰 간격
-$spacing-xxl: 48px;           // 초대형 간격
+$spacing-0: 0;                // 0px
+$spacing-1: 0.25rem;          // 4px
+$spacing-2: 0.5rem;           // 8px
+$spacing-3: 0.75rem;          // 12px
+$spacing-4: 1rem;             // 16px
+$spacing-5: 1.25rem;          // 20px
+$spacing-6: 1.5rem;           // 24px
+$spacing-8: 2rem;             // 32px
+$spacing-10: 2.5rem;          // 40px
+$spacing-12: 3rem;            // 48px
+$spacing-16: 4rem;            // 64px
+$spacing-20: 5rem;            // 80px
 
-// 컴포넌트별 간격
-$padding-btn: $spacing-sm $spacing-md;      // 버튼 패딩
-$padding-card: $spacing-lg;                 // 카드 패딩
-$padding-section: $spacing-xl;              // 섹션 패딩
+// 시맨틱 간격 변수
+$spacing-xs: $spacing-1;      // 0.25rem (4px)
+$spacing-sm: $spacing-2;      // 0.5rem (8px)
+$spacing-md: $spacing-4;      // 1rem (16px)
+$spacing-lg: $spacing-6;      // 1.5rem (24px)
+$spacing-xl: $spacing-8;      // 2rem (32px)
+$spacing-xxl: $spacing-12;    // 3rem (48px)
 
 // -----------------------------------------------------------------------------
 // 크기 변수 (Size Variables)
 // -----------------------------------------------------------------------------
 
-// 컨테이너 최대 너비
-$container-max-width: 1200px;
+// 뷰포트 기반 크기
+$container-max-width: 75rem;      // 1200px (최대 너비)
+$container-width-sm: 36rem;       // 576px
+$container-width-md: 48rem;       // 768px
+$container-width-lg: 62rem;       // 992px
+$container-width-xl: 75rem;       // 1200px
 
-// 컴포넌트 높이
-$header-height: 60px;         // 헤더 높이
-$sidebar-width: 250px;        // 사이드바 너비
-$footer-height: 50px;         // 푸터 높이
+// 컴포넌트 높이 (rem 기준)
+$header-height: 3.75rem;          // 60px
+$footer-height: 3.125rem;         // 50px
 
-// 버튼 높이
-$btn-height-sm: 32px;         // 작은 버튼
-$btn-height-md: 40px;         // 중간 버튼
-$btn-height-lg: 48px;         // 큰 버튼
+// 아이콘 크기
+$icon-size-xs: 0.75rem;           // 12px
+$icon-size-sm: 1rem;              // 16px
+$icon-size-md: 1.25rem;           // 20px
+$icon-size-lg: 1.5rem;            // 24px
+$icon-size-xl: 2rem;              // 32px
 
 // -----------------------------------------------------------------------------
 // 테두리 변수 (Border Variables)
 // -----------------------------------------------------------------------------
 
-$border-width: 1px;           // 기본 테두리 두께
-$border-radius: 4px;          // 기본 모서리 둥글기
-$border-radius-sm: 2px;       // 작은 모서리 둥글기
-$border-radius-lg: 8px;       // 큰 모서리 둥글기
-$border-radius-xl: 12px;      // 매우 큰 모서리 둥글기
+$border-width-sm: 0.0625rem;    // 1px
+$border-width-md: 0.125rem;    // 2px
+$border-width-lg: 0.25rem;   // 4px
+
+$border-radius-none: 0;
+$border-radius-xs: 0.125rem;      // 2px
+$border-radius-sm: 0.25rem;       // 4px
+$border-radius-md: 0.375rem;      // 6px
+$border-radius-lg: 0.5rem;        // 8px
+$border-radius-xl: 0.75rem;       // 12px
+$border-radius-2xl: 1rem;         // 16px
+$border-radius-full: 50%;
 
 // -----------------------------------------------------------------------------
 // 그림자 변수 (Shadow Variables)
 // -----------------------------------------------------------------------------
 
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-$shadow-md: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-$shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+$shadow-none: none;
+$shadow-xs: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.05), 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.1);
+$shadow-md: 0 0.25rem 0.375rem -0.0625rem rgba(0, 0, 0, 0.1), 0 0.125rem 0.25rem -0.125rem rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.1), 0 0.25rem 0.375rem -0.125rem rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 1.25rem 1.5625rem -0.3125rem rgba(0, 0, 0, 0.1), 0 0.625rem 0.625rem -0.25rem rgba(0, 0, 0, 0.1);
 
 // -----------------------------------------------------------------------------
-// 애니메이션 변수 (Animation Variables)
+// 애니메이션 변수 (Animation Variables) - 나중에 쓰려면 쓰던가~
 // -----------------------------------------------------------------------------
 
-$transition-fast: 0.15s ease-in-out;     // 빠른 애니메이션
-$transition-base: 0.3s ease-in-out;      // 기본 애니메이션
-$transition-slow: 0.5s ease-in-out;      // 느린 애니메이션
+
 
 // -----------------------------------------------------------------------------
 // Z-INDEX 변수 (Z-Index Variables)
 // -----------------------------------------------------------------------------
 
-$z-index-dropdown: 1000;      // 드롭다운
-$z-index-sticky: 1020;        // 고정 요소
-$z-index-fixed: 1030;         // 고정 헤더/푸터
-$z-index-modal: 1040;         // 모달
-$z-index-popover: 1050;       // 팝오버
-$z-index-tooltip: 1060;       // 툴팁
-$z-index-toast: 1070;         // 토스트 알림
-
-// =============================================================================
-// TODO: 팀원과 디자인 시스템 협의 후 아래 항목들 수정 예정
-// - 브랜드 컬러 (Primary, Secondary)
-// - 폰트 패밀리 (웹폰트 적용)
-// - 브레이크포인트 (반응형 기준점)
-// - 컴포넌트별 세부 크기
-// =============================================================================
+$z-index-hide: -1;
+$z-index-auto: auto;
+$z-index-base: 0;
+$z-index-docked: 10;
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-banner: 1030;
+$z-index-overlay: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-skiplink: 1070;
+$z-index-toast: 1080;
+$z-index-tooltip: 1090;

@@ -3,7 +3,6 @@
 // Abstract ( 추상화 )
 @import 'abstracts/variables';    // 색상, 폰트 크기, 간격 등의 변수들
 @import 'abstracts/mixins';       // 재사용 가능한 CSS 함수들 (예: border-radius mixin)
-@import 'abstracts/functions';    // SCSS 함수들 (예: px을 rem으로 변환)
 
 // Base ( 기본 스타일 )
 @import 'base/reset';      // CSS 리셋 (브라우저 기본 스타일 제거)
@@ -13,7 +12,6 @@
 // Components ( 컴포넌트 스타일 )
 @import 'components/button';       // 버튼 컴포넌트 스타일
 @import 'components/modal';        // 모달창 컴포넌트 스타일
-@import 'components/calendar';     // 달력 컴포넌트 스타일
 @import 'components/notification'; // 알림/토스트 컴포넌트 스타일
 
 // Layout ( 레이아웃 스타일 )
@@ -21,9 +19,11 @@
 @import 'layout/footer';   // 푸터 영역 스타일
 
 // Pages ( 페이지별 스타일 )
-@import 'pages/home';     // 홈페이지 전용 스타일
-@import 'pages/calendar'; // 달력페이지 전용 스타일
-@import 'pages/login';    // 로그인페이지 전용 스타일
+@import 'pages/landing';     // 랜딩페이지 전용 스타일
+@import 'pages/calendar'; // 달력 모드 전용 스타일
+@import 'pages/diary';    // 다이어리 모드 전용 스타일
+@import 'pages/project';  // 프로젝트 모드 전용 스타일
+@import 'pages/login';    // 로그인 전용 스타일
 
 // Third-party ( 서드파티 라이브러리 스타일 )
 @import 'vendor/fullcalendar-overrides'; // FullCalendar 라이브러리 스타일 덮어쓰기
