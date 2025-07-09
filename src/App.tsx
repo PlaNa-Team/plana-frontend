@@ -1,6 +1,6 @@
 import React from 'react';
 // React Router의 라우팅 컴포넌트들 가져오기
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 // Redux 상태를 React 앱에 연결하는 Provider
 import { Provider } from 'react-redux';
 // 우리가 만든 Redux 스토어 가져오기
@@ -21,101 +21,42 @@ import Layout from './components/common/Layout';
 // 스타일
 import './App.scss';
 
-// 보호된 라우트 컴포넌트 (로그인이 필요한 페이지들)
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
-  // Redux에서 로그인 상태 가져오기
-  
-  // 로그인이 안 되어있으면 랜딩 페이지로 리다이렉트
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  
-  // 로그인이 되어있으면 원래 페이지 렌더링
-  return <>{children}</>;
-};
-
-// 공개 라우트 컴포넌트 (로그인 안 된 상태에서만 접근 가능)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
-  // Redux에서 로그인 상태 가져오기
-  
-  // 이미 로그인이 되어있으면 캘린더 페이지로 리다이렉트
-  if (isAuthenticated) {
-    return <Navigate to="/calendar" replace />;
-  }
-  
-  // 로그인이 안 되어있으면 원래 페이지 렌더링
-  return <>{children}</>;
-};
-
-// 앱 내부 라우팅 컴포넌트
-const AppRoutes: React.FC = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* 공개 라우트들 (로그인 전에만 접근 가능) */}
-        <Route 
-          path="/" 
-          element={
-            <PublicRoute>
-              <Landing />  {/* 랜딩 페이지 */}
-            </PublicRoute>
-          } 
-        />
-        <Route 
-          path="/login" 
-          element={
-            <PublicRoute>
-              <Login />    {/* 로그인 페이지 */}
-            </PublicRoute>
-          } 
-        />
-        
-        {/* 보호된 라우트들 (로그인 후에만 접근 가능) */}
-        <Route 
-          path="/calendar" 
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Calendar />  {/* 캘린더 페이지 */}
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/diary" 
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Diary />     {/* 다이어리 페이지 */}
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/project" 
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Project />   {/* 프로젝트 페이지 */}
-              </Layout>
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* 잘못된 경로로 접근 시 처리 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
-  );
-};
-
 function App() {
   return (
-    // Redux Provider로 전체 앱을 감싸서 모든 컴포넌트에서 상태 사용 가능
     <Provider store={store}>
-      <AppRoutes />
+      <Router>
+        <Routes>
+          {/* 공개 페이지들 (레이아웃 없음) */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* 메인 앱 페이지들 (레이아웃 적용) */}
+          <Route path="/calendar" element={
+            <Layout>
+              <Calendar />
+            </Layout>
+          } />
+          
+          <Route path="/diary" element={
+            <Layout>
+              <Diary />
+            </Layout>
+          } />
+          
+          <Route path="/project" element={
+            <Layout>
+              <Project />
+            </Layout>
+          } />
+          
+          {/* 기본적으로 캘린더로 리다이렉트 */}
+          <Route path="/app" element={
+            <Layout>
+              <Calendar />
+            </Layout>
+          } />
+        </Routes>
+      </Router>
     </Provider>
   );
 }
