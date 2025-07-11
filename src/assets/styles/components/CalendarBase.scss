@@ -1,0 +1,300 @@
+.calendar-base {
+  
+  // 컨테이너 레이아웃
+  .calendar-container {
+    display: flex;
+  }
+  
+  // 메인 캘린더 영역
+  .calendar-main {
+    flex: 1;
+  }
+  
+  // 메모 컬럼 영역
+  .memo-column {
+    width: 120px;
+    border-left: 1px solid #e5e7eb;
+    
+    // 메모 헤더
+    .memo-header {
+      padding: 12px 8px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      color: #374151;
+    }
+    
+    // 메모 셀
+    .memo-cell {
+      min-height: 100px;
+      padding: 8px;
+      border-bottom: 1px solid #f3f4f6;
+      background: #fafafa;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      
+      &:hover:not(.editing) {
+        background: #f0f9ff;
+      }
+      
+      &.editing {
+        background: #f0f9ff;
+        cursor: text;
+      }
+    }
+    
+    // 편집 모드
+    .memo-edit-mode {
+      .memo-textarea {
+        width: 100%;
+        height: 60px;
+        border: none;
+        background: transparent;
+        resize: none;
+        outline: none;
+        font-size: 12px;
+        font-family: inherit;
+        line-height: 1.4;
+      }
+      
+      .memo-buttons {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+        justify-content: flex-end;
+        
+        button {
+          padding: 2px 6px;
+          font-size: 10px;
+          border: none;
+          border-radius: 3px;
+          cursor: pointer;
+        }
+        
+        .memo-save-btn {
+          background: #3b82f6;
+          color: white;
+        }
+        
+        .memo-cancel-btn {
+          background: #6b7280;
+          color: white;
+        }
+      }
+    }
+    
+    // 보기 모드
+    .memo-view-mode {
+      .memo-content {
+        font-size: 12px;
+        line-height: 1.4;
+        color: #374151;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      
+      .memo-placeholder {
+        font-size: 12px;
+        color: #9ca3af;
+        text-align: center;
+        margin-top: 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        
+        .memo-plus {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+  // === FullCalendar 커스터마이징 ===
+  
+  // 헤더 툴바 스타일
+  :global(.fc-header-toolbar) {
+    padding: 12px 16px !important;
+    margin: 0 auto !important;
+    background: #fff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    width: 300px !important;
+  }
+  
+  // 각 영역별 flex 설정
+  :global(.fc-toolbar-chunk) {
+    display: flex !important;
+    align-items: center !important;
+    
+    // 왼쪽 영역 (이전 버튼)
+    &:first-child {
+      flex: 0 0 auto !important;
+      min-width: 40px !important;
+    }
+    
+    // 가운데 영역 (제목)
+    &:nth-child(2) {
+      flex: 0 1 200px !important;
+      justify-content: center !important;
+      min-width: 120px !important;
+      max-width: 200px !important;
+    }
+    
+    // 오른쪽 영역 (다음 버튼)
+    &:last-child {
+      flex: 0 0 auto !important;
+      min-width: 40px !important;
+    }
+  }
+  
+  // 제목 스타일
+  :global(.fc-toolbar-title) {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    max-width: 200px !important;
+  }
+  
+  // 이전/다음 버튼
+  :global(.fc-prev-button),
+  :global(.fc-next-button) {
+    width: 32px !important;
+    height: 32px !important;
+    border: none !important;
+    background: #ffffff !important;
+    border-radius: 6px !important;
+    color: #6b7280 !important;
+    font-size: 14px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    
+    // 호버 효과
+    &:hover {
+      background: #f3f4f6 !important;
+      color: #374151 !important;
+      transform: scale(1.05) !important;
+    }
+    
+    // 비활성화 상태
+    &:disabled {
+      opacity: 0.3 !important;
+      cursor: not-allowed !important;
+    }
+  }
+  
+  // 전체 캘린더 스타일
+  :global(.fc) {
+    border: none !important;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  }
+  
+  :global(.fc-theme-standard .fc-scrollgrid) {
+    border: 1px solid #e5e7eb !important;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+  }
+  
+  // 요일 헤더
+  :global(.fc-col-header-cell) {
+    background: #f9fafb !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    border-color: #e5e7eb !important;
+    padding: 12px 8px !important;
+    font-size: 14px !important;
+  }
+  
+  // 날짜 셀
+  :global(.fc-daygrid-day) {
+    border-color: #f3f4f6 !important;
+    min-height: 100px !important;
+  }
+  
+  // 오늘 날짜
+  :global(.fc-day-today) {
+    background-color: #fef3c7 !important;
+  }
+  
+  // 날짜 숫자
+  :global(.fc-daygrid-day-number) {
+    color: #374151 !important;
+    font-weight: 500 !important;
+    padding: 8px !important;
+    font-size: 14px !important;
+  }
+  
+  // 이벤트 스타일
+  :global(.fc-event) {
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+    margin: 1px 2px !important;
+  }
+}
+
+// === 반응형 설정 ===
+@media (max-width: 768px) {
+  .calendar-base {
+    :global(.fc-header-toolbar) {
+      gap: 8px !important;
+    }
+    
+    :global(.fc-toolbar-chunk:nth-child(2)) {
+      flex: 0 1 150px !important;
+      max-width: 150px !important;
+    }
+    
+    :global(.fc-toolbar-title) {
+      font-size: 16px !important;
+      max-width: 150px !important;
+    }
+    
+    :global(.fc-prev-button),
+    :global(.fc-next-button) {
+      width: 28px !important;
+      height: 28px !important;
+      font-size: 12px !important;
+    }
+    
+    .memo-column {
+      width: 100px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-base {
+    :global(.fc-toolbar-chunk:nth-child(2)) {
+      flex: 0 1 120px !important;
+      max-width: 120px !important;
+    }
+    
+    :global(.fc-toolbar-title) {
+      font-size: 14px !important;
+      max-width: 120px !important;
+    }
+    
+    .memo-column {
+      width: 80px;
+    }
+  }
+}

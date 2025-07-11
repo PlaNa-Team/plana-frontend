@@ -1,13 +1,34 @@
+// pages/calendar/Calendar.tsx - 최소한의 코드
 import React from 'react';
+import { useAppSelector, useAppDispatch } from '../../store';
+import CalendarBase from '../../components/ui/CalendarBase';
+import { updateCurrentDate, selectEvents } from '../../store/slices/calendarSlice';
 
 const Calendar: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const events = useAppSelector(selectEvents);
+
+  // 날짜 변경 핸들러
+  const handleDatesSet = (dateInfo: any) => {
+    dispatch(updateCurrentDate({ start: dateInfo.start }));
+  };
+
   return (
     <div style={{ padding: '20px' }}>
-      <h2>캘린더 페이지</h2>
-      <p>여기에 FullCalendar가 들어갈 예정입니다.</p>
-      <div style={{ height: '400px', background: '#f0f0f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span>캘린더 영역</span>
-      </div>
+      <h2>일정 관리</h2>
+      
+      <CalendarBase 
+        height="600px"
+        headerToolbar={{
+          left: 'prev',
+          center: 'title',
+          right: 'next'
+        }}
+        locale="ko"
+        className="schedule-calendar"
+        events={events}
+        onDatesSet={handleDatesSet}
+      />
     </div>
   );
 };
