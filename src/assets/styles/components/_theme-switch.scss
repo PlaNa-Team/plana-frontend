@@ -6,7 +6,7 @@ button {
 
 .theme-switch {
     position: relative;
-    width: 52px;
+    width: 55px;
     height: 25px;
     background-color: var(--color-xl);
     border-radius: $border-radius-2xl;
@@ -21,16 +21,21 @@ button {
     // 아이콘 컨테이너
     &__icons {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 6px;
+        padding: 0 $spacing-1;
         pointer-events: none;
-        z-index: 1;
+        z-index: $z-index-base;
+        gap: $spacing-2;
+    }
+
+    &__sun {
+        width: $icon-size-md;
+    }
+
+    &__moon {
+        width: $icon-size-sm;
     }
   
     // 움직이는 thumb
@@ -40,13 +45,15 @@ button {
         height: 21px;
         background-color: var(--color-xs);
         border-radius: $border-radius-2xl;
+        border: none;
+        outline: none;
         transition: transform 100ms ease;
         transform: translateX(2px);
         will-change: transform;
-        z-index: 290;
+        z-index: $z-index-docked;
         // 체크된 상태일 때 thumb 이동
         &[data-state="checked"] {
-            transform: translateX(19px);
+            transform: translateX(32px);
         }
     }
 }

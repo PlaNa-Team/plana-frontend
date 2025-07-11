@@ -27,11 +27,11 @@ export const ThemeSwitch: React.FC<ThemeSwitchProps> = ({
         {...props}                                 // 추가 props 전달
       >
         <div className="theme-switch__icons">
-          <SunIcon width="12" height="12" fill="var(--color-xs)"/>
-          <MoonIcon width="12" height="12" fill="var(--color-xs)"/>
+          <SunIcon fill="var(--color-xs)" className="theme-switch__sun"/>
+          <MoonIcon fill="var(--color-xs)" className="theme-switch__moon"/>
         </div>
         {/* Switch의 움직이는 thumb 부분 */}
-        <SwitchPrimitive.Thumb className="switch__thumb" />
+        <SwitchPrimitive.Thumb className="theme-switch__thumb" />
       </SwitchPrimitive.Root>
     );
   };
