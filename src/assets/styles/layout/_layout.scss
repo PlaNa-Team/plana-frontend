@@ -1,0 +1,26 @@
+// src/assets/styles/layout/_layout.scss
+
+.layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  
+    &__content {
+      flex: 1;
+      padding: 1rem;
+      padding-bottom: 90px; // 푸터 높이 + 여백
+      overflow-y: auto;
+    }
+  }
+  
+  // 전체 페이지 스타일
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: $font-family-base;
+  }
+  
+  #root {
+    height: 100%;
+  }

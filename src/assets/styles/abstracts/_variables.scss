@@ -9,6 +9,7 @@ $light-color: (
     'color-md': #8f8f8f, // 중간 회색 배경
     'color-lg': #535353, // 진한 회색 배경
     'color-xl': #000000, // 검은색 배경
+    'color-footer': #f8f8f8, // 푸터 배경색
 );
 
 $dark-color: (
@@ -18,6 +19,7 @@ $dark-color: (
     'color-md': #8f8f8f, // 중간 회색 배경
     'color-lg': #D9D9D9, // 연한 회색 배경
     'color-xl': #ffffff, // 흰색 배경
+    'color-footer': #191919, // 푸터 배경색
 );
 
 // CSS 커스텀 프로퍼티로 변환하는 믹스인
@@ -112,7 +114,7 @@ $container-width-xl: 75rem;       // 1200px
 
 // 컴포넌트 높이 (rem 기준)
 $header-height: 3.75rem;          // 60px
-$footer-height: 3.125rem;         // 50px
+$footer-height: 2.75rem;
 
 // 아이콘 크기
 $icon-size-xs: 0.75rem;           // 12px

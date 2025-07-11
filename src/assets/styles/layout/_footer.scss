@@ -1,0 +1,49 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: $footer-height;
+    @include flex-center;
+    gap: 12rem;
+    background-color: var(--color-footer);
+    padding: $spacing-2;
+    z-index: $z-index-sticky;
+
+    &__containers {
+        @include flex-column-center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        // 활성 상태
+        &--active {
+            .footer__titles {
+                color: var(--color-xl);
+                font-weight: $font-weight-semibold;
+            }
+        }
+    }
+
+    &__icons {
+        width: $icon-size-md;
+    }
+
+    &__titles {
+        margin: $spacing-1;
+        color: var(--color-md);
+        font-size: $font-size-xs;
+        font-weight: $font-weight-medium;
+    }
+}
+
+// 푸터 높이만큼 body에 padding 추가
+body {
+    padding-bottom: var(--footer-height);
+}

@@ -17,8 +17,9 @@
 @import 'components/CalendarBase'; // 달력 컴포넌트 스타일
 
 // Layout ( 레이아웃 스타일 )
+@import 'layout/layout';   // 전체 레이아웃 스타일
 @import 'layout/header';   // 헤더 영역 스타일
-// @import 'layout/footer';   // 푸터 영역 스타일
+@import 'layout/footer';   // 푸터 영역 스타일
 
 // Pages ( 페이지별 스타일 )
 // @import 'pages/landing';     // 랜딩페이지 전용 스타일
