@@ -35,8 +35,9 @@ function Header() {
             <div className="header__mode">{ getCurrentMode() }</div>
         </div>
         <div className="header__icons">
-            <BellIcon />
+            <BellIcon fill="var(--color-xl)" />
             <PersonIcon 
+                fill="var(--color-xl)"
                 width="18"
                 height="18"
             />

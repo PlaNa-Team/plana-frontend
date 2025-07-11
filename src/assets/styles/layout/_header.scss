@@ -8,7 +8,7 @@
     &__title {
       display: flex;
       flex-direction: column;
-      gap: 0.05rem;
+      gap: $spacing-0;
     }
   
     &__user {
