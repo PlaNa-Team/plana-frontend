@@ -1,0 +1,52 @@
+// src/assets/styles/components/_theme-switch.scss
+
+button {
+    all: unset;
+}
+
+.theme-switch {
+    position: relative;
+    width: 52px;
+    height: 25px;
+    background-color: var(--color-xl);
+    border-radius: $border-radius-2xl;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+  
+    // 아이콘 컨테이너
+    &__icons {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 6px;
+        pointer-events: none;
+        z-index: 1;
+    }
+  
+    // 움직이는 thumb
+    &__thumb {
+        display: block;
+        width: 21px;
+        height: 21px;
+        background-color: var(--color-xs);
+        border-radius: $border-radius-2xl;
+        transition: transform 100ms ease;
+        transform: translateX(2px);
+        will-change: transform;
+        z-index: 290;
+        // 체크된 상태일 때 thumb 이동
+        &[data-state="checked"] {
+            transform: translateX(19px);
+        }
+    }
+}
