@@ -19,7 +19,7 @@ import { Project } from './pages/project';      // project/index.ts에서 export
 import Layout from './components/common/Layout';
 
 // 스타일
-import './App.scss';
+import './assets/styles/main.scss';
 
 function App() {
   return (

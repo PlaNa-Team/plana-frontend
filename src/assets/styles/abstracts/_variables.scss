@@ -20,6 +20,22 @@ $dark-color: (
     'color-xl': #ffffff, // 흰색 배경
 );
 
+// CSS 커스텀 프로퍼티로 변환하는 믹스인
+@mixin apply-theme($theme-map) {
+    @each $key, $value in $theme-map {
+        --#{$key}: #{$value};
+    }
+}
+
+// 라이트 테마 적용
+:root {
+    @include apply-theme($light-color);
+}
+
+// 다크 테마 적용 
+:root.dark {
+    @include apply-theme($dark-color);
+}
 
 // 프로젝트 모드 - state, 별 토글
 
