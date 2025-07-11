@@ -1,0 +1,48 @@
+// src/assets/styles/components/_header.scss
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+  
+    &__title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+    }
+  
+    &__user {
+      font-size: $font-size-lg;
+      color: var(--color-xl);
+      font-weight: $font-weight-semibold;
+    }
+  
+    &__mode {
+      font-size: $font-size-4xl;
+      color: var(--color-xl);
+      font-weight: $font-weight-bold;
+    }
+  
+    &__icons {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+  
+  // 반응형 디자인
+  @media (max-width: 768px) {
+    .header {
+      padding: 0.75rem 1rem;
+  
+      &__actions {
+        gap: 0.75rem;
+  
+        svg {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+    }
+  }
