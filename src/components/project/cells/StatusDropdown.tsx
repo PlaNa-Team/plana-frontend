@@ -9,6 +9,13 @@ interface StatusDropdownProps {
   disabled?: boolean;
 }
 
+const STATUS_COLORS = {
+  '예정': '#f0ad4e',
+  '진행': '#5bc0de',
+  '완료': '#5cb85c',
+  '중단': '#d9534f'
+} as const;
+
 const StatusDropdown: React.FC<StatusDropdownProps> = ({
   value = '예정',
   onChange,
@@ -46,8 +53,8 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
             className={`status-dropdown__trigger ${getStatusClass(selectedStatus)}`}
             disabled={disabled}
           >
+            <div className="status-dropdown__icon">●</div>
             <span className="status-dropdown__current">{selectedStatus}</span>
-            <span className="status-dropdown__arrow">▼</span>
           </button>
         </DropdownMenu.Trigger>
 
