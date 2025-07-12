@@ -15,15 +15,9 @@ const Calendar: React.FC = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>일정 관리</h2>
-      
       <CalendarBase 
-        height="600px"
-        headerToolbar={{
-          left: 'prev',
-          center: 'title',
-          right: 'next'
-        }}
+        height="800px"
+        headerToolbar={{left: 'prev',center: 'title',right: 'next'}}
         locale="ko"
         className="schedule-calendar"
         events={events}
