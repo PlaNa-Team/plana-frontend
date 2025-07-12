@@ -14,23 +14,7 @@
     transition: all 0.2s ease;
     min-width: 4rem;
     gap: $spacing-2;
-
-    // 상태별 색상
-    &.status-scheduled {
-      background-color: rgba($project-scheduled, 0.4);
-    }
-
-    &.status-progress {
-      background-color: rgba($project-progress, 0.4);
-    }
-
-    &.status-completed {
-      background-color: rgba($project-completed, 0.4);
-    }
-
-    &.status-paused {
-      background-color: rgba($project-paused, 0.4);
-    }
+    background-color: var(--status-bg-color);
   }
 
   &__icon {
@@ -39,7 +23,7 @@
     @include flex-center;
     margin: 0 $spacing-1;
     font-size: $font-size-xl;
-    color: var(--color-xs);
+    color: var(--status-color);
     z-index: 100;
   }
 
@@ -75,56 +59,47 @@
     align-items: center;
     justify-content: space-between;
     padding: $spacing-2 $spacing-3;
-    font-family: $font-family-base;
     font-size: $font-size-sm;
-    font-weight: $font-weight-normal;
+    font-weight: $font-weight-semibold;
     border-radius: $border-radius-sm;
     cursor: pointer;
     transition: background-color 0.15s ease;
     outline: none;
-
-    &:hover {
-      background-color: var(--color-sm);
-    }
 
     &:focus {
       background-color: var(--color-sm);
     }
 
     &--selected {
-      font-weight: $font-weight-medium;
+      font-weight: $font-weight-bold;
     }
 
     // 상태별 색상
     &.status-scheduled {
-      color: #3b82f6;
-      
+      color: #7E7E7E;
       &:hover {
-        background-color: rgba(59, 130, 246, 0.1);
+        background-color: rgba(#7E7E7E, 0.2);
       }
     }
 
     &.status-progress {
-      color: #f59e0b;
-      
+      color: #53A75A;
       &:hover {
-        background-color: rgba(245, 158, 11, 0.1);
+        background-color: rgba(#53A75A, 0.2);
       }
     }
 
     &.status-completed {
-      color: #10b981;
-      
+      color: #338CD9;
       &:hover {
-        background-color: rgba(16, 185, 129, 0.1);
+        background-color: rgba(#338CD9, 0.2);
       }
     }
 
     &.status-paused {
-      color: #ef4444;
-      
+      color: #E48485;
       &:hover {
-        background-color: rgba(239, 68, 68, 0.1);
+        background-color: rgba(#E48485, 0.2);
       }
     }
   }
