@@ -1,4 +1,5 @@
 import React from 'react';
+import ProjectTable from '../../components/project/ProjectTable';
 
 const Project: React.FC = () => {
   return (
