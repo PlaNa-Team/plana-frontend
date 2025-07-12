@@ -6,8 +6,8 @@ export interface Project {
   memberId: number;
   year: number;
   title: string;
-  startMonth: number;
-  endMonth: number;
+  startMonth: number | undefined;
+  endMonth: number | undefined;
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;

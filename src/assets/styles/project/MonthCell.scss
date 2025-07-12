@@ -7,28 +7,28 @@
     position: relative;
     
     &:hover {
-      border-color: #9ca3af;
-      background-color: rgba(59, 130, 246, 0.1) !important;
+      border-color: var(--color-sm);
     }
     
     &--selected {
-      color: white;
-      font-weight: 500;
-      opacity: 0.8;
+      font-weight: $font-weight-medium;
       
       &:hover {
-        opacity: 1;
+        opacity: 0.9;
       }
     }
     
     &--start,
     &--end {
       .month-cell__content {
-        font-size: 8px;
+        font-size: $font-size-xs;
+        color: var(--color-xs);
+        font-weight: $font-weight-bold;
       }
     }
     
     &__content {
       pointer-events: none;
+      user-select: none;
     }
   }
