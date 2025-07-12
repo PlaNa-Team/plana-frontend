@@ -1,99 +1,228 @@
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { createColumnHelper, useReactTable, flexRender, getCoreRowModel } from '@tanstack/react-table'
-import { Project } from '../../types'
+import { Project, ProjectStatus } from '../../types'
 import { EditableCell, MonthCell, StatusDropdown } from './cells'
 
-const columnHelper = createColumnHelper<Project>()
-
-function ProjectTable() {
-    const [ data, setData ] = React.useState<Project[]>([])
-    const [ year, setYear ] = React.useState<number>(new Date().getFullYear())
-
-    const handlePrevYear = () => setYear(prev => prev - 1)
-    const handleNextYear = () => setYear(prev => prev + 1)
-
-    // 컬럼 정의
-    const columns = [
-        columnHelper.display({
-            id: 'no',
-            header: 'No.',
-            cell: ({ row }) => row.index + 1,
-            size: 60,
-        }),
-        columnHelper.accessor('title', {
-            header: 'Project Title',
-            cell: ({ getValue, row }) => (
-                <EditableCell 
-                    // value={ getValue()}
-                    // onUpdate={( newValue ) => updateProject(row.original.id, { title: newValue })
-                />
-            ),
-        }),
-        columnHelper.accessor('status', {
-            header: 'Status',
-            cell: ({ getValue, row }) => (
-                <StatusDropdown 
-                    // value={getValue()}
-                    // onUpdate={( newStatus ) => updateProject(row.original.id, { status: newStatus })}
-                />
-            ),
-        }),
-
-        // 월별 컬럼들 (Jan ~ Dec)
-        ...Array.from ({ length: 12 }, (_, index) => 
-            columnHelper.display({
-                id: `month-${index + 1}`,
-                header: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][index],
-                cell: ({ row }) => (
-                    <MonthCell 
-                    // month={index + 1} year={year} projectId={row.original.id}
-                     />
-                ),
-            })
-        ),
-    ]
-
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    })
-
-    // 테이블 랜더링
-    return (
-        <div className="project-table">
-            <div className="year-selector">
-                <button onClick={handlePrevYear}>←</button>
-                <span>{year}년</span>
-                <button onClick={handleNextYear}>→</button>
-            </div>
-
-            <table>
-                <thead>
-                {table.getHeaderGroups().map(headerGroup => (
-                    <tr key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
-                        <th key={header.id}>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        </th>
-                    ))}
-                    </tr>
-                ))}
-                </thead>
-                <tbody>
-                {table.getRowModel().rows.map(row => (
-                    <tr key={row.id}>
-                    {row.getVisibleCells().map(cell => (
-                        <td key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                    ))}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
-    )
+interface ProjectTableProps {
+    initialData?: Project[];
+    onDataChange?: (data: Project[]) => void;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const columnHelper = createColumnHelper<Project>();
+
+const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataChange }) => {
+    const [ data, setData ] = useState<Project[]>(initialData);
+    const [ year, setYear ] = useState<number>(new Date().getFullYear());
+
+    useEffect(() => {
+        onDataChange?.(data);
+    }, [data, onDataChange]);
+
+    const handlePrevYear = () => setYear(prev => prev - 1);
+    const handleNextYear = () => setYear(prev => prev + 1);
+
+    const updateProject = (projectId: number, updates: Partial<Project>) => {
+        setData(prevData => {
+            const existingIndex = prevData.findIndex(p => p.id === projectId && p.year === year);
+
+            if (existingIndex >= 0) {
+                // 기존 프로젝트 업데이트
+                return prevData.map(project =>
+                    project.id === projectId && project.year === year
+                        ? { ...project, ...updates, updatedAt: new Date().toISOString() }
+                        : project
+                );
+            } else {
+                // 새 프로젝트 생성
+                const newProject: Project = {
+                    id: projectId,
+                    memberId: 1, // 예시로 1번 멤버로 설정
+                    year,
+                    title: '',
+                    startMonth: 0,
+                    endMonth: 0,
+                    status: '예정' as ProjectStatus,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isDeleted: false,
+                    ...updates
+                };
+                return [...prevData, newProject];
+            }
+        });
+    };
+
+    const handlePeriodChange = (projectId: number, startMonth?: number, endMonth?: number) => {
+        updateProject(projectId, { startMonth, endMonth });
+    };
+
+    // 현재 연도의 데이터를 10개 행으로 정규화
+    const tableData = useMemo(() => {
+        const yearData = data.filter(project => project.year === year);
+        const normalizedData: Project[] = [];
+    
+        for (let i = 1; i <= 10; i++) {
+            const existingProject = yearData.find(project => project.id === i);
+            if (existingProject) {
+                normalizedData.push(existingProject);
+            } else {
+                // 빈 프로젝트 생성 (UI 표시용)
+                normalizedData.push({
+                    id: i,
+                    memberId: 1,
+                    year,
+                    title: '',
+                    startMonth: 0,
+                    endMonth: 0,
+                    status: '예정',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isDeleted: false
+                });
+            }
+        }
+        return normalizedData;
+    }, [data, year]);
+
+  // 첫 번째 테이블 컬럼 (프로젝트 정보)
+  const infoColumns = [
+    columnHelper.display({
+      id: 'no',
+      header: 'No.',
+      cell: ({ row }) => row.index + 1,
+      size: 60,
+    }),
+    columnHelper.accessor('title', {
+      header: 'Project Title',
+      cell: ({ getValue, row }) => (
+        <EditableCell 
+          value={getValue() || ''}
+          onUpdate={(newValue) => updateProject(row.original.id, { title: newValue })}
+          placeholder="프로젝트 제목을 입력하세요"
+        />
+      ),
+      minSize: 200,
+    }),
+    columnHelper.accessor('status', {
+      header: 'Status',
+      cell: ({ getValue, row }) => (
+        <StatusDropdown 
+          value={getValue()}
+          onChange={(newStatus) => updateProject(row.original.id, { status: newStatus })}
+        />
+      ),
+      size: 120,
+    }),
+  ];
+
+  // 두 번째 테이블 컬럼 (월별)
+  const monthColumns = MONTHS.map((month, index) => 
+    columnHelper.display({
+      id: `month-${index + 1}`,
+      header: month,
+      cell: ({ row }) => (
+        <MonthCell 
+          month={index + 1}
+          projectId={row.original.id}
+          startMonth={row.original.startMonth}
+          endMonth={row.original.endMonth}
+          status={row.original.status}
+          onPeriodChange={handlePeriodChange}
+        />
+      ),
+      size: 50,
+    })
+  );
+
+  const infoTable = useReactTable({
+    data: tableData,
+    columns: infoColumns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const monthTable = useReactTable({
+    data: tableData,
+    columns: monthColumns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="project-table">
+      {/* 첫 번째 테이블: 프로젝트 정보 */}
+      <div className="project-table__info">
+        <table className="project-table__table">
+          <thead>
+            {infoTable.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th 
+                    key={header.id}
+                    style={{ width: header.getSize() }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {infoTable.getRowModel().rows.map(row => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 두 번째 테이블: 월별 */}
+      <div className="project-table__months">
+        <div className="project-table__year-selector">
+          <button onClick={handlePrevYear} className="project-table__year-btn">
+            ◀
+          </button>
+          <span className="project-table__year">{year}년</span>
+          <button onClick={handleNextYear} className="project-table__year-btn">
+            ▶
+          </button>
+        </div>
+        
+        <table className="project-table__table">
+          <thead>
+            {monthTable.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th 
+                    key={header.id}
+                    style={{ width: header.getSize() }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {monthTable.getRowModel().rows.map(row => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="project-table__month-cell">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+ 
 export default ProjectTable

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import './StatusDropdown.scss';
 
 export type StatusType = '예정' | '진행' | '완료' | '중단';
 
