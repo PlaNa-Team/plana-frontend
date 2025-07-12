@@ -1,0 +1,174 @@
+@import '../../assets/styles/abstracts/variables';
+
+.status-dropdown {
+  position: relative;
+  display: inline-block;
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-2 $spacing-3;
+    border: $border-width-sm solid var(--color-sm);
+    border-radius: $border-radius-md;
+    background-color: var(--color-xs);
+    color: var(--color-xl);
+    font-family: $font-family-base;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 4rem;
+    gap: $spacing-2;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-md);
+      box-shadow: $shadow-sm;
+    }
+
+    &:focus:not(:disabled) {
+      outline: none;
+      border-color: var(--color-lg);
+      box-shadow: $shadow-md;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // 상태별 색상
+    &.status-scheduled {
+      border-color: #3b82f6;
+      
+      .status-dropdown__current {
+        color: #3b82f6;
+      }
+    }
+
+    &.status-progress {
+      border-color: #f59e0b;
+      
+      .status-dropdown__current {
+        color: #f59e0b;
+      }
+    }
+
+    &.status-completed {
+      border-color: #10b981;
+      
+      .status-dropdown__current {
+        color: #10b981;
+      }
+    }
+
+    &.status-paused {
+      border-color: #ef4444;
+      
+      .status-dropdown__current {
+        color: #ef4444;
+      }
+    }
+  }
+
+  &__current {
+    flex: 1;
+    text-align: left;
+  }
+
+  &__arrow {
+    font-size: $font-size-xs;
+    color: var(--color-md);
+    transition: transform 0.2s ease;
+    
+    [data-state="open"] & {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__content {
+    min-width: 6rem;
+    background-color: var(--color-xs);
+    border: $border-width-sm solid var(--color-sm);
+    border-radius: $border-radius-md;
+    box-shadow: $shadow-lg;
+    padding: $spacing-1;
+    z-index: $z-index-dropdown;
+    animation: slideDown 0.2s ease-out;
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-2 $spacing-3;
+    font-family: $font-family-base;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-normal;
+    border-radius: $border-radius-sm;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    outline: none;
+
+    &:hover {
+      background-color: var(--color-sm);
+    }
+
+    &:focus {
+      background-color: var(--color-sm);
+    }
+
+    &--selected {
+      font-weight: $font-weight-medium;
+    }
+
+    // 상태별 색상
+    &.status-scheduled {
+      color: #3b82f6;
+      
+      &:hover {
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+    }
+
+    &.status-progress {
+      color: #f59e0b;
+      
+      &:hover {
+        background-color: rgba(245, 158, 11, 0.1);
+      }
+    }
+
+    &.status-completed {
+      color: #10b981;
+      
+      &:hover {
+        background-color: rgba(16, 185, 129, 0.1);
+      }
+    }
+
+    &.status-paused {
+      color: #ef4444;
+      
+      &:hover {
+        background-color: rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+
+  &__check {
+    font-size: $font-size-xs;
+    margin-left: $spacing-2;
+  }
+}
