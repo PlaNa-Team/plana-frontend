@@ -50,6 +50,22 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // textarea 이벤트 핸들러들
+  const handleTextareaClick = (e: Event) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const target = e.target as HTMLTextAreaElement;
+    target.focus();
+  };
+
+  const handleTextareaFocus = (e: Event) => {
+    e.stopPropagation();
+  };
+
+  const handleTextareaMouseDown = (e: Event) => {
+    e.stopPropagation();
+  };
+
   // 날짜 숫자만 표시 (일 제거)
   const renderDayCellContent = (dayInfo: any) => {
     if (dayCellContent) {
@@ -90,9 +106,9 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
       headerRow.appendChild(memoHeaderCell);
     }
 
-    // 각 주차 행에 메모 셀 추가
+    // 각 행에 메모 셀 추가
     const bodyRows = calendarEl.querySelectorAll('.fc-daygrid-body tr[role="row"]');
-    bodyRows.forEach((row: Element, weekIndex: number) => {
+    bodyRows.forEach((row: Element) => {
       if (!row.querySelector('.memo-body-cell')) {
         const memoBodyCell = document.createElement('td');
         memoBodyCell.className = 'fc-daygrid-day memo-body-cell';
@@ -101,7 +117,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
           <div class="fc-daygrid-day-frame">
             <div class="memo-content">
               <textarea 
-                placeholder="${weekIndex + 1}주차 메모" 
+                placeholder="텍스트를 입력하세요" 
                 class="memo-textarea"
               ></textarea>
             </div>
@@ -110,6 +126,38 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         row.appendChild(memoBodyCell);
       }
     });
+
+    // innerHTML로 추가한 후 이벤트 리스너 등록
+    const textareas = calendarEl.querySelectorAll('.memo-textarea');
+    textareas.forEach((textarea: Element) => {
+      const textareaEl = textarea as HTMLTextAreaElement;
+      
+      // 기존 이벤트 리스너 제거 (중복 방지)
+      textareaEl.removeEventListener('click', handleTextareaClick);
+      textareaEl.removeEventListener('focus', handleTextareaFocus);
+      textareaEl.removeEventListener('mousedown', handleTextareaMouseDown);
+      
+      // 새 이벤트 리스너 추가
+      textareaEl.addEventListener('click', handleTextareaClick);
+      textareaEl.addEventListener('focus', handleTextareaFocus);
+      textareaEl.addEventListener('mousedown', handleTextareaMouseDown);
+    });
+
+    // 캘린더 전체에 클릭 이벤트 추가 (textarea 밖 클릭시 포커스 해제)
+    const handleCalendarClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // 클릭한 요소가 textarea가 아니면 모든 textarea 포커스 해제
+      if (!target.closest('.memo-textarea')) {
+        const allTextareas = calendarEl.querySelectorAll('.memo-textarea') as NodeListOf<HTMLTextAreaElement>;
+        allTextareas.forEach(textarea => {
+          textarea.blur();
+        });
+      }
+    };
+
+    // 기존 이벤트 리스너 제거 후 새로 추가
+    calendarEl.removeEventListener('click', handleCalendarClick);
+    calendarEl.addEventListener('click', handleCalendarClick);
   };
 
   // 로딩 상태에서 미리 처리
