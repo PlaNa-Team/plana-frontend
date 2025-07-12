@@ -56,7 +56,6 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
       return dayCellContent(dayInfo);
     }
     
-    // 날짜에서 숫자만 추출 (1일 → 1)
     const dayNumber = dayInfo.date.getDate();
     
     return (
@@ -66,16 +65,23 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     );
   };
 
-  // FullCalendar가 렌더링된 후 메모 컬럼 추가
+  // 메모 컬럼 추가 (최적화된 버전)
   const addMemoColumn = () => {
     const calendarEl = containerRef.current?.querySelector('.fc');
     if (!calendarEl) return;
+
+    // 먼저 모든 셀의 너비를 미리 설정 (깜빡임 방지)
+    const allCells = calendarEl.querySelectorAll('.fc-col-header-cell, .fc-daygrid-day');
+    allCells.forEach((cell: Element) => {
+      (cell as HTMLElement).style.width = '12.5%';
+    });
 
     // 헤더에 메모 컬럼 추가
     const headerRow = calendarEl.querySelector('.fc-col-header tr');
     if (headerRow && !headerRow.querySelector('.memo-header-cell')) {
       const memoHeaderCell = document.createElement('th');
       memoHeaderCell.className = 'fc-col-header-cell memo-header-cell';
+      memoHeaderCell.style.width = '12.5%'; // 즉시 너비 설정
       memoHeaderCell.innerHTML = `
         <div class="fc-scrollgrid-sync-inner">
           <div class="fc-col-header-cell-cushion">메모</div>
@@ -90,6 +96,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
       if (!row.querySelector('.memo-body-cell')) {
         const memoBodyCell = document.createElement('td');
         memoBodyCell.className = 'fc-daygrid-day memo-body-cell';
+        memoBodyCell.style.width = '12.5%'; // 즉시 너비 설정
         memoBodyCell.innerHTML = `
           <div class="fc-daygrid-day-frame">
             <div class="memo-content">
@@ -103,29 +110,35 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         row.appendChild(memoBodyCell);
       }
     });
+  };
 
-    // 컬럼 너비 조정
-    const allCells = calendarEl.querySelectorAll('.fc-col-header-cell, .fc-daygrid-day');
-    allCells.forEach((cell: Element) => {
-      (cell as HTMLElement).style.width = '12.5%';
+  // 로딩 상태에서 미리 처리
+  const handleLoading = (isLoading: boolean) => {
+    if (!isLoading) {
+      // 로딩 완료 직후 즉시 실행 (지연 최소화)
+      requestAnimationFrame(() => {
+        addMemoColumn();
+      });
+    }
+  };
+
+  // FullCalendar 렌더링 후 실행 (지연 시간 단축)
+  const handleViewDidMount = () => {
+    requestAnimationFrame(() => {
+      addMemoColumn();
     });
   };
 
-  // FullCalendar 렌더링 후 실행
-  const handleViewDidMount = () => {
-    setTimeout(() => {
-      addMemoColumn();
-    }, 100);
-  };
-
-  // 날짜 변경 시에도 메모 컬럼 다시 추가
+  // 날짜 변경 시 처리 (지연 시간 단축)
   const handleDatesSet = (dateInfo: any) => {
     if (onDatesSet) {
       onDatesSet(dateInfo);
     }
-    setTimeout(() => {
+    
+    // setTimeout 대신 requestAnimationFrame 사용 (더 부드러움)
+    requestAnimationFrame(() => {
       addMemoColumn();
-    }, 100);
+    });
   };
 
   return (
@@ -151,9 +164,10 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         eventResize={onEventResize}
         datesSet={handleDatesSet}
         viewDidMount={handleViewDidMount}
+        loading={handleLoading} // 로딩 상태 처리 추가
         
         eventContent={eventContent}
-        dayCellContent={renderDayCellContent} // 커스텀 날짜 렌더링
+        dayCellContent={renderDayCellContent}
         
         eventDisplay="block"
         dayMaxEventRows={3}
