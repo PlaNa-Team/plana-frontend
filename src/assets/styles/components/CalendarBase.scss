@@ -1,16 +1,15 @@
-// assets/styles/components/CalendarBase.scss
 .calendar-base {
   
   // === 8컬럼 그리드 스타일 ===
   
   // 모든 컬럼 너비 통일
-  :global(.fc-col-header-cell),
-  :global(.fc-daygrid-day) {
+  .fc-col-header-cell,
+  .fc-daygrid-day {
     width: 12.5% !important; // 8분할
   }
   
   // 메모 헤더 셀 스타일
-  :global(.memo-header-cell) {
+  .memo-header-cell {
     background: #f9fafb !important;
     font-weight: 600 !important;
     color: #374151 !important;
@@ -21,7 +20,7 @@
   }
   
   // 메모 바디 셀 스타일
-  :global(.memo-body-cell) {
+  .memo-body-cell {
     border-color: #f3f4f6 !important;
     min-height: 100px !important;
     background: #ffffff !important;
@@ -62,21 +61,20 @@
   // === 기존 FullCalendar 스타일 ===
   
   // 헤더 툴바
-  :global(.fc-header-toolbar) {
+  .fc-header-toolbar {
     padding: 16px 20px !important;
     background: #ffffff !important;
     border-bottom: 1px solid #e5e7eb !important;
     margin-bottom: 0 !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
     gap: 16px !important;
     border-radius: 8px 8px 0 0 !important;
   }
-  
-  // 툴바 제목
-  :global(.fc-toolbar-title) {
-    font-size: 20px !important;
+
+  // 툴바 제목 (3000px -> 18px로 수정!)
+  .fc-toolbar-title {
+    font-size: 18px !important; // 3000px에서 수정!
     font-weight: 600 !important;
     color: #1f2937 !important;
     margin: 0 !important;
@@ -90,8 +88,8 @@
   }
   
   // 이전/다음 버튼
-  :global(.fc-prev-button),
-  :global(.fc-next-button) {
+  .fc-prev-button,
+  .fc-next-button {
     width: 32px !important;
     height: 32px !important;
     border: none !important;
@@ -121,19 +119,19 @@
   }
   
   // 전체 캘린더 스타일
-  :global(.fc) {
+  .fc {
     border: 1px solid #e5e7eb !important;
     border-radius: 8px !important;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
   }
   
-  :global(.fc-theme-standard .fc-scrollgrid) {
+  .fc-theme-standard .fc-scrollgrid {
     border: none !important;
     border-radius: 0 0 8px 8px !important;
   }
   
   // 요일 헤더
-  :global(.fc-col-header-cell) {
+  .fc-col-header-cell {
     background: #f9fafb !important;
     font-weight: 600 !important;
     color: #374151 !important;
@@ -143,18 +141,18 @@
   }
   
   // 날짜 셀
-  :global(.fc-daygrid-day) {
+  .fc-daygrid-day {
     border-color: #f3f4f6 !important;
     min-height: 100px !important;
   }
   
   // 오늘 날짜
-  :global(.fc-day-today) {
+  .fc-day-today {
     background-color: #fef3c7 !important;
   }
   
   // 날짜 숫자
-  :global(.fc-daygrid-day-number) {
+  .fc-daygrid-day-number {
     color: #374151 !important;
     font-weight: 500 !important;
     padding: 8px !important;
@@ -162,7 +160,7 @@
   }
   
   // 이벤트 스타일
-  :global(.fc-event) {
+  .fc-event {
     border-radius: 4px !important;
     font-size: 12px !important;
     padding: 2px 6px !important;
@@ -173,28 +171,28 @@
 // === 반응형 설정 ===
 @media (max-width: 768px) {
   .calendar-base {
-    :global(.fc-header-toolbar) {
+    .fc-header-toolbar {
       gap: 8px !important;
     }
     
-    :global(.fc-toolbar-chunk:nth-child(2)) {
+    .fc-toolbar-chunk:nth-child(2) {
       flex: 0 1 150px !important;
       max-width: 150px !important;
     }
     
-    :global(.fc-toolbar-title) {
+    .fc-toolbar-title {
       font-size: 16px !important;
       max-width: 150px !important;
     }
     
-    :global(.fc-prev-button),
-    :global(.fc-next-button) {
+    .fc-prev-button,
+    .fc-next-button {
       width: 28px !important;
       height: 28px !important;
       font-size: 12px !important;
     }
     
-    :global(.memo-body-cell) {
+    .memo-body-cell {
       .memo-content .memo-textarea {
         font-size: 11px;
         height: 85px;
@@ -209,17 +207,17 @@
 
 @media (max-width: 480px) {
   .calendar-base {
-    :global(.fc-toolbar-chunk:nth-child(2)) {
+    .fc-toolbar-chunk:nth-child(2) {
       flex: 0 1 120px !important;
       max-width: 120px !important;
     }
     
-    :global(.fc-toolbar-title) {
+    .fc-toolbar-title {
       font-size: 14px !important;
       max-width: 120px !important;
     }
     
-    :global(.memo-body-cell) {
+    .memo-body-cell {
       .memo-content .memo-textarea {
         font-size: 10px;
         height: 80px;
