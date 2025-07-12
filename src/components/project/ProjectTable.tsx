@@ -92,7 +92,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
       id: 'no',
       header: 'No.',
       cell: ({ row }) => row.index + 1,
-      size: 60,
+      size: 44,
     }),
     columnHelper.accessor('title', {
       header: 'Project Title',
@@ -103,7 +103,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           placeholder="프로젝트 제목을 입력하세요"
         />
       ),
-      minSize: 200,
+      minSize: 377,
     }),
     columnHelper.accessor('status', {
       header: 'Status',
@@ -113,7 +113,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           onChange={(newStatus) => updateProject(row.original.id, { status: newStatus })}
         />
       ),
-      size: 120,
+      size: 102,
     }),
   ];
 
@@ -149,10 +149,10 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
   });
 
   return (
-    <div className="project-table">
+    <div className="project">
       {/* 첫 번째 테이블: 프로젝트 정보 */}
-      <div className="project-table__info">
-        <table className="project-table__table">
+      <div className="project__info">
+        <table className="project__info-table">
           <thead>
             {infoTable.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
@@ -182,18 +182,18 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
       </div>
 
       {/* 두 번째 테이블: 월별 */}
-      <div className="project-table__months">
-        <div className="project-table__year-selector">
-          <button onClick={handlePrevYear} className="project-table__year-btn">
+      <div className="project__months">
+        <div className="project__year-selector">
+          <button onClick={handlePrevYear} className="project__year-btn">
             ◀
           </button>
-          <span className="project-table__year">{year}년</span>
-          <button onClick={handleNextYear} className="project-table__year-btn">
+          <span className="project__year">{year}년</span>
+          <button onClick={handleNextYear} className="project__year-btn">
             ▶
           </button>
         </div>
         
-        <table className="project-table__table">
+        <table className="project__months-table">
           <thead>
             {monthTable.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
@@ -212,7 +212,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
             {monthTable.getRowModel().rows.map(row => (
               <tr key={row.id}>
                 {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="project-table__month-cell">
+                  <td key={cell.id} className="project__months-cell">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
