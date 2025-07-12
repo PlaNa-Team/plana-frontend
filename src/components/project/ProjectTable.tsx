@@ -185,11 +185,17 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
       <div className="project__months">
         <div className="project__year-selector">
           <button onClick={handlePrevYear} className="project__year-btn">
-            ◀
+          <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.90609 13.1253L1.15967 7.06267L7.90609 1" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+
           </button>
           <span className="project__year">{year}년</span>
           <button onClick={handleNextYear} className="project__year-btn">
-            ▶
+          <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1.15983 1.00015L7.90625 7.06282L1.15983 13.1255" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+
           </button>
         </div>
         
