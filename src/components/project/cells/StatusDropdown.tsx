@@ -10,10 +10,10 @@ interface StatusDropdownProps {
 }
 
 const STATUS_COLORS = {
-  '예정': '#f0ad4e',
-  '진행': '#5bc0de',
-  '완료': '#5cb85c',
-  '중단': '#d9534f'
+  '예정': '#7E7E7E',
+  '진행': '#53A75A',
+  '완료': '#338CD9',
+  '중단': '#E48485'
 } as const;
 
 const StatusDropdown: React.FC<StatusDropdownProps> = ({
@@ -45,12 +45,22 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
     }
   };
 
+  // 상태별 스타일 반환
+  const getStatusStyle = (status: StatusType) => {
+    const color = STATUS_COLORS[status];
+    return {
+      '--status-color': color,
+      '--status-bg-color': `${color}40`,
+    } as React.CSSProperties;
+  };
+
   return (
     <div className="status-dropdown">
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
           <button 
             className={`status-dropdown__trigger ${getStatusClass(selectedStatus)}`}
+            style={getStatusStyle(selectedStatus)}
             disabled={disabled}
           >
             <div className="status-dropdown__icon">●</div>
@@ -70,6 +80,7 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({
                 className={`status-dropdown__item ${getStatusClass(status)} ${
                   selectedStatus === status ? 'status-dropdown__item--selected' : ''
                 }`}
+                style={getStatusStyle(selectedStatus)}
                 onSelect={() => handleStatusChange(status)}
               >
                 {status}
