@@ -5,15 +5,14 @@
   &__trigger {
     @include flex-center;
     height: 1.5rem;
-    width: 5rem;
-    padding: $spacing-1 0;
+    width: 5.75rem;
+    padding: $spacing-1 $spacing-1;
     border-radius: $border-radius-2xl;
     font-size: $font-size-xs;
     font-weight: $font-weight-medium;
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 4rem;
-    gap: $spacing-2;
     background-color: var(--status-bg-color);
   }
 
@@ -21,7 +20,7 @@
     width: $icon-size-md;
     height: $icon-size-md;
     @include flex-center;
-    margin: 0 $spacing-1;
+    margin: 0 0 0 $spacing-1;
     font-size: $font-size-xl;
     color: var(--status-color);
     z-index: 100;
@@ -29,7 +28,7 @@
 
   &__current {
     flex: 1;
-    text-align: left;
+    text-align: center;
   }
 
   &__content {
