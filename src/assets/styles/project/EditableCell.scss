@@ -1,0 +1,35 @@
+.editable-cell {
+    &__display {
+        padding: 8px 12px;
+        min-height: 20px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+            background-color: #f8f9fa;
+        }
+        
+        &:empty::before {
+            content: attr(placeholder);
+            color: #9ca3af;
+            font-style: italic;
+        }
+    }
+    
+    &__input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #3b82f6;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: inherit;
+        outline: none;
+        
+        &::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+    }
+}
+  
