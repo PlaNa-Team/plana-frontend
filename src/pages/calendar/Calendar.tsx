@@ -15,9 +15,9 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div>
       <CalendarBase 
-        height="800px"
+        height="1000px"
         headerToolbar={{left: 'prev',center: 'title',right: 'next'}}
         locale="ko"
         className="schedule-calendar"
