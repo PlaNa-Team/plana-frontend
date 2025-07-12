@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from '../../store';
 import CalendarBase from '../../components/ui/CalendarBase';
 import { updateCurrentDate, selectEvents } from '../../store/slices/calendarSlice';
 
+
 const Calendar: React.FC = () => {
   const dispatch = useAppDispatch();
   const events = useAppSelector(selectEvents);

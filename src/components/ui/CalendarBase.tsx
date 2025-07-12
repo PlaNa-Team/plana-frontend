@@ -1,4 +1,3 @@
-// components/ui/CalendarBase.tsx - CSS 제거, SCSS 경로 수정
 import React, { useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
