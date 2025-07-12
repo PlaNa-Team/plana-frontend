@@ -71,8 +71,12 @@
     gap: 16px !important;
     border-radius: 8px 8px 0 0 !important;
   }
+  .fc .fc-toolbar {
+    width: 300px !important;
+    margin: auto !important;
+  }
 
-  // 툴바 제목 (3000px -> 18px로 수정!)
+  // 툴바 제목 
   .fc-toolbar-title {
     font-size: 18px !important; // 3000px에서 수정!
     font-weight: 600 !important;
@@ -120,8 +124,8 @@
   
   // 전체 캘린더 스타일
   .fc {
-    border: 1px solid #e5e7eb !important;
-    border-radius: 8px !important;
+    // border: 1px solid #e5e7eb !important;
+    // border-radius: 8px !important;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
   }
   
@@ -144,6 +148,11 @@
   .fc-daygrid-day {
     border-color: #f3f4f6 !important;
     min-height: 100px !important;
+  }
+
+
+  .fc .fc-daygrid-day-top {
+    flex-direction: row !important; //날짜를 왼쪽으로
   }
   
   // 오늘 날짜

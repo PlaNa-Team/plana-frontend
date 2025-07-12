@@ -50,6 +50,22 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // 날짜 숫자만 표시 (일 제거)
+  const renderDayCellContent = (dayInfo: any) => {
+    if (dayCellContent) {
+      return dayCellContent(dayInfo);
+    }
+    
+    // 날짜에서 숫자만 추출 (1일 → 1)
+    const dayNumber = dayInfo.date.getDate();
+    
+    return (
+      <div className="fc-daygrid-day-number">
+        {dayNumber}
+      </div>
+    );
+  };
+
   // FullCalendar가 렌더링된 후 메모 컬럼 추가
   const addMemoColumn = () => {
     const calendarEl = containerRef.current?.querySelector('.fc');
@@ -137,7 +153,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         viewDidMount={handleViewDidMount}
         
         eventContent={eventContent}
-        dayCellContent={dayCellContent}
+        dayCellContent={renderDayCellContent} // 커스텀 날짜 렌더링
         
         eventDisplay="block"
         dayMaxEventRows={3}
