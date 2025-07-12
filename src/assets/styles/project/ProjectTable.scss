@@ -11,7 +11,7 @@
         height: 30rem;
         border-collapse: collapse;
         color: var(--color-xl);
-        
+
         th {
             text-align: center;
             height: $spacing-10;
@@ -25,7 +25,6 @@
                 width: 102px;
             }
         }
-
         td {
             text-align: center;
             height: $spacing-10;
@@ -40,20 +39,17 @@
     }
     
     &__year-selector {
+        position: relative;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 16px;
-        margin-bottom: 16px;
-        padding: 12px;
-        background-color: #f8f9fa;
+        justify-content: left;
+        gap: $spacing-1;
+        top: -$spacing-6;
         border-radius: 8px;
     }
     
     &__year-btn {
         background: none;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
         width: 32px;
         height: 32px;
         display: flex;
@@ -61,58 +57,36 @@
         justify-content: center;
         cursor: pointer;
         transition: all 0.2s ease;
-        
-        &:hover {
-            background-color: #e5e7eb;
-            border-color: #9ca3af;
-        }
-        
-        &:active {
-            background-color: #d1d5db;
-        }
     }
     
     &__year {
-        font-size: 18px;
-        font-weight: 600;
+        font-size: $font-size-base;
+        font-weight: $font-weight-bold;
         color: #374151;
         min-width: 80px;
         text-align: center;
     }
     
     &__months-table {
+        position: relative;
+        top: -$spacing-8;
         width: 46.5rem;
         height: 30rem;
         border-collapse: collapse;
-        background-color: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        
-        th {
-            background-color: #f8f9fa;
-            padding: 12px 8px;
+        color: var(--color-xl);
+
+        tr {
             text-align: center;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-            font-size: 14px;
-        }
-        
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: center;
-            vertical-align: middle;
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
+            height: $spacing-10;
+            width: 2.25rem;
+            font-size: $font-size-sm;
+
+            th {
+                font-weight: $font-weight-medium;
+            }
+            td {
+                border: 1px solid #ddd;
+            }
         }
     }
-    
-    &__months-cell {
-        padding: 4px !important;
-        width: 50px;
-    }
-  }
+}
