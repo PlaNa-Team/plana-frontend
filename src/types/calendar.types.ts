@@ -56,3 +56,28 @@ export interface Category {
   color: string;
   isDeleted?: string | boolean;
 }
+
+export interface HolidayItem {
+  dateKind: string;     // ex: "01"
+  dateName: string;     // ex: "추석"
+  isHoliday: string;    // "Y" | "N"
+  locdate: number;      // ex: 20250926
+  seq: number;
+}
+
+export interface HolidayApiResponse {
+  response: {
+    header: {
+      resultCode: string;
+      resultMsg: string;
+    };
+    body: {
+      items: {
+        item: HolidayItem[] | HolidayItem;
+      };
+      numOfRows: number;
+      pageNo: number;
+      totalCount: number;
+    };
+  };
+}
