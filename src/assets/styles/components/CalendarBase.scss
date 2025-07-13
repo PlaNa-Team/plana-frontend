@@ -18,6 +18,16 @@
     font-size: 14px !important;
     text-align: center !important;
   }
+
+  // 첫 번째 컬럼 헤더 (일요일) - 빨간색
+  .fc-col-header-cell:nth-child(1) {
+    color: #dc2626 !important;       // 빨간 글씨
+  }
+  
+  // 일곱 번째 컬럼 헤더 (토요일) - 파란색  
+  .fc-col-header-cell:nth-child(7) {
+    color: #2563eb !important;       // 파란 글씨
+  }
   
   // 메모 바디 셀 스타일
   .memo-body-cell {
