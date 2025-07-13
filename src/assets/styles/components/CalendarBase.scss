@@ -55,6 +55,26 @@
     }
   }
   
+  // === 날짜 색상 스타일 ===
+  
+  // 일요일과 공휴일 (빨간색)
+  .fc-daygrid-day-number.sunday-holiday {
+    color: #dc2626 !important; // 빨간색
+    font-weight: 600 !important;
+  }
+  
+  // 토요일 (파란색)
+  .fc-daygrid-day-number.saturday {
+    color: #2563eb !important; // 파란색
+    font-weight: 600 !important;
+  }
+  
+  // 평일 (기본색)
+  .fc-daygrid-day-number.weekday {
+    color: #374151 !important; // 기본 회색
+    font-weight: 500 !important;
+  }
+  
   // === 기존 FullCalendar 스타일 ===
   
   // 헤더 툴바
@@ -75,7 +95,7 @@
 
   // 툴바 제목 
   .fc-toolbar-title {
-    font-size: 18px !important; // 3000px에서 수정!
+    font-size: 18px !important;
     font-weight: 600 !important;
     color: #1f2937 !important;
     margin: 0 !important;
@@ -145,22 +165,27 @@
     min-height: 100px !important;
   }
 
-
   .fc .fc-daygrid-day-top {
     flex-direction: row !important; //날짜를 왼쪽으로
   }
   
-  // 오늘 날짜
+  // 오늘 날짜 (기본 스타일 유지하되 색상은 위에서 정의한 클래스 우선)
   .fc-day-today {
     background-color: #fef3c7 !important;
+    
+    // 오늘 날짜의 숫자 색상은 요일/공휴일 규칙을 따름
+    .fc-daygrid-day-number {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 4px;
+      padding: 4px 8px !important;
+    }
   }
   
-  // 날짜 숫자
+  // 날짜 숫자 기본 스타일
   .fc-daygrid-day-number {
-    color: #374151 !important;
-    font-weight: 500 !important;
     padding: 8px !important;
     font-size: 14px !important;
+    transition: color 0.2s ease !important;
   }
   
   // 이벤트 스타일
@@ -206,6 +231,12 @@
         }
       }
     }
+    
+    // 모바일에서 날짜 숫자 크기 조정
+    .fc-daygrid-day-number {
+      font-size: 13px !important;
+      padding: 6px !important;
+    }
   }
 }
 
@@ -230,6 +261,12 @@
           font-size: 9px;
         }
       }
+    }
+    
+    // 작은 화면에서 날짜 숫자 더 작게
+    .fc-daygrid-day-number {
+      font-size: 12px !important;
+      padding: 4px !important;
     }
   }
 }
