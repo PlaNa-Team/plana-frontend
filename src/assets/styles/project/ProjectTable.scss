@@ -1,6 +1,8 @@
 .project {
-    display: flex;
-    gap: 24px;
+    &__list {
+        display: flex;
+        gap: $spacing-4;
+    }
     
     &__info {
         flex: 0;
@@ -88,5 +90,9 @@
                 border: 1px solid #ddd;
             }
         }
+    }
+
+    &__detail {
+        margin-top: 30px;
     }
 }

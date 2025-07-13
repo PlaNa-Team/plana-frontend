@@ -7,6 +7,7 @@ interface EditableCellProps {
     showPlaceholder?: boolean;
     onDetailClick?: () => void;
     showDetailButton?: boolean;
+    maxLength?: number;
 }
 
 const EditableCell: React.FC<EditableCellProps> = ({ 
@@ -15,7 +16,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
     placeholder = '프로젝트 제목을 입력하세요',
     showPlaceholder = true,
     onDetailClick,
-    showDetailButton = false
+    showDetailButton = false,
+    maxLength = 30
 }) => {
     const [ isEditing, setIsEditing ] = useState(false);
     const [ editValue, setEditValue ] = useState(value);
@@ -58,16 +60,24 @@ const EditableCell: React.FC<EditableCellProps> = ({
         onDetailClick?.();
     }
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        if (newValue.length <= maxLength) {
+            setEditValue(newValue);
+        }
+    };
+
     if (isEditing) {
         return (
             <input
                 ref={ inputRef }
                 value={ editValue }
-                onChange={(e) => setEditValue(e.target.value)}
+                onChange={ handleInputChange }
                 onKeyDown={ handleKeyDown }
                 onBlur={ handleBlur }
                 className="editable-cell__input"
                 placeholder={ placeholder }
+                maxLength={ maxLength }
             />
         );
     }

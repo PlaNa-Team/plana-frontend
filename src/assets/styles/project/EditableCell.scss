@@ -1,24 +1,22 @@
 .editable-cell {
     &__display {
+        width: 94%;
         padding: $spacing-1 $spacing-2;
         min-height: $spacing-4;
         cursor: pointer;
-        border-radius: 4px;
         transition: background-color 0.2s ease;
         position: relative;
+        display: flex;
+        align-items: left;
+        left: $spacing-3;
 
         &--with-button {
             @include flex-between;
         }
     }
 
-    &__text {
-        flex: 1;
-        text-align: left;
-
-        &--placeholder {
-            color: var(--color-md);
-        }
+    &__text--placeholder {
+        color: var(--color-md);
     }
 
     &__detail-button {
