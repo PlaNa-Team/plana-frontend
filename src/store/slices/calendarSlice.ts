@@ -5,22 +5,27 @@ import { HolidayItem } from '../../types/calendar.types';
 // 달력 상태 타입 정의
 interface CalendarState {
   events: any[];
-  currentDate: Date;
+  currentDate: string; // Date 대신 string 사용
   holidays: HolidayItem[];
   isLoadingHolidays: boolean;
+}
+
+// RootState 타입 정의 (임시)
+interface RootState {
+  calendar: CalendarState;
 }
 
 const calendarSlice = createSlice({
   name: 'calendar',
   initialState: { 
     events: [], 
-    currentDate: new Date(),
+    currentDate: new Date().toISOString(), // string으로 저장
     holidays: [],
     isLoadingHolidays: false
   } as CalendarState,
   reducers: {
     updateCurrentDate: (state, action: PayloadAction<{ start: string }>) => {
-      state.currentDate = new Date(action.payload.start);
+      state.currentDate = action.payload.start;
     },
     setEvents: (state, action: PayloadAction<any[]>) => {
       state.events = action.payload;
@@ -43,10 +48,10 @@ export const {
 } = calendarSlice.actions;
 
 // Selector 함수들
-export const selectEvents = (state: { calendar: CalendarState }) => state.calendar.events;
-export const selectCurrentDate = (state: { calendar: CalendarState }) => state.calendar.currentDate;
-export const selectHolidays = (state: { calendar: CalendarState }) => state.calendar.holidays;
-export const selectIsLoadingHolidays = (state: { calendar: CalendarState }) => state.calendar.isLoadingHolidays;
+export const selectEvents = (state: RootState) => state.calendar.events;
+export const selectCurrentDate = (state: RootState) => state.calendar.currentDate;
+export const selectHolidays = (state: RootState) => state.calendar.holidays;
+export const selectIsLoadingHolidays = (state: RootState) => state.calendar.isLoadingHolidays;
 
 // reducer 내보내기
 export default calendarSlice.reducer;

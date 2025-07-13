@@ -65,19 +65,20 @@ export interface HolidayItem {
   seq: number;
 }
 
+// API 응답 타입을 더 안전하게 정의
 export interface HolidayApiResponse {
   response: {
     header: {
       resultCode: string;
       resultMsg: string;
     };
-    body: {
-      items: {
-        item: HolidayItem[] | HolidayItem;
+    body?: {  // body를 선택적으로 만듦
+      items?: {  // items도 선택적으로 만듦
+        item?: HolidayItem[] | HolidayItem;  // item도 선택적으로 만듦
       };
-      numOfRows: number;
-      pageNo: number;
-      totalCount: number;
+      numOfRows?: number;
+      pageNo?: number;
+      totalCount?: number;
     };
   };
 }

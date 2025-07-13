@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { fetchHolidays } from '../../services/publicApi';
+import { useAppDispatch, useAppSelector } from '../../store';
 import { 
   setHolidays, 
   setLoadingHolidays, 
@@ -55,17 +55,19 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   className = ''
 }) => {
   
-  const dispatch = useDispatch();
-  const holidays = useSelector(selectHolidays);
-  const isLoadingHolidays = useSelector(selectIsLoadingHolidays);
+  const dispatch = useAppDispatch();
+  const holidays = useAppSelector(selectHolidays);
+  const isLoadingHolidays = useAppSelector(selectIsLoadingHolidays);
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 공휴일 데이터 로드
-  const loadHolidays = async (year: string) => {
+  const loadHolidays = React.useCallback(async (year: string) => {
     try {
+      console.log('공휴일 로드 시작:', year); // 디버그 로그
       dispatch(setLoadingHolidays(true));
       const holidayData = await fetchHolidays(year);
+      console.log('로드된 공휴일 데이터:', holidayData); // 디버그 로그
       dispatch(setHolidays(holidayData));
     } catch (error) {
       console.error('공휴일 데이터 로드 실패:', error);
@@ -73,16 +75,22 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     } finally {
       dispatch(setLoadingHolidays(false));
     }
-  };
+  }, [dispatch]);
 
   // 날짜가 공휴일인지 확인하는 함수
-  const isHoliday = (date: Date): boolean => {
+  const isHoliday = React.useCallback((date: Date): boolean => {
     const dateString = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
-    return holidays.some(holiday => holiday.locdate === dateString && holiday.isHoliday === 'Y');
-  };
+    console.log('공휴일 확인:', dateString, holidays); // 디버그 로그
+    const result = holidays.some(holiday => {
+      console.log('비교:', holiday.locdate, dateString, holiday.isHoliday); // 디버그 로그
+      return holiday.locdate === dateString && holiday.isHoliday === 'Y';
+    });
+    console.log('공휴일 결과:', result); // 디버그 로그
+    return result;
+  }, [holidays]);
 
   // 요일별 색상 클래스 반환
-  const getDayColorClass = (date: Date): string => {
+  const getDayColorClass = React.useCallback((date: Date): string => {
     const dayOfWeek = date.getDay(); // 0: 일요일, 6: 토요일
     
     if (dayOfWeek === 0 || isHoliday(date)) {
@@ -91,7 +99,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
       return 'saturday'; // 토요일: 파란색
     }
     return 'weekday'; // 평일: 기본색
-  };
+  }, [isHoliday]);
 
   // textarea 이벤트 핸들러들
   const handleTextareaClick = (e: Event) => {
@@ -109,8 +117,8 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     e.stopPropagation();
   };
 
-  // 날짜 숫자 색상 적용하여 표시
-  const renderDayCellContent = (dayInfo: any) => {
+  // 날짜 숫자 색상 적용하여 표시 (useCallback으로 최적화)
+  const renderDayCellContent = React.useCallback((dayInfo: any) => {
     if (dayCellContent) {
       return dayCellContent(dayInfo);
     }
@@ -123,10 +131,10 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         {dayNumber}
       </div>
     );
-  };
+  }, [dayCellContent, getDayColorClass]);
 
-  // 날짜 색상 적용 함수
-  const applyDateColors = () => {
+  // 날짜 색상 적용 함수 (useCallback으로 메모이제이션)
+  const applyDateColors = React.useCallback(() => {
     const calendarEl = containerRef.current?.querySelector('.fc');
     if (!calendarEl) return;
 
@@ -145,10 +153,10 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         cell.classList.add(colorClass);
       }
     });
-  };
+  }, [getDayColorClass]); // getDayColorClass를 의존성에 추가
 
-  // 메모 컬럼 추가 (최적화된 버전)
-  const addMemoColumn = () => {
+  // 메모 컬럼 추가 (useCallback으로 메모이제이션)
+  const addMemoColumn = React.useCallback(() => {
     const calendarEl = containerRef.current?.querySelector('.fc');
     if (!calendarEl) return;
 
@@ -224,15 +232,15 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     // 기존 이벤트 리스너 제거 후 새로 추가
     calendarEl.removeEventListener('click', handleCalendarClick);
     calendarEl.addEventListener('click', handleCalendarClick);
-  };
+  }, []); // 의존성이 없으므로 빈 배열
 
-  // 캘린더 업데이트 함수 (메모 컬럼 + 색상 적용)
-  const updateCalendar = () => {
+  // 캘린더 업데이트 함수 (메모 컬럼 + 색상 적용) - useCallback으로 메모이제이션
+  const updateCalendar = React.useCallback(() => {
     requestAnimationFrame(() => {
       addMemoColumn();
       applyDateColors();
     });
-  };
+  }, [addMemoColumn, applyDateColors]); // addMemoColumn과 applyDateColors를 의존성에 추가
 
   // 로딩 상태에서 미리 처리
   const handleLoading = (isLoading: boolean) => {
@@ -267,16 +275,19 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   useEffect(() => {
     const currentYear = new Date().getFullYear().toString();
     loadHolidays(currentYear);
-  }, []);
+  }, [loadHolidays]); // loadHolidays를 의존성에 추가
 
   // 공휴일 데이터가 변경되면 색상 다시 적용
   useEffect(() => {
-    if (!isLoadingHolidays) {
-      requestAnimationFrame(() => {
+    if (!isLoadingHolidays && holidays.length > 0) {
+      // 약간의 지연을 주어 DOM이 완전히 렌더링된 후 실행
+      const timer = setTimeout(() => {
         applyDateColors();
-      });
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [holidays, isLoadingHolidays]);
+  }, [holidays, isLoadingHolidays, applyDateColors]); // applyDateColors를 의존성에 추가
 
   return (
     <div className={`calendar-base ${className}`} ref={containerRef}>
