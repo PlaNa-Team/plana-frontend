@@ -9,16 +9,12 @@ const publicApiClient = axios.create({
 export const fetchHolidays = async (year: string): Promise<HolidayItem[]> => {
   try {
     const serviceKey = process.env.REACT_APP_HOLIDAY_API_KEY;
-    console.log('API 키 존재 여부:', serviceKey ? '있음' : '없음');
-    console.log('API 키 길이:', serviceKey?.length);
     
     if (!serviceKey) {
-      console.error('API 키가 설정되지 않았습니다.');
+      console.error('공공데이터 API 호출 응답 상태: API 키 미설정');
       return [];
     }
 
-    console.log(`${year}년 공휴일 API 호출 시작`);
-    
     const response = await publicApiClient.get<HolidayApiResponse>(
       'https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo',
       {
@@ -31,51 +27,43 @@ export const fetchHolidays = async (year: string): Promise<HolidayItem[]> => {
       }
     );
 
-    console.log(`${year}년 응답 상태:`, response.status);
-    console.log(`${year}년 응답 타입:`, typeof response.data);
-
-    // 문자열 응답인 경우 (여전히 오류)
+    // 문자열 응답인 경우 (API 오류)
     if (typeof response.data === 'string') {
-      console.error(`${year}년 API 오류:`, response.data);
+      console.error('공공데이터 API 호출 응답 상태: API 키 인증 오류');
       return [];
     }
 
     // 정상 JSON 응답 처리
     if (!response.data?.response) {
-      console.log(`${year}년: response 필드 없음`);
+      console.error('공공데이터 API 호출 응답 상태: 응답 구조 오류');
       return [];
     }
 
     const header = response.data.response.header;
     if (header?.resultCode !== '00') {
-      console.error(`${year}년 API 오류:`, header);
+      console.error(`공공데이터 API 호출 응답 상태: ${header?.resultCode}`);
       return [];
     }
 
     const body = response.data.response.body;
-    if (!body) {
-      console.log(`${year}년: body 없음`);
-      return [];
-    }
-
-    if (body.totalCount === 0) {
-      console.log(`${year}년: 공휴일 0개`);
+    if (!body || body.totalCount === 0) {
+      console.log(`${year}년 공휴일 데이터 확인완료`);
       return [];
     }
 
     const items = body.items?.item;
     if (!items) {
-      console.log(`${year}년: items 없음`);
+      console.log(`${year}년 공휴일 데이터 확인완료`);
       return [];
     }
 
     const holidayArray = Array.isArray(items) ? items : [items];
-    console.log(`🎉 ${year}년 공휴일: ${holidayArray.length}개 성공!`, holidayArray);
+    console.log(`${year}년 공휴일 데이터 확인완료`);
     
     return holidayArray;
     
   } catch (error) {
-    console.error(`${year}년 공휴일 API 호출 실패:`, error);
+    console.error('공공데이터 API 호출 응답 상태: 네트워크 오류');
     return [];
   }
 };

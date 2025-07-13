@@ -265,17 +265,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
       ? Math.floor(holidays[0].locdate / 10000).toString() 
       : '';
     
-    console.log('년도 변경 감지:', {
-      시작날짜: startDate.toISOString().split('T')[0],
-      끝날짜: endDate.toISOString().split('T')[0],
-      중간날짜: middleDate.toISOString().split('T')[0],
-      현재년도: currentYear,
-      저장된년도: storedYear,
-      공휴일개수: holidays.length
-    });
-    
     if (currentYear !== storedYear) {
-      console.log(`${currentYear}년 공휴일 데이터 로드 필요`);
       loadHolidays(currentYear);
     }
     
