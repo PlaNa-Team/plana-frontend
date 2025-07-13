@@ -1,15 +1,41 @@
 .editable-cell {
     &__display {
-        padding: 8px 12px;
-        min-height: 20px;
+        padding: $spacing-1 $spacing-2;
+        min-height: $spacing-4;
         cursor: pointer;
         border-radius: 4px;
+        transition: background-color 0.2s ease;
+        position: relative;
+
+        &--with-button {
+            @include flex-between;
+        }
+    }
+
+    &__text {
+        flex: 1;
+        text-align: left;
+
+        &--placeholder {
+            color: var(--color-md);
+        }
+    }
+
+    &__detail-button {
+        background-color: var(--color-md);
+        color: white;
+        border: none;
+        padding: $spacing-1 $spacing-2;
+        border-radius: $border-radius-xl;
+        font-size: $font-size-sm;
+        cursor: pointer;
+        margin-left: $spacing-2;
         transition: background-color 0.2s ease;
     }
     
     &__input {
         background-color: var(--color-xs);
-        width: 94%;
+        width: 90%;
         padding: 8px 12px;
         border: 1px solid var(--color-xs);
         font-family: inherit;
