@@ -4,12 +4,14 @@ interface EditableCellProps {
     value: string;
     onUpdate: (newValue: string) => void;
     placeholder?: string;
+    showPlaceholder?: boolean;
 }
 
 const EditableCell: React.FC<EditableCellProps> = ({ 
     value,
     onUpdate,
-    placeholder = '프로젝트 제목을 입력하세요'
+    placeholder = '프로젝트 제목을 입력하세요',
+    showPlaceholder = true
 }) => {
     const [ isEditing, setIsEditing ] = useState(false);
     const [ editValue, setEditValue ] = useState(value);
@@ -65,7 +67,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             className="editable-cell__display"
             onClick={() => setIsEditing(true)} 
         >
-            { value || placeholder }
+            {value || (showPlaceholder ? placeholder : '')}
         </div>
     );
 };

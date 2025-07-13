@@ -54,8 +54,8 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
         });
     };
 
-    const handlePeriodChange = (projectId: number, startMonth?: number, endMonth?: number) => {
-        updateProject(projectId, { startMonth, endMonth });
+    const handlePeriodChange = (projectId: number, startMonth?: number, endMonth?: number) => {      
+      updateProject(projectId, { startMonth, endMonth });
     };
 
     // 현재 연도의 데이터를 10개 행으로 정규화
@@ -86,6 +86,18 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
         return normalizedData;
     }, [data, year]);
 
+    // 채워진 행의 다음 행을 찾는 함수
+    const getNextEmptyRowIndex = (tableData: Project[]): number =>{
+      for (let i = 0; i < tableData.length; i++) {
+        if (!tableData[i].title || tableData[i].title.trim() === '') {
+          return i;
+        }
+      }
+      return -1; // 모든 행이 채워진 경우
+    };
+
+    const nextEmptyRowIndex = getNextEmptyRowIndex(tableData);
+
   // 첫 번째 테이블 컬럼 (프로젝트 정보)
   const infoColumns = [
     columnHelper.display({
@@ -101,18 +113,23 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           value={getValue() || ''}
           onUpdate={(newValue) => updateProject(row.original.id, { title: newValue })}
           placeholder="프로젝트 제목을 입력하세요"
+          showPlaceholder={row.index === nextEmptyRowIndex}
         />
       ),
       minSize: 377,
     }),
     columnHelper.accessor('status', {
       header: 'Status',
-      cell: ({ getValue, row }) => (
-        <StatusDropdown 
-          value={getValue()}
-          onChange={(newStatus) => updateProject(row.original.id, { status: newStatus })}
-        />
-      ),
+      cell: ({ getValue, row }) => {
+        // title이 비어있으면 StatusDropdown 렌더링 X
+        if (!row.original.title || row.original.title.trim() === '') return null;
+        return (
+          <StatusDropdown 
+            value={getValue()}
+            onChange={(newStatus) => updateProject(row.original.id, { status: newStatus })}
+          />
+        );
+      },
       size: 102,
     }),
   ];
@@ -130,6 +147,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           endMonth={row.original.endMonth}
           status={row.original.status}
           onPeriodChange={handlePeriodChange}
+          hasTitle={!!row.original.title?.trim()}
         />
       ),
       size: 50,
