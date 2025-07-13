@@ -10,11 +10,6 @@ interface CalendarState {
   isLoadingHolidays: boolean;
 }
 
-// RootState 타입 정의 (임시)
-interface RootState {
-  calendar: CalendarState;
-}
-
 const calendarSlice = createSlice({
   name: 'calendar',
   initialState: { 
@@ -47,11 +42,11 @@ export const {
   setLoadingHolidays
 } = calendarSlice.actions;
 
-// Selector 함수들
-export const selectEvents = (state: RootState) => state.calendar.events;
-export const selectCurrentDate = (state: RootState) => state.calendar.currentDate;
-export const selectHolidays = (state: RootState) => state.calendar.holidays;
-export const selectIsLoadingHolidays = (state: RootState) => state.calendar.isLoadingHolidays;
+// Selector 함수들 (제네릭 타입 사용)
+export const selectEvents = (state: any) => state.calendar.events;
+export const selectCurrentDate = (state: any) => state.calendar.currentDate;
+export const selectHolidays = (state: any) => state.calendar.holidays;
+export const selectIsLoadingHolidays = (state: any) => state.calendar.isLoadingHolidays;
 
 // reducer 내보내기
 export default calendarSlice.reducer;
