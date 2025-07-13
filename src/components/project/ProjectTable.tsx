@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { createColumnHelper, useReactTable, flexRender, getCoreRowModel } from '@tanstack/react-table'
-import { Project, ProjectStatus } from '../../types'
+import { JournalDetailSchedule, Project, ProjectStatus } from '../../types'
 import { EditableCell, MonthCell, StatusDropdown } from './cells'
+import ProjectDetailTable from './cells/ProjectDetailTable'
 
 interface ProjectTableProps {
     initialData?: Project[];
@@ -15,6 +16,8 @@ const columnHelper = createColumnHelper<Project>();
 const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataChange }) => {
     const [ data, setData ] = useState<Project[]>(initialData);
     const [ year, setYear ] = useState<number>(new Date().getFullYear());
+    const [ selectedProjectId, setSelectedProjectId ] = useState<number | null>(null);
+    const [ schedules, setSchedules ] = useState<JournalDetailSchedule[]>([]);
 
     useEffect(() => {
         onDataChange?.(data);
@@ -57,6 +60,18 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
     const handlePeriodChange = (projectId: number, startMonth?: number, endMonth?: number) => {      
       updateProject(projectId, { startMonth, endMonth });
     };
+
+    const handleDetailClick = (projectId: number) => {
+      if (selectedProjectId === projectId) {
+        setSelectedProjectId(null);
+      } else {
+        setSelectedProjectId(projectId);
+      }
+    };
+
+    const handleSchedulesChange = (newSchedules: JournalDetailSchedule[]) => {
+      setSchedules(newSchedules);
+    }
 
     // 현재 연도의 데이터를 10개 행으로 정규화
     const tableData = useMemo(() => {
@@ -114,6 +129,8 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           onUpdate={(newValue) => updateProject(row.original.id, { title: newValue })}
           placeholder="프로젝트 제목을 입력하세요"
           showPlaceholder={row.index === nextEmptyRowIndex}
+          showDetailButton={!!(getValue()?.trim())}
+          onDetailClick={() => handleDetailClick(row.original.id)}
         />
       ),
       minSize: 377,
@@ -165,6 +182,8 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
     columns: monthColumns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const selectedProject = selectedProjectId ? tableData.find(p => p.id === selectedProjectId) : null;
 
   return (
     <div className="project">
@@ -245,6 +264,17 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           </tbody>
         </table>
       </div>
+
+      { selectedProject && selectedProject.title && (
+        <div className="project__detail">
+          <ProjectDetailTable
+            projectId={selectedProject.id}
+            projectTitle={selectedProject.title}
+            initialSchedules={schedules.filter(s => s.projectId === selectedProject.id)}
+            onSchedulesChange={handleSchedulesChange}
+          />
+        </div>
+      )}
     </div>
   );
 };
