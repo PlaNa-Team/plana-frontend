@@ -131,6 +131,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           showPlaceholder={row.index === nextEmptyRowIndex}
           showDetailButton={!!(getValue()?.trim())}
           onDetailClick={() => handleDetailClick(row.original.id)}
+          maxLength={ 30 }
         />
       ),
       minSize: 377,
@@ -187,82 +188,84 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
 
   return (
     <div className="project">
-      {/* 첫 번째 테이블: 프로젝트 정보 */}
-      <div className="project__info">
-        <table className="project__info-table">
-          <thead>
-            {infoTable.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th 
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {infoTable.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 두 번째 테이블: 월별 */}
-      <div className="project__months">
-        <div className="project__year-selector">
-          <button onClick={handlePrevYear} className="project__year-btn">
-          <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7.90609 13.1253L1.15967 7.06267L7.90609 1" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-
-          </button>
-          <span className="project__year">{year}년</span>
-          <button onClick={handleNextYear} className="project__year-btn">
-          <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1.15983 1.00015L7.90625 7.06282L1.15983 13.1255" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-
-          </button>
+      <div className="project__list">
+        {/* 첫 번째 테이블: 프로젝트 정보 */}
+        <div className="project__info">
+          <table className="project__info-table">
+            <thead>
+              {infoTable.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th 
+                      key={header.id}
+                      style={{ width: header.getSize() }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {infoTable.getRowModel().rows.map(row => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        
-        <table className="project__months-table">
-          <thead>
-            {monthTable.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th 
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {monthTable.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="project__months-cell">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        {/* 두 번째 테이블: 월별 */}
+        <div className="project__months">
+          <div className="project__year-selector">
+            <button onClick={handlePrevYear} className="project__year-btn">
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.90609 13.1253L1.15967 7.06267L7.90609 1" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            </button>
+            <span className="project__year">{year}년</span>
+            <button onClick={handleNextYear} className="project__year-btn">
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.15983 1.00015L7.90625 7.06282L1.15983 13.1255" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            </button>
+          </div>
+          
+          <table className="project__months-table">
+            <thead>
+              {monthTable.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th 
+                      key={header.id}
+                      style={{ width: header.getSize() }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {monthTable.getRowModel().rows.map(row => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="project__months-cell">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       { selectedProject && selectedProject.title && (
