@@ -1,6 +1,7 @@
 import React from 'react'
 import { JournalDetailSchedule } from '../../../types';
 import { DateInput, DetailInput, StarIcon } from './index';
+import DeleteConfirmDialog from '../DeleteConfirmDialog';
 
 const ScheduleTable: React.FC<{
     schedules: JournalDetailSchedule[];
@@ -52,12 +53,11 @@ const ScheduleTable: React.FC<{
                         />
                     </td>
                     <td className="delete-cell">
-                        <button
-                            className="delete-button"
-                            onClick={() => onDeleteSchedule(schedule.id)}
-                        >
-                            삭제
-                        </button>
+                        <DeleteConfirmDialog onDelete={() => onDeleteSchedule(schedule.id)}>
+                            <button className="delete-button">
+                                삭제
+                            </button>
+                        </DeleteConfirmDialog>
                     </td>
                 </tr>
             ))}

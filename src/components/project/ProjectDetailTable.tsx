@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { JournalDetailSchedule } from '../../types'
 import { ScheduleTable } from './projectDetail'
+import DeleteConfirmDialog from './DeleteConfirmDialog';
 
 interface ProjectDetailTableProps {
     projectId: number;
@@ -82,10 +83,7 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     };
 
     const deleteProject = () => {
-        if (window.confirm('현재 프로젝트를 삭제하시겠습니까?')) {
-            // 이 부분 팝업창으로 변경
-            console.log('프로젝트 삭제: ', projectId);
-        }
+        console.log('프로젝트 삭제: ', projectId);
     };
 
     return (
@@ -130,9 +128,11 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
 
             {/* 프로젝트 삭제 버튼 */}
             <div className="project-detail__delete">
-                <button className="delete-project-button" onClick={deleteProject}>
-                    현재 프로젝트 삭제
-                </button>
+                <DeleteConfirmDialog onDelete={deleteProject}>
+                    <button className="delete-project-button">
+                        현재 프로젝트 삭제
+                    </button>
+                </DeleteConfirmDialog>
             </div>
         </div>
     );

@@ -1,0 +1,81 @@
+/* reset */
+button {
+	all: unset;
+}
+
+.AlertDialogOverlay {
+	position: fixed;
+	inset: 0;
+	animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.AlertDialogContent {
+    background-color: var(--color-xs);
+    color: var(--color-xl);
+    border: 1px solid var(--color-sm);
+	border-radius: $border-radius-lg;
+	box-shadow: $shadow-xl;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 90vw;
+	max-width: 500px;
+	max-height: 85vh;
+	padding: 25px;
+	animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.AlertDialogContent:focus {
+	outline: none;
+}
+
+.AlertDialogTitle {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 500;
+}
+
+.AlertDialogDescription {
+	margin-bottom: 20px;
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.Button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	padding: 0 15px;
+	font-size: 15px;
+	line-height: 1;
+	font-weight: 500;
+	height: 35px;
+	user-select: none;
+}
+.Button:focus:not(:focus-visible) {
+	outline: 0;
+}
+.Button.red {
+	background-color: var(--color-sm);
+}
+
+@keyframes overlayShow {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes contentShow {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -48%) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
