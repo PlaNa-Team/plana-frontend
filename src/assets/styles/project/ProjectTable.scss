@@ -30,7 +30,7 @@
         td {
             text-align: center;
             height: $spacing-10;
-            border: 1px solid #ddd;
+            border: 1px solid var(--color-sm);
             font-size: $font-size-sm;
         }
     }
@@ -87,7 +87,7 @@
                 font-weight: $font-weight-medium;
             }
             td {
-                border: 1px solid #ddd;
+                border: 1px solid var(--color-sm);
             }
         }
     }
