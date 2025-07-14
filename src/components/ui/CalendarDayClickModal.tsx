@@ -67,6 +67,55 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
+      },
+      {
+        id: '2',
+        title: '점심 약속',
+        time: '12:30 - 14:00',
+        category: 'personal',
+        description: '친구와 만남'
       }
     ];
 
@@ -119,12 +168,9 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
                   <div className={`event-category-indicator ${event.category}`} />
                   <div className="event-content">
                     <div className="event-header">
-                      <h3 className="event-title">{event.title}</h3>
-                      <span className="event-time">{event.time}</span>
+                      <h3 className="event-title">{event.title}</h3>  
                     </div>
-                    {event.description && (
-                      <p className="event-description">{event.description}</p>
-                    )}
+                     <span className="event-time">{event.time}</span>
                   </div>
                 </div>
               ))}
