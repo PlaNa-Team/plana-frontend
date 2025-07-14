@@ -21,9 +21,7 @@
     &--start,
     &--end {
       .month-cell__content {
-        font-size: $font-size-xs;
-        color: var(--color-xs);
-        font-weight: $font-weight-bold;
+        opacity: 0.2;        
       }
     }
     

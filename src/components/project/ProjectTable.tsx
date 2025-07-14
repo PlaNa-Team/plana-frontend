@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { createColumnHelper, useReactTable, flexRender, getCoreRowModel } from '@tanstack/react-table'
-import { Project, ProjectStatus } from '../../types'
+import { JournalDetailSchedule, Project, ProjectStatus } from '../../types'
 import { EditableCell, MonthCell, StatusDropdown } from './cells'
+import ProjectDetailTable from './cells/ProjectDetailTable'
 
 interface ProjectTableProps {
     initialData?: Project[];
@@ -15,6 +16,8 @@ const columnHelper = createColumnHelper<Project>();
 const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataChange }) => {
     const [ data, setData ] = useState<Project[]>(initialData);
     const [ year, setYear ] = useState<number>(new Date().getFullYear());
+    const [ selectedProjectId, setSelectedProjectId ] = useState<number | null>(null);
+    const [ schedules, setSchedules ] = useState<JournalDetailSchedule[]>([]);
 
     useEffect(() => {
         onDataChange?.(data);
@@ -54,9 +57,21 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
         });
     };
 
-    const handlePeriodChange = (projectId: number, startMonth?: number, endMonth?: number) => {
-        updateProject(projectId, { startMonth, endMonth });
+    const handlePeriodChange = (projectId: number, startMonth?: number, endMonth?: number) => {      
+      updateProject(projectId, { startMonth, endMonth });
     };
+
+    const handleDetailClick = (projectId: number) => {
+      if (selectedProjectId === projectId) {
+        setSelectedProjectId(null);
+      } else {
+        setSelectedProjectId(projectId);
+      }
+    };
+
+    const handleSchedulesChange = (newSchedules: JournalDetailSchedule[]) => {
+      setSchedules(newSchedules);
+    }
 
     // 현재 연도의 데이터를 10개 행으로 정규화
     const tableData = useMemo(() => {
@@ -86,6 +101,18 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
         return normalizedData;
     }, [data, year]);
 
+    // 채워진 행의 다음 행을 찾는 함수
+    const getNextEmptyRowIndex = (tableData: Project[]): number =>{
+      for (let i = 0; i < tableData.length; i++) {
+        if (!tableData[i].title || tableData[i].title.trim() === '') {
+          return i;
+        }
+      }
+      return -1; // 모든 행이 채워진 경우
+    };
+
+    const nextEmptyRowIndex = getNextEmptyRowIndex(tableData);
+
   // 첫 번째 테이블 컬럼 (프로젝트 정보)
   const infoColumns = [
     columnHelper.display({
@@ -101,18 +128,26 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           value={getValue() || ''}
           onUpdate={(newValue) => updateProject(row.original.id, { title: newValue })}
           placeholder="프로젝트 제목을 입력하세요"
+          showPlaceholder={row.index === nextEmptyRowIndex}
+          showDetailButton={!!(getValue()?.trim())}
+          onDetailClick={() => handleDetailClick(row.original.id)}
+          maxLength={ 30 }
         />
       ),
       minSize: 377,
     }),
     columnHelper.accessor('status', {
       header: 'Status',
-      cell: ({ getValue, row }) => (
-        <StatusDropdown 
-          value={getValue()}
-          onChange={(newStatus) => updateProject(row.original.id, { status: newStatus })}
-        />
-      ),
+      cell: ({ getValue, row }) => {
+        // title이 비어있으면 StatusDropdown 렌더링 X
+        if (!row.original.title || row.original.title.trim() === '') return null;
+        return (
+          <StatusDropdown 
+            value={getValue()}
+            onChange={(newStatus) => updateProject(row.original.id, { status: newStatus })}
+          />
+        );
+      },
       size: 102,
     }),
   ];
@@ -130,6 +165,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
           endMonth={row.original.endMonth}
           status={row.original.status}
           onPeriodChange={handlePeriodChange}
+          hasTitle={!!row.original.title?.trim()}
         />
       ),
       size: 50,
@@ -148,85 +184,100 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ initialData = [], onDataCha
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const selectedProject = selectedProjectId ? tableData.find(p => p.id === selectedProjectId) : null;
+
   return (
     <div className="project">
-      {/* 첫 번째 테이블: 프로젝트 정보 */}
-      <div className="project__info">
-        <table className="project__info-table">
-          <thead>
-            {infoTable.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th 
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {infoTable.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 두 번째 테이블: 월별 */}
-      <div className="project__months">
-        <div className="project__year-selector">
-          <button onClick={handlePrevYear} className="project__year-btn">
-          <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7.90609 13.1253L1.15967 7.06267L7.90609 1" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-
-          </button>
-          <span className="project__year">{year}년</span>
-          <button onClick={handleNextYear} className="project__year-btn">
-          <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1.15983 1.00015L7.90625 7.06282L1.15983 13.1255" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-
-          </button>
+      <div className="project__list">
+        {/* 첫 번째 테이블: 프로젝트 정보 */}
+        <div className="project__info">
+          <table className="project__info-table">
+            <thead>
+              {infoTable.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th 
+                      key={header.id}
+                      style={{ width: header.getSize() }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {infoTable.getRowModel().rows.map(row => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        
-        <table className="project__months-table">
-          <thead>
-            {monthTable.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th 
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {monthTable.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="project__months-cell">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        {/* 두 번째 테이블: 월별 */}
+        <div className="project__months">
+          <div className="project__year-selector">
+            <button onClick={handlePrevYear} className="project__year-btn">
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.90609 13.1253L1.15967 7.06267L7.90609 1" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            </button>
+            <span className="project__year">{year}년</span>
+            <button onClick={handleNextYear} className="project__year-btn">
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.15983 1.00015L7.90625 7.06282L1.15983 13.1255" stroke="var(--color-xl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            </button>
+          </div>
+          
+          <table className="project__months-table">
+            <thead>
+              {monthTable.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th 
+                      key={header.id}
+                      style={{ width: header.getSize() }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {monthTable.getRowModel().rows.map(row => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="project__months-cell">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      { selectedProject && selectedProject.title && (
+        <div className="project__detail">
+          <ProjectDetailTable
+            projectId={selectedProject.id}
+            projectTitle={selectedProject.title}
+            initialSchedules={schedules.filter(s => s.projectId === selectedProject.id)}
+            onSchedulesChange={handleSchedulesChange}
+          />
+        </div>
+      )}
     </div>
   );
 };
