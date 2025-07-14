@@ -19,16 +19,19 @@
   border-radius: 1rem;
   width: 90vw;
   max-width: 35rem;
+  height: 80vh; /* 고정 높이로 변경 */
   max-height: 80vh;
   position: relative;
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
   overflow: hidden;
+  display: flex;
+  flex-direction: column; /* 세로 방향 플렉스 */
 }
 
 /* 모달 헤더 */
 .modal-header {
   position: relative;
-  padding: 0.5rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
   display: flex; /* 부모에 flex 추가 */
   justify-content: space-between; /* 양 끝으로 정렬 */
@@ -58,17 +61,45 @@
   }
 
   .close-button {
-    left: 1rem;
+    // left: 1rem; /* 주석처리 또는 제거 */
+    order: 1; /* flex에서 순서 지정 */
   }
 
   .confirm-button {
-    right: 1rem;
+    // right: 1rem; /* 주석처리 또는 제거 */
+    order: 3; /* flex에서 순서 지정 */
   }
+}
+
+/* 검색 결과 없음 메시지 */
+.no-results {
+  text-align: center;
+  padding: 4rem 1rem; /* 패딩을 늘려서 공간 확보 */
+  color: #6b7280;
+  flex: 1; /* flex로 남은 공간 모두 차지 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  p {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+}
+
+/* 검색어 하이라이트 */
+.event-title mark {
+  background-color: #fef08a;
+  color: #374151;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
 }
 
 /* 검색 영역 */
 .search-section {
   padding: 0 1.5rem 1rem 1.5rem;
+  flex-shrink: 0; /* 검색 영역 크기 고정 */
 
   .search-container {
     position: relative;
@@ -83,7 +114,7 @@
       outline: none;
       transition: border-color 0.2s ease;
       background-color: #f9fafb;
-      box-sizing: border-box;
+      box-sizing: border-box; /* 핵심: padding과 border를 width에 포함 */
 
       &:focus {
         border-color: #3b82f6;
@@ -111,19 +142,34 @@
 /* 결과 영역 */
 .results-section {
   padding: 0 1.5rem 1.5rem 1.5rem;
-//   border: 1px solid #e5e7eb;
+  flex: 1; /* 남은 공간 모두 차지 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 스크롤 제어 */
 
   .results-title {
     font-size: 1rem;
     font-weight: 600;
     color: #374151;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0; /* 제목 크기 고정 */
+
+    .search-count {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: #6b7280;
+    }
   }
 
   .results-list {
-    max-height: 25rem;
+    flex: 1; /* 남은 공간 모두 차지 */
     overflow-y: auto;
     border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
 
     /* 스크롤바 스타일 */
     &::-webkit-scrollbar {
@@ -155,7 +201,10 @@
   margin-bottom: 0.5rem;
   transition: background-color 0.2s ease;
   cursor: pointer;
-    background-color: #f9fafb;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
 
   &.selected {
     background-color: #dbeafe;
@@ -207,31 +256,13 @@
 /* 검색 버튼 컨테이너 */
 .search-button-container {
   padding: 1rem;
-  text-align: right;
+  text-align: left;
   position: relative;
   z-index: 1;
 
   .search-trigger-button {
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-    border: none;
-    border-radius: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-
-    &:hover {
-      background: linear-gradient(135deg, #1d4ed8, #1e40af);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
   }
 }
 @media (max-width: 768px) {
