@@ -34,6 +34,7 @@
         padding: 8px;
         text-align: center;
         vertical-align: middle;
+        min-width: $spacing-12;
     }
 
     th {
@@ -86,6 +87,7 @@
     color: var(--color-xl);
     border: none;
     resize: none;
+    min-width: 50rem;
 
     &:focus {
         outline: none;
@@ -126,7 +128,6 @@
 }
 
 .delete-project-button {
-    background-color: var(--color-xs);
     color: #FF0000;
     border: 1px solid #FF0000;
     padding: 10px 20px;
@@ -136,6 +137,6 @@
     transition: all 0.2s ease;
 
     &:hover {
-        color: white;
+        color: var(--color-xl);
     }
 }

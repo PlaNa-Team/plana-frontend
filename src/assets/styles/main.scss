@@ -10,11 +10,9 @@
 // @import 'base/typography'; // 기본 텍스트 스타일 (h1, p, a 등)
 
 // Components ( 컴포넌트 스타일 )
-// @import 'components/button';       // 버튼 컴포넌트 스타일
-// @import 'components/modal';        // 모달창 컴포넌트 스타일
-// @import 'components/notification'; // 알림/토스트 컴포넌트 스타일
 @import 'components/theme-switch'; // 테마 스위치 컴포넌트 스타일
 @import 'components/CalendarBase'; // 달력 컴포넌트 스타일
+@import 'components/alert-dialog';
 
 // Layout ( 레이아웃 스타일 )
 @import 'layout/layout';   // 전체 레이아웃 스타일
