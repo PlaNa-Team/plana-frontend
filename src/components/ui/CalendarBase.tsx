@@ -19,6 +19,7 @@ interface CalendarBaseProps {
   onEventDrop?: (dropInfo: any) => void;
   onEventResize?: (resizeInfo: any) => void;
   onDatesSet?: (dateInfo: any) => void;
+  onDateClick?: (dateStr: string) => void; // 🆕 날짜 클릭 이벤트 추가
   initialView?: string;
   headerToolbar?: any;
   height?: string | number;
@@ -39,6 +40,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   onEventDrop,
   onEventResize,
   onDatesSet,
+  onDateClick, // 🆕 새로운 prop
   initialView = 'dayGridMonth',
   headerToolbar = {
     left: 'prev',
@@ -62,6 +64,20 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const loadedYears = useRef<Set<string>>(new Set());
+
+  // 🆕 날짜 클릭 핸들러 추가 (커스텀 이벤트 발생)
+  const handleDateClick = (arg: any) => {
+    // 커스텀 이벤트 발생으로 모달에게 알림
+    const event = new CustomEvent('calendar-date-click', {
+      detail: { dateStr: arg.dateStr }
+    });
+    window.dispatchEvent(event);
+
+    // 기존 onDateClick prop도 유지 (하위 호환성)
+    if (onDateClick) {
+      onDateClick(arg.dateStr);
+    }
+  };
 
   const loadHolidays = React.useCallback(
     async (year: string) => {
@@ -301,6 +317,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         eventClick={onEventClick}
         eventDrop={onEventDrop}
         eventResize={onEventResize}
+        dateClick={handleDateClick} // 🆕 날짜 클릭 이벤트 연결
         datesSet={handleDatesSet}
         viewDidMount={handleViewDidMount}
         loading={handleLoading}
