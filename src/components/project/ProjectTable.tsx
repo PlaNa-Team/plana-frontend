@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { createColumnHelper, useReactTable, flexRender, getCoreRowModel } from '@tanstack/react-table'
 import { JournalDetailSchedule, Project, ProjectStatus } from '../../types'
 import { EditableCell, MonthCell, StatusDropdown } from './cells'
-import ProjectDetailTable from './cells/ProjectDetailTable'
+import ProjectDetailTable from './ProjectDetailTable'
 
 interface ProjectTableProps {
     initialData?: Project[];
