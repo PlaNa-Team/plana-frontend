@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import CalendarSearchIconProps from '../../assets/icons/CalendarSearchIcon';
 
 
 interface SearchResult {
@@ -197,7 +198,7 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
             className="search-trigger-button"
             onClick={openModal}
           >
-            🔍
+           <CalendarSearchIconProps fill="var(--color-xl)"/>
           </button>
         </div>
       )}
