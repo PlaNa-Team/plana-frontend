@@ -7,7 +7,8 @@
   
     &__content {
       flex: 1;
-      padding: 1rem;
+      padding: 0 1rem;
+      padding-top: 0;
       padding-bottom: 90px; // 푸터 높이 + 여백
       overflow-y: auto;
     }
