@@ -112,6 +112,11 @@
     color: var(--color-md);
   }
 
+  .icon-container .time-icon {
+    color: var(--color-md); // currentColor를 위한 색상
+    display: block; // 혹시 숨겨져 있지 않은지 확인
+  }
+
   .color-dot {
     width: 1rem;
     height: 1rem;
@@ -294,6 +299,12 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   flex: 1;
+  justify-content: space-between;
+
+  .tags-subcontainer{
+    display: flex;
+    gap: 0.2rem;
+  }
 
   .tag {
     background: var(--color-sm);

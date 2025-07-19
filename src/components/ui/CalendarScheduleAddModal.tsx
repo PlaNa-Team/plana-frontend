@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TimeIcon, ColorIcon, RoundArrowIcon, TagIcon, BellIcon, LocationIcon, NoteIcon } from '../../assets/icons';
 
 interface CalendarScheduleAddModalProps {
   isOpen: boolean;
@@ -75,7 +76,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <div className={`color-dot selected-color ${selectedColor}`}></div>
+                <ColorIcon width={24} height={24} fill="var(--color-xl)" className="color-icon" />
               </div>
               <div className="color-picker">
                 {['black', 'pink', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray', 'white'].map((color) => (
@@ -96,7 +97,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">🕐</span>
+                <TimeIcon width={24} height={24} fill="var(--color-xl)" className="time-icon" />
               </div>
               <div className="datetime-container">
                 <div className="date-time-group">
@@ -117,7 +118,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">🔄</span>
+                <RoundArrowIcon width={24} height={24} fill="var(--color-xl)" className="repeat-icon"/>
               </div>
               <span className="form-label">반복 없음</span>
             </div>
@@ -127,12 +128,16 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">🏷️</span>
+                <TagIcon width={24} height={24} fill="var(--color-xl)" className="tag-icon" />
               </div>
               <div className="tags-container">
+                <div className="tags-subcontainer">
                 <span className="tag selected">업무</span>
                 <span className="tag">집안일</span>
+                </div>
+                <div>
                 <button className="add-tag-button">+</button>
+                </div>
               </div>
             </div>
           </div>
@@ -141,7 +146,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">🔔</span>
+                <BellIcon width={24} height={24} fill="var(--color-xl)" className="bell-icon" />
               </div>
               <span className="form-label">알림 없음</span>
             </div>
@@ -151,7 +156,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">📍</span>
+                <LocationIcon width={24} height={24} fill="var(--color-xl)" className="location-icon" />
               </div>
               <input
                 type="text"
@@ -167,7 +172,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">💬</span>
+                <NoteIcon width={24} height={24} fill="var(--color-xl)" className="note-icon" />
               </div>
               <textarea
                 className="memo-textarea"
