@@ -22,6 +22,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   const [reminder, setReminder] = useState('알림 없음');
   const [location, setLocation] = useState('');
   const [memo, setMemo] = useState('');
+  const [selectedColor, setSelectedColor] = useState('red');
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -33,6 +34,11 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     // 일정 저장 로직 추가 예정
     console.log('일정 저장');
     onClose();
+  };
+
+  // 색상 선택 핸들러 추가
+  const handleColorSelect = (color: string) => {
+  setSelectedColor(color);
   };
 
   if (!isOpen) return null;
@@ -56,35 +62,32 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <span className="form-icon">📝</span>
+                <div className={`color-picker-indicator ${selectedColor}`}></div>
               </div>
-              <input
-                type="text"
-                className="title-input"
-                placeholder="제목"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+              <input type="text" className="title-input" placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)}
+                id="schedule-title"
+                name="title"
               />
             </div>
           </div>
 
-          {/* 색상 선택 */}
+        {/* 색상 선택 */}
           <div className="form-section">
             <div className="form-row">
               <div className="icon-container">
-                <div className="color-dot selected-color"></div>
+                <div className={`color-dot selected-color ${selectedColor}`}></div>
               </div>
               <div className="color-picker">
-                <div className="color-option black"></div>
-                <div className="color-option pink"></div>
-                <div className="color-option red"></div>
-                <div className="color-option orange"></div>
-                <div className="color-option yellow"></div>
-                <div className="color-option green"></div>
-                <div className="color-option blue"></div>
-                <div className="color-option purple"></div>
-                <div className="color-option gray"></div>
-                <div className="color-option white"></div>
+                {['black', 'pink', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray', 'white'].map((color) => (
+                  <div key={color} className={`color-option ${color} ${selectedColor === color ? 'selected' : ''}`}
+                    onClick={() => handleColorSelect(color)} role="radio" aria-checked={selectedColor === color} tabIndex={0} onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleColorSelect(color);
+                      }
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>
