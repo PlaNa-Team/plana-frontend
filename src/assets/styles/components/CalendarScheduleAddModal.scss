@@ -352,18 +352,13 @@
 /* 위치 입력 */
 .location-input {
   flex: 1;
-  padding: 0.5rem 0;
+  padding: 0.4rem 0 0 0;
   border: none;
   outline: none;
   font-size: 0.875rem;
   color: var(--color-lg);
   background: transparent;
   border-bottom: 1px solid transparent;
-  transition: border-color 0.2s ease;
-
-  &:focus {
-    border-bottom-color: #3b82f6;
-  }
 
   &::placeholder {
     color: var(--color-md);
@@ -373,7 +368,7 @@
 /* 메모 텍스트 영역 */
 .memo-textarea {
   flex: 1;
-  padding: 0.5rem 0;
+  padding: 0.3rem 0;
   border: none;
   outline: none;
   font-size: 0.875rem;
@@ -381,7 +376,6 @@
   background: transparent;
   resize: none;
   font-family: inherit;
-  line-height: 1.4;
 
   &::placeholder {
     color: var(--color-md);
