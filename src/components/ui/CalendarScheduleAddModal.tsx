@@ -100,17 +100,21 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 <TimeIcon width={24} height={24} fill="var(--color-xl)" className="time-icon" />
               </div>
               <div className="datetime-container">
-                <div className="date-time-group">
-                  <span className="date-text">{startDate.split('-')[1]}월 {startDate.split('-')[2]}일 (월)</span>
-                  <span className="time-text">{startTime}</span>
+                  <div className="date-spacebox">
+                    <div className="date-time-group">
+                      <span className="date-text">{startDate.split('-')[1]}월 {startDate.split('-')[2]}일 (월)</span>
+                      <span className="time-text">{startTime}</span>
+                    </div>
+                    <span className="arrow">〉</span>
+                    <div className="date-time-group">
+                      <span className="date-text">{endDate.split('-')[1]}월 {endDate.split('-')[2]}일 (월)</span>
+                      <span className="time-text">{endTime}</span>
+                    </div>
+                  </div>
+                  <div className="btn-spacebox">  
+                    <button className="all-day-button">하루종일</button>
+                  </div>
                 </div>
-                <span className="arrow">〉</span>
-                <div className="date-time-group">
-                  <span className="date-text">{endDate.split('-')[1]}월 {endDate.split('-')[2]}일 (월)</span>
-                  <span className="time-text">{endTime}</span>
-                </div>
-                <button className="all-day-button">하루종일</button>
-              </div>
             </div>
           </div>
 
