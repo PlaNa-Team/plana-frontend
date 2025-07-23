@@ -14,23 +14,23 @@ const DiaryCalendar: React.FC = () => {
     const DiaryData: DiaryCalendarProps[] = [
         {
             id: 1,
-            diaryDate: '2023-10-01',
+            diaryDate: '2025-07-01',
             diaryType: 'DAILY',
-            imageUrl: 'https://example.com/image1.jpg',
+            imageUrl: '/images/temp1.png',
             title: 'My first diary entry'
         },
         {
             id: 2,
-            diaryDate: '2023-10-02',
+            diaryDate: '2025-07-02',
             diaryType: 'BOOK',
-            imageUrl: 'https://example.com/image2.jpg',
+            imageUrl: '/images/temp2.png',
             title: 'Book review'
         },
         {
             id: 3,
-            diaryDate: '2023-10-03',
+            diaryDate: '2025-07-03',
             diaryType: 'MOVIE',
-            imageUrl: 'https://example.com/image3.jpg',
+            imageUrl: '/images/temp3.jpg',
             title: 'Movie thoughts'
         }
     ];
