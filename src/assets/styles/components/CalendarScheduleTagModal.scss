@@ -1,0 +1,334 @@
+/* 태그 설정 모달 오버레이 */
+.tag-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(1px);
+}
+
+/* 태그 설정 모달 컨테이너 */
+.tag-modal-container {
+  background: var(color-xs);
+  border-radius: 1rem;
+  width: 90vw;
+  max-height: 40vh;
+  max-width: 28rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin-top: 34vh;
+  
+  animation: fadeInUp 0.2s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 태그 설정 모달 헤더 */
+.tag-modal-header {
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-sm);
+  background: var(--color-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-xl);
+  }
+
+  .tag-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-md);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    
+    &:hover {
+      background: var(--color-sm);
+      color: var(--color-xl);
+    }
+  }
+}
+
+/* 태그 설정 모달 내용 */
+.tag-modal-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: var(--color-xs);
+
+  
+  /* 스크롤바 스타일 */
+  &::-webkit-scrollbar {
+    width: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-sm);
+    border-radius: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-md);
+    border-radius: 0.375rem;
+  }
+}
+
+
+/* 입력 영역 */
+.tag-input-section {
+  .tag-input {
+    padding: 0.2rem;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid var(--color-md);
+    background-color: var(--color-xs);
+    font-size: 0.875rem;
+    color: var(--color-xl);
+    outline: none;
+    margin-right: 1rem;
+
+    &::placeholder {
+      color: var(--color-md);
+    }
+  }
+}
+
+/* 색상 선택 */
+.color-selection {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .color-option {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &.selected {
+      border-color: #3b82f6;
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    // 색상별 배경색
+    &.pink { background-color: #ec4899; }
+    &.red { background-color: #ef4444; }
+    &.orange { background-color: #f97316; }
+    &.yellow { background-color: #eab308; }
+    &.green { background-color: #22c55e; }
+    &.blue { background-color: #3b82f6; }
+    &.purple { background-color: #8b5cf6; }
+    &.gray { background-color: #6b7280; }
+    &.white { background-color: #ffffff; border: 1px solid var(--color-md); }
+  }
+}
+
+/* 현재 추가된 태그들 */
+.current-tags-section {
+  .section-title {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--color-md);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .current-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    position: relative;
+  }
+
+  .tag-chip {
+    padding: 0.4rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &.editing {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    // 태그 색상별 스타일
+    &.pink {
+      background: #fdf2f8;
+      color: #ec4899;
+      border-color: #fbcfe8;
+    }
+    &.red {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+    &.orange {
+      background: #fff7ed;
+      color: #ea580c;
+      border-color: #fed7aa;
+    }
+    &.yellow {
+      background: #fefce8;
+      color: #ca8a04;
+      border-color: #fef3c7;
+    }
+    &.green {
+      background: #f0fdf4;
+      color: #16a34a;
+      border-color: #bbf7d0;
+    }
+    &.blue {
+      background: #eff6ff;
+      color: #2563eb;
+      border-color: #bfdbfe;
+    }
+    &.purple {
+      background: #faf5ff;
+      color: #9333ea;
+      border-color: #e9d5ff;
+    }
+    &.gray {
+      background: #f9fafb;
+      color: #6b7280;
+      border-color: #e5e7eb;
+    }
+    &.white {
+      background: #ffffff;
+      color: #374151;
+      border-color: #d1d5db;
+    }
+  }
+
+  .tag-remove {
+    background: none;
+    border: none;
+    color: var(--color-md);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.125rem;
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--color-sm);
+      color: var(--color-xl);
+    }
+  }
+}
+
+/* 추가 버튼 */
+.add-tag-btn {
+  max-height: 2rem;
+  background: var(--color-md);
+  color: var(--color-xs);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 1.0rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+
+  &:disabled {
+    background: var(--color-sm);
+    color: var(--color-md);
+    cursor: not-allowed;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .tag-modal-container {
+    margin-top: 19rem;
+  }
+  
+  .tag-modal-header {
+    padding: 1rem 1.25rem 0.75rem 1.25rem;
+    
+    h3 {
+      font-size: 0.9rem;
+    }
+  }
+  
+  .tag-modal-content {
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tag-modal-container {
+    margin-top: 22rem;
+  }
+  
+  .tag-modal-header {
+    padding: 0.875rem 1rem 0.625rem 1rem;
+    
+    h3 {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .tag-modal-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .color-selection {
+    gap: 0.375rem;
+    
+    .color-option {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+}
