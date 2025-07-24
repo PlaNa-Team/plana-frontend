@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { TimeIcon, ColorIcon, RoundArrowIcon, TagIcon, BellIcon, LocationIcon, NoteIcon } from '../../assets/icons';
 import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
+import CalendarScheduleTagModal from './CalendarScheduleTagModal';
+
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
 
 interface CalendarScheduleAddModalProps {
   isOpen: boolean;
@@ -24,14 +31,21 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   const [memo, setMemo] = useState('');
   const [selectedColor, setSelectedColor] = useState('red');
 
-  //모달 관련 상태 ( 일정반복, 알람 )
+  // 태그 관련 상태
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([
+    { id: '1', name: '업무', color: 'red' }
+  ]);
+
+  //모달 관련 상태 ( 일정반복, 알람, 태그 )
   const [isRepeatModalOpen, setIsRepeatModalOpen] = useState(false);
   const [repeatValue, setRepeatValue] = useState('');
 
   const [isAlramModalOpen, setIsAlramModalOpen] = useState(false);
   const [alramValue, setAlramValue] = useState('');
 
-  //클릭 핸들러 ( 일정반복, 알람 )
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+
+  //클릭 핸들러 ( 일정반복, 알람, 태그 )
   const handleRepeatClick = () => {
     setIsRepeatModalOpen(true);
   };
@@ -40,7 +54,11 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     setIsAlramModalOpen(true);
   };
 
-  //모달 닫기 ( 일정 반복, 알람)
+  const handleTagClick = () => {
+    setIsTagModalOpen(true);
+  };
+
+  //모달 닫기 ( 일정 반복, 알람, 태그 )
   const handleRepeatModalClose = () => {
     setIsRepeatModalOpen(false);
   };
@@ -49,7 +67,11 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     setIsAlramModalOpen(false);
   };
 
-  //모달에서 값 선택 시 ( 일정 반복, 알람)
+  const handleTagModalClose = () => {
+    setIsTagModalOpen(false);
+  };
+
+  //모달에서 값 선택 시 ( 일정 반복, 알람, 태그 )
   const handleRepeatSelect = (value: string) => {
     setRepeatValue(value);
     setIsRepeatModalOpen(false);
@@ -58,6 +80,16 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   const handleAlarmSelect = (value: string) => {
     setAlramValue(value);
     setIsAlramModalOpen(false);
+  };
+
+  const handleTagSelect = (tags: Tag[]) => {
+    setSelectedTags(tags);
+    setIsTagModalOpen(false);
+  };
+
+  // 개별 태그 제거 핸들러
+  const handleTagRemove = (tagId: string) => {
+    setSelectedTags(prev => prev.filter(tag => tag.id !== tagId));
   };
 
   //오버레이 클릭 핸들러
@@ -208,11 +240,25 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 </div>
                 <div className="tags-container">
                   <div className="tags-subcontainer">
-                  <span className="tag selected">업무</span>
-                  <span className="tag">집안일</span>
+                    {selectedTags.map((tag) => (
+                      <span 
+                        key={tag.id} 
+                        className={`tag ${tag.color}`}
+                        onClick={() => handleTagRemove(tag.id)}
+                        style={{ cursor: 'pointer' }}
+                        title="클릭하여 삭제"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
                   </div>
                   <div>
-                  <button className="add-tag-button">+</button>
+                    <button 
+                      className="add-tag-button"
+                      onClick={handleTagClick}    
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               </div>
@@ -269,7 +315,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
         </div>
       </div>
 
-      {/* 반복 설정 모달 */}
+      {/* 반복 설정 모달*/}
       <CalendarScheduleRepeatModal
         isOpen={isRepeatModalOpen}
         onClose={handleRepeatModalClose}
@@ -282,6 +328,13 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
         onClose={handleAlarmModalClose}
         onSelect={handleAlarmSelect}
         currentValue={alramValue}
+      />
+      {/*태그 설정 모달*/}
+      <CalendarScheduleTagModal
+        isOpen={isTagModalOpen}
+        onClose={handleTagModalClose}
+        onSelect={handleTagSelect}
+        currentTags={selectedTags}
       />
     </>
   );
