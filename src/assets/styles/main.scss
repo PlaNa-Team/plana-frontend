@@ -15,7 +15,10 @@
 @import 'components/alert-dialog';
 @import 'components/CalendarSearchModal'; // 달력 검색 모달 컴포넌트 스타일
 @import 'components/CalendarDayClickModal'; // 달력 날짜 클릭 모달 컴포넌트 스타일
-
+@import 'components/CalendarScheduleAddModal'; // 달력 일정 추가 모달 컴포넌트 스타일
+@import 'components/CalendarScheduleRepeatModal'; 
+@import 'components/ClaendarScheduleAlarmModal';
+@import 'components/CalendarScheduleTagModal';
 
 // Layout ( 레이아웃 스타일 )
 @import 'layout/layout';   // 전체 레이아웃 스타일

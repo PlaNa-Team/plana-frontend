@@ -11,10 +11,13 @@ interface DayEvent {
 interface CalendarDayClickModalProps {
   // 외부에서 날짜 클릭 이벤트를 전달받기 위한 prop
   onDateClick?: (dateStr: string) => void;
+  // 일정 추가 모달 열기 콜백 추가
+  onOpenAddModal?: () => void;
 }
 
 const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
-  onDateClick
+  onDateClick,
+  onOpenAddModal
 }) => {
   // 🔄 내부에서 모든 상태 관리
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +54,7 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
   };
 
   // 해당 날짜의 일정 데이터 (실제로는 API에서 가져올 예정)
-  const getDayEvents = (): DayEvent[] => {
+  const getDayEvents = React.useMemo((): DayEvent[] => {
     // 더미 데이터 - 나중에 실제 API 호출로 교체
     const sampleEvents: DayEvent[] = [
       {
@@ -69,49 +72,49 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '3',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '4',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '5',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '6',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '7',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '8',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
         description: '친구와 만남'
       },
       {
-        id: '2',
+        id: '9',
         title: '점심 약속',
         time: '12:30 - 14:00',
         category: 'personal',
@@ -121,9 +124,9 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
 
     // 실제로는 selectedDate에 해당하는 일정만 필터링
     return selectedDate === '2025-09-04' ? sampleEvents : [];
-  };
+  }, [selectedDate]);
 
-  const dayEvents = getDayEvents();
+  const dayEvents = getDayEvents;
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -136,9 +139,12 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     setSelectedDate('');
   };
 
+  // + 버튼 클릭 핸들러 - 일정 추가 모달 열기
   const handleAddEvent = () => {
-    // 나중에 일정 추가 기능 구현
-    console.log('일정 추가 버튼 클릭');
+    closeModal(); // 현재 모달 닫기
+    if (onOpenAddModal) {
+      onOpenAddModal(); // 일정 추가 모달 열기
+    }
   };
 
   if (!isOpen) return null;

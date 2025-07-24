@@ -1,0 +1,196 @@
+/* 알림 설정 모달 오버레이 */
+.alarm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(1px);
+}
+
+/* 알림 설정 모달 컨테이너 */
+.alarm-modal-container {
+  background-color: var(--color-xs);
+  border-radius: 1rem;
+  width: 90vw;
+  max-height: 70vh;
+  max-width: 28rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin-top: 14vh;
+  
+  // 페이드인 애니메이션
+  animation: fadeInUp 0.2s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 알림 설정 모달 헤더 */
+.alarm-modal-header {
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-sm);
+  background:  var(--color-xs);
+  
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-xl);
+    text-align: center;
+  }
+}
+
+/* 알림 설정 모달 내용 */
+.alarm-modal-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  overflow-y: auto;
+  background:  var(--color-xs);;
+}
+
+/* 알림 옵션 컨테이너 */
+.alarm-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* 개별 알림 옵션 */
+.alarm-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: var(--color-sm);
+  }
+  
+  .alarm-checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 2px solid var(--color-md);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    appearance: none;
+    position: relative;
+    transition: all 0.2s ease;
+    
+    &:checked {
+      background:  var(--color-md);;
+      border-color:  var(color-md);;
+      
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--color-xs);
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  .alarm-text {
+    font-size: 0.875rem;
+    color: var(--color-lg);
+    font-weight: 500;
+    user-select: none;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .alarm-modal-container {
+    margin-top: 12rem;
+  }
+  
+  .alarm-modal-header {
+    padding: 1rem 1.25rem 0.75rem 1.25rem;
+    
+    h3 {
+      font-size: 0.9rem;
+    }
+  }
+  
+  .alarm-modal-content {
+    padding: 1.25rem;
+  }
+  
+  .alarm-options {
+    gap: 0.5rem;
+  }
+  
+  .alarm-option {
+    padding: 0.625rem;
+    
+    .alarm-text {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .alarm-modal-container {
+    margin-top: 9rem;
+  }
+  
+  .alarm-modal-header {
+    padding: 0.875rem 1rem 0.625rem 1rem;
+    
+    h3 {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .alarm-modal-content {
+    padding: 1rem;
+  }
+  
+  .alarm-options {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .alarm-option {
+    padding: 0.5rem;
+    
+    .alarm-checkbox {
+      width: 1rem;
+      height: 1rem;
+    }
+    
+    .alarm-text {
+      font-size: 0.75rem;
+    }
+  }
+}

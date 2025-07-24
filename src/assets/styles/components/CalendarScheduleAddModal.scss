@@ -1,0 +1,533 @@
+/* 모달 오버레이 (배경) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+/* 모달 컨테이너 */
+.modal-container {
+  background: var(--color-xs);
+  border-radius: 1rem;
+  border: 1px solid var(--color-sm);
+  width: 90vw;
+  max-width: 28rem;
+  height: 70vh;
+  max-height: 70vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 모달 헤더 */
+.modal-header {
+  position: relative;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--color-xs);
+
+  .close-button,
+  .confirm-button {
+    color: var(--color-xl);
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* 모달 내용 */
+.add-modal-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  /* 스크롤바 스타일 */
+  &::-webkit-scrollbar {
+    width: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-sm);
+    border-radius: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-md);
+    border-radius: 0.375rem;
+  }
+}
+
+/* 폼 섹션 */
+.form-section {
+  margin-bottom: 0.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* 폼 행 */
+.form-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+}
+
+/* 아이콘 컨테이너 */
+.icon-container {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+
+  .form-icon {
+    font-size: 1rem;
+    color: var(--color-md);
+  }
+
+  .icon-container .time-icon {
+    color: var(--color-md); // currentColor를 위한 색상
+    display: block; // 혹시 숨겨져 있지 않은지 확인
+  }
+
+  .color-dot {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid var(--color-sm);
+
+    &.selected-color {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    // 색상별 스타일
+    &.black { background-color: #000000; }
+    &.pink { background-color: #ec4899; }
+    &.red { background-color: #ef4444; }
+    &.orange { background-color: #f97316; }
+    &.yellow { background-color: #eab308; }
+    &.green { background-color: #22c55e; }
+    &.blue { background-color: #3b82f6; }
+    &.purple { background-color: #8b5cf6; }
+    &.gray { background-color: #6b7280; }
+    &.white { background-color: #ffffff; border-color: var(--color-md); }
+  }
+
+  // 색상 인디케이터 (제목 옆)
+  .color-picker-indicator {
+    width: 0.25rem;
+    height: 1.5rem;
+    border-radius: 0.125rem;
+    
+    &.black { background-color: #000000; }
+    &.pink { background-color: #ec4899; }
+    &.red { background-color: #ef4444; }
+    &.orange { background-color: #f97316; }
+    &.yellow { background-color: #eab308; }
+    &.green { background-color: #22c55e; }
+    &.blue { background-color: #3b82f6; }
+    &.purple { background-color: #8b5cf6; }
+    &.gray { background-color: #6b7280; }
+    &.white { background-color: #ffffff; border: 1px solid var(--color-md); }
+  }
+}
+
+/* 제목 입력 */
+.title-input {
+  flex: 1;
+  padding: 0.3rem 0 0 0;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--color-xl);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+
+  &::placeholder {
+    color: var(--color-md);
+  }
+}
+
+/* 색상 선택기 */
+.color-picker {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .color-option {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--color-sm);
+    position: relative;
+
+    &:hover {
+      transform: scale(1.1);
+      border-color: var(--color-md);
+    }
+
+    &.selected {
+      border-color: #3b82f6;
+      border-width: 3px;
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 0.6rem;
+        font-weight: bold;
+        text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+      }
+
+      &.white::after {
+        color: #333;
+        text-shadow: none;
+      }
+    }
+
+    // 색상별 배경색
+    &.black { background-color: #000000; }
+    &.pink { background-color: #ec4899; }
+    &.red { background-color: #ef4444; }
+    &.orange { background-color: #f97316; }
+    &.yellow { background-color: #eab308; }
+    &.green { background-color: #22c55e; }
+    &.blue { background-color: #3b82f6; }
+    &.purple { background-color: #8b5cf6; }
+    &.gray { background-color: #6b7280; }
+    &.white { background-color: #ffffff; border-color: var(--color-md); }
+  }
+}
+
+/* 날짜 시간 컨테이너 */
+.datetime-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: space-between;
+
+  .date-time-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    .date-text {
+      font-size: 0.875rem;
+      color: var(--color-lg);
+      font-weight: 500;
+    }
+
+    .time-text {
+      font-size: 1rem;
+      color: var(--color-xl);
+      font-weight: 600;
+    }
+  }
+
+  .date-spacebox {
+    display: flex;
+  }
+
+  .arrow {
+    font-size: 0.875rem;
+    color: var(--color-md);
+    margin: 0.5rem 0.8rem 0 0.1rem;
+  }
+
+  .all-day-button {
+    border: 1px solid var(--color-md);
+    border-radius: 1rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-lg);
+    cursor: pointer;
+  }
+}
+
+/* 날짜/시간 input 커스터마이징 */
+.hidden-date-input,
+.hidden-time-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 0.375rem;
+  color: var(--color-xl);
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-height: 2rem;
+
+  /* 아이콘 완전히 숨기고 전체 영역 클릭 가능하게 */
+  &::-webkit-calendar-picker-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.hidden-date-input {
+  position: relative;
+}
+
+.hidden-time-input {
+  min-width: 5rem;
+  font-weight: 600;
+  position: relative;
+}
+
+/* 폼 라벨 */
+.form-label {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--color-lg);
+  padding: 0.375rem 0;
+  cursor: pointer;
+}
+
+/* 태그 컨테이너 */
+.tags-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: space-between;
+
+  .tags-subcontainer{
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  .tag {
+    background: var(--color-sm);
+    border: 1px solid var(--color-md);
+    border-radius: 1rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--color-md);
+      color: var(--color-xl);
+    }
+
+    &.selected {
+      background: #ef4444;
+      color: white;
+      border-color: #ef4444;
+    }
+  }
+
+  .add-tag-button {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 1px solid var(--color-md);
+    color: var(--color-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
+}
+.tag {
+  background: var(--color-sm);
+  border: 1px solid var(--color-md);
+  border-radius: 1rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+
+  // 색상별 스타일
+  &.red {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+  }
+
+  &.blue {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+  }
+
+  &.green {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+  }
+
+  &.yellow {
+    background: #fefce8;
+    color: #ca8a04;
+    border-color: #fef3c7;
+  }
+
+  &.purple {
+    background: #faf5ff;
+    color: #9333ea;
+    border-color: #e9d5ff;
+  }
+
+  &.pink {
+    background: #fdf2f8;
+    color: #ec4899;
+    border-color: #fbcfe8;
+  }
+
+  &.orange {
+    background: #fff7ed;
+    color: #ea580c;
+    border-color: #fed7aa;
+  }
+
+  &.gray {
+    background: #f9fafb;
+    color: #6b7280;
+    border-color: #e5e7eb;
+  }
+
+  &.white {
+    background: #ffffff;
+    color: #374151;
+    border-color: #d1d5db;
+  }
+}
+
+/* 위치 입력 */
+.location-input {
+  flex: 1;
+  padding: 0.4rem 0 0 0;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--color-lg);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+
+  &::placeholder {
+    color: var(--color-md);
+  }
+}
+
+/* 메모 텍스트 영역 */
+.memo-textarea {
+  flex: 1;
+  padding: 0.3rem 0;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--color-lg);
+  background: transparent;
+  resize: none;
+  font-family: inherit;
+
+  &::placeholder {
+    color: var(--color-md);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 95vw;
+    height: 75vh;
+    max-height: 75vh;
+  }
+  
+  .modal-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+
+    .close-button,
+    .confirm-button {
+      width: 2.25rem;
+      height: 2.25rem;
+      font-size: 1rem;
+    }
+  }
+
+  .add-modal-content {
+    padding: 1rem;
+  }
+  .date-spacebox {
+    display: flex;
+  }
+
+  .datetime-container {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+
+    .date-time-group {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    width: 90vw;
+    height: 80vh;
+    max-height: 80vh;
+  }
+  
+  .color-picker {
+    gap: 0.375rem;
+  }
+
+  .tags-container {
+    gap: 0.375rem;
+  }
+}
