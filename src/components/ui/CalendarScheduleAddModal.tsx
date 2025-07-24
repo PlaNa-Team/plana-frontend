@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TimeIcon, ColorIcon, RoundArrowIcon, TagIcon, BellIcon, LocationIcon, NoteIcon } from '../../assets/icons';
-import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal'; // 추가
+import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 
 interface CalendarScheduleAddModalProps {
@@ -20,9 +20,6 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   const [endDate, setEndDate] = useState('2025-06-15');
   const [endTime, setEndTime] = useState('20:00');
   const [isAllDay, setIsAllDay] = useState(false);
-  const [repeatType, setRepeatType] = useState('없음');
-  const [selectedTags, setSelectedTags] = useState<string[]>(['업무']);
-  const [reminder, setReminder] = useState('알림 없음');
   const [location, setLocation] = useState('');
   const [memo, setMemo] = useState('');
   const [selectedColor, setSelectedColor] = useState('red');
@@ -43,7 +40,6 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     setIsAlramModalOpen(true);
   };
 
-
   //모달 닫기 ( 일정 반복, 알람)
   const handleRepeatModalClose = () => {
     setIsRepeatModalOpen(false);
@@ -62,9 +58,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   const handleAlarmSelect = (value: string) => {
     setAlramValue(value);
     setIsAlramModalOpen(false);
-  };  
-
-
+  };
 
   //오버레이 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -143,21 +137,50 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                   <TimeIcon width={24} height={24} fill="var(--color-xl)" className="time-icon" />
                 </div>
                 <div className="datetime-container">
-                    <div className="date-spacebox">
-                      <div className="date-time-group">
-                        <span className="date-text">{startDate.split('-')[1]}월 {startDate.split('-')[2]}일 (월)</span>
-                        <span className="time-text">{startTime}</span>
-                      </div>
-                      <span className="arrow">〉</span>
-                      <div className="date-time-group">
-                        <span className="date-text">{endDate.split('-')[1]}월 {endDate.split('-')[2]}일 (월)</span>
-                        <span className="time-text">{endTime}</span>
-                      </div>
+                  <div className="date-spacebox">
+                    <div className="date-time-group">
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="hidden-date-input"
+                      />
+                      {!isAllDay && (
+                        <input
+                          type="time"
+                          value={startTime}
+                          onChange={(e) => setStartTime(e.target.value)}
+                          className="hidden-time-input"
+                        />
+                      )}
                     </div>
-                    <div className="btn-spacebox">  
-                      <button className="all-day-button">하루종일</button>
+                    <span className="arrow">〉</span>
+                    <div className="date-time-group">
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="hidden-date-input"
+                      />
+                      {!isAllDay && (
+                        <input
+                          type="time"
+                          value={endTime}
+                          onChange={(e) => setEndTime(e.target.value)}
+                          className="hidden-time-input"
+                        />
+                      )}
                     </div>
                   </div>
+                  <div className="btn-spacebox">  
+                    <button 
+                      className={`all-day-button ${isAllDay ? 'active' : ''}`}
+                      onClick={() => setIsAllDay(!isAllDay)}
+                    >
+                      하루종일
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
