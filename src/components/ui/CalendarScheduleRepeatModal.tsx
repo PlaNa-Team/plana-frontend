@@ -84,7 +84,7 @@ const CalendarScheduleRepeatModal: React.FC<CalendarScheduleRepeatModalProps> = 
         <div className="repeat-modal-content">
           {/* 반복 주기 선택 */}
           <div className="period-selection">
-            {['없음', '매주', '매달', '매년'].map((period) => (
+            {['매일', '매주', '매달', '매년'].map((period) => (
               <button
                 key={period}
                 className={`period-button ${selectedPeriod === period ? 'selected' : ''}`}

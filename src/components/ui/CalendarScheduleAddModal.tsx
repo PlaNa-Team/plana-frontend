@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TimeIcon, ColorIcon, RoundArrowIcon, TagIcon, BellIcon, LocationIcon, NoteIcon } from '../../assets/icons';
 import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal'; // 추가
+import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 
 interface CalendarScheduleAddModalProps {
   isOpen: boolean;
@@ -26,26 +27,46 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   const [memo, setMemo] = useState('');
   const [selectedColor, setSelectedColor] = useState('red');
 
-  // 반복 설정 모달 관련 상태
+  //모달 관련 상태 ( 일정반복, 알람 )
   const [isRepeatModalOpen, setIsRepeatModalOpen] = useState(false);
   const [repeatValue, setRepeatValue] = useState('');
 
-  // 반복 설정 클릭 핸들러
+  const [isAlramModalOpen, setIsAlramModalOpen] = useState(false);
+  const [alramValue, setAlramValue] = useState('');
+
+  //클릭 핸들러 ( 일정반복, 알람 )
   const handleRepeatClick = () => {
     setIsRepeatModalOpen(true);
   };
 
-  // 반복 설정 모달에서 값 선택 시
+  const handleAlarmClick = () => {
+    setIsAlramModalOpen(true);
+  };
+
+
+  //모달 닫기 ( 일정 반복, 알람)
+  const handleRepeatModalClose = () => {
+    setIsRepeatModalOpen(false);
+  };
+
+  const handleAlarmModalClose = () => {
+    setIsAlramModalOpen(false);
+  };
+
+  //모달에서 값 선택 시 ( 일정 반복, 알람)
   const handleRepeatSelect = (value: string) => {
     setRepeatValue(value);
     setIsRepeatModalOpen(false);
   };
 
-  // 반복 설정 모달 닫기
-  const handleRepeatModalClose = () => {
-    setIsRepeatModalOpen(false);
-  };
+  const handleAlarmSelect = (value: string) => {
+    setAlramValue(value);
+    setIsAlramModalOpen(false);
+  };  
 
+
+
+  //오버레이 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -180,7 +201,13 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 <div className="icon-container">
                   <BellIcon width={24} height={24} fill="var(--color-xl)" className="bell-icon" />
                 </div>
-                <span className="form-label">알림 없음</span>
+               <span 
+                  className="form-label" 
+                  onClick={handleAlarmClick}
+                  style={{ cursor: 'pointer' }}
+                > 
+                  {alramValue || '알림 없음'} 
+                </span>
               </div>
             </div>
 
@@ -225,6 +252,13 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
         onClose={handleRepeatModalClose}
         onSelect={handleRepeatSelect}
         currentValue={repeatValue}
+      />
+      {/*알람 설정 모달*/}
+      <CalendarScheduleAlramModal
+        isOpen={isAlramModalOpen}
+        onClose={handleAlarmModalClose}
+        onSelect={handleAlarmSelect}
+        currentValue={alramValue}
       />
     </>
   );
