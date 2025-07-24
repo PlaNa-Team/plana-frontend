@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { RoundArrowIcon } from '../../assets/icons';
 
 interface CalendarScheduleRepeatModalProps {
   isOpen: boolean;
@@ -124,7 +125,7 @@ const CalendarScheduleRepeatModal: React.FC<CalendarScheduleRepeatModalProps> = 
                 onClose();
               }}
             >
-              🔄 반복 안함
+              <RoundArrowIcon></RoundArrowIcon> 반복 안함
             </button>
           </div>
         </div>
