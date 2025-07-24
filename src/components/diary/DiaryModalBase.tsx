@@ -3,6 +3,7 @@ import { CheckIcon, XIcon } from '../../assets/icons';
 import TrashBinIcon from '../../assets/icons/TrashBinIcon';
 import MomentContent from './MomentContent';
 import { render } from '@testing-library/react';
+import MovieContent from './MovieContent';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -111,6 +112,22 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                         } : undefined}
                     />
                 );
+            case 'MOVIE':
+                return (
+                    <MovieContent
+                        { ...commonProps }
+                        initialData={diaryData?.diaryType === 'MOVIE' ? {
+                            title: diaryData.title,
+                            director: diaryData.director,
+                            genre: diaryData.genre,
+                            actors: diaryData.actors,
+                            releaseDate: diaryData.releaseDate,
+                            rewatch: diaryData.rewatch,
+                            rating: diaryData.rating,
+                            comment: diaryData.comment
+                        } : undefined}
+                    />
+                )
             default:
                 return null;
         }
