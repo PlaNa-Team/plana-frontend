@@ -28,12 +28,12 @@
   margin-top: 10vh; // AddModal 위치를 고려한 여백
   
   // 아래에서 위로 슬라이드 애니메이션
-  animation: slideUpFromCenter 0.5s ease-out;
+  animation: slideUpFromCenter 0.2s ease-out;
 }
 
 @keyframes slideUpFromCenter {
   from {
-    transform: translateY(600px);
+    transform: translateY(30px);
     opacity: 0;
   }
   to {
