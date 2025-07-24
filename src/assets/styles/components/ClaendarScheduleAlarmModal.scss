@@ -15,7 +15,7 @@
 
 /* 알림 설정 모달 컨테이너 */
 .alarm-modal-container {
-  background: white;
+  background-color: var(--color-xs);
   border-radius: 1rem;
   width: 90vw;
   max-height: 70vh;
@@ -46,7 +46,7 @@
 .alarm-modal-header {
   padding: 1.25rem 1.5rem 1rem 1.5rem;
   border-bottom: 1px solid var(--color-sm);
-  background: white;
+  background:  var(--color-xs);
   
   h3 {
     margin: 0;
@@ -64,7 +64,7 @@
   flex-direction: column;
   max-height: 50vh;
   overflow-y: auto;
-  background: white;
+  background:  var(--color-xs);;
 }
 
 /* 알림 옵션 컨테이너 */
@@ -99,8 +99,8 @@
     transition: all 0.2s ease;
     
     &:checked {
-      background: #3b82f6;
-      border-color: #3b82f6;
+      background:  var(--color-md);;
+      border-color:  var(color-md);;
       
       &::after {
         content: '✓';
@@ -108,7 +108,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: white;
+        color: var(--color-xs);
         font-size: 0.75rem;
         font-weight: bold;
       }
