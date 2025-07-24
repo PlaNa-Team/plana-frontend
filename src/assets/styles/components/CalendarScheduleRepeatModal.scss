@@ -1,0 +1,273 @@
+/* 반복 설정 모달 오버레이 */
+.repeat-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; // 기존 모달보다 높은 z-index
+  backdrop-filter: blur(1px);
+}
+
+/* 반복 설정 모달 컨테이너 */
+.repeat-modal-container {
+  background: white;
+  border-radius: 1rem;
+  width: 90vw;
+  max-height: 70vh;
+  max-width: 28rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin-top: 10vh; // AddModal 위치를 고려한 여백
+  
+  // 아래에서 위로 슬라이드 애니메이션
+  animation: slideUpFromCenter 0.5s ease-out;
+}
+
+@keyframes slideUpFromCenter {
+  from {
+    transform: translateY(600px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 반복 설정 모달 헤더 */
+.repeat-modal-header {
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-sm);
+  background: white;
+  
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-xl);
+    text-align: center;
+  }
+}
+
+/* 반복 설정 모달 내용 */
+.repeat-modal-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 20rem;
+  background: white;
+}
+
+/* 반복 주기 선택 */
+.period-selection {
+  display: flex;
+  gap: 0.5rem;
+  
+  .period-button {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-md);
+    border-radius: 0.5rem;
+    background: var(--color-xs);
+    color: var(--color-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--color-sm);
+      border-color: var(--color-lg);
+    }
+    
+    &.selected {
+      background: #9ca3af;
+      color: white;
+      border-color: #9ca3af;
+    }
+  }
+}
+
+/* 간격 설정 */
+.interval-setting {
+  .interval-input-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    .interval-input {
+      width: 4rem;
+      padding: 0.5rem;
+      border: 1px solid var(--color-md);
+      border-radius: 0.375rem;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-xl);
+      background: var(--color-xs);
+      
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      // 숫자 입력 스피너 제거
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      
+      &[type=number] {
+        -moz-appearance: textfield;
+      }
+    }
+    
+    .interval-text {
+      font-size: 0.875rem;
+      color: var(--color-lg);
+      font-weight: 500;
+    }
+  }
+}
+
+/* 반복 종료일 설정 */
+.end-date-setting {
+  text-align: center;
+  
+  .end-date-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--color-md);
+    margin-bottom: 0.5rem;
+  }
+  
+  .end-date-value {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--color-sm);
+    border: 1px solid var(--color-md);
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--color-md);
+      color: var(--color-xl);
+    }
+  }
+}
+
+/* 반복 안함 섹션 */
+.no-repeat-section {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-sm);
+  
+  .no-repeat-button {
+    width: 100%;
+    padding: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: var(--color-sm);
+    color: var(--color-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    &:hover {
+      background: var(--color-md);
+      color: var(--color-xl);
+    }
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .repeat-modal-container {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .repeat-modal-header {
+    padding: 1rem 1.25rem 0.75rem 1.25rem;
+    
+    h3 {
+      font-size: 0.9rem;
+    }
+  }
+  
+  .repeat-modal-content {
+    padding: 1.25rem;
+    gap: 1.25rem;
+    min-height: 18rem;
+  }
+  
+  .period-selection {
+    gap: 0.375rem;
+    
+    .period-button {
+      padding: 0.625rem 0.75rem;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .repeat-modal-header {
+    padding: 0.875rem 1rem 0.625rem 1rem;
+    
+    h3 {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .repeat-modal-content {
+    padding: 1rem;
+    gap: 1rem;
+    min-height: 16rem;
+  }
+  
+  .period-selection {
+    flex-wrap: wrap;
+    
+    .period-button {
+      flex: 1;
+      min-width: calc(50% - 0.25rem);
+      padding: 0.5rem 0.625rem;
+      font-size: 0.75rem;
+    }
+  }
+  
+  .interval-setting {
+    .interval-input-container {
+      .interval-input {
+        width: 3.5rem;
+        padding: 0.4rem;
+        font-size: 0.9rem;
+      }
+      
+      .interval-text {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
