@@ -4,6 +4,7 @@ import TrashBinIcon from '../../assets/icons/TrashBinIcon';
 import MomentContent from './MomentContent';
 import { render } from '@testing-library/react';
 import MovieContent from './MovieContent';
+import BookContent from './BookContent';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -127,11 +128,28 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                             comment: diaryData.comment
                         } : undefined}
                     />
-                )
+                );
+            case 'BOOK':
+                return (
+                    <BookContent
+                        { ...commonProps }
+                        initialData={diaryData?.diaryType === 'BOOK' ? {
+                            title: diaryData.title,
+                            author: diaryData.author,
+                            genre: diaryData.genre,
+                            publisher: diaryData.publisher,
+                            startDate: diaryData.startDate,
+                            endDate: diaryData.endDate,
+                            reread: diaryData.reread,
+                            rating: diaryData.rating,
+                            comment: diaryData.comment
+                        } : undefined}
+                    />
+                );
             default:
                 return null;
         }
-    }
+    };
 
     if (!isOpen) return null;
 

@@ -1,32 +1,34 @@
 import React, { useState } from 'react'
 import { StarEmptyIcon, StarFullIcon } from '../../assets/icons';
 
-interface MovieContentProps {
+interface BookContentProps {
     imagePreview: string;
     onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     initialData?: {
         title?: string;
-        director?: string;
+        author?: string;
         genre?: string;
-        actors?: string;
-        releaseDate?: string;
-        rewatch?: boolean;
+        publisher?: string;
+        startDate?: string;
+        endDate?: string;
+        reread?: boolean;
         rating?: number;
         comment?: string;
     };
 }
 
-const MovieContent: React.FC<MovieContentProps> = ({
+const BookContent: React.FC<BookContentProps> = ({
     imagePreview,
     onImageUpload,
     initialData
 }) => {
     const [ title, setTitle ] = useState(initialData?.title || '');
-    const [ director, setDirector ] = useState(initialData?.director || '');
+    const [ author, setAuthor ] = useState(initialData?.author || '');
     const [ genre, setGenre ] = useState(initialData?.genre || '');
-    const [ actors, setActors ] = useState(initialData?.actors || '');
-    const [ releaseDate, setReleaseDate ] = useState(initialData?.releaseDate || '');
-    const [ rewatch, setRewatch ] = useState(initialData?.rewatch || false);
+    const [ publisher, setPublisher ] = useState(initialData?.publisher || '');
+    const [ startDate, setStartDate ] = useState(initialData?.startDate || '');
+    const [ endDate, setEndDate ] = useState(initialData?.endDate || '');
+    const [ reread, setReread ] = useState(initialData?.reread || false);
     const [ rating, setRating ] = useState(initialData?.rating || 0);
     const [ comment, setComment ] = useState(initialData?.comment || '');
 
@@ -35,18 +37,18 @@ const MovieContent: React.FC<MovieContentProps> = ({
     }
 
     return (
-        <div className="movie-content">
+        <div className="book-content">
             <div className="image-section">
                 <div className="image-upload">
                     {imagePreview ? (
                         <img 
                             src={ imagePreview }
-                            alt="Movie Poster"
+                            alt="Book Cover"
                             className="preview-image"
                         />
                     ) : (
                         <div className="image-placeholder">
-                            <span>영화 포스터를 업로드하세요.</span>
+                            <span>책 표지를 업로드하세요.</span>
                         </div>
                     )}
                     <input
@@ -54,10 +56,10 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         accept="image/*"
                         onChange={ onImageUpload }
                         className="file-input"
-                        id="movie-image-upload"
+                        id="book-image-upload"
                     />
-                    <label htmlFor="movie-image-upload" className="upload-button">
-                        포스터 선택
+                    <label htmlFor="book-image-upload" className="upload-button">
+                        표지 선택
                     </label>
                 </div>
             </div>
@@ -66,31 +68,31 @@ const MovieContent: React.FC<MovieContentProps> = ({
                 <div className="input-group title-row">
                     <input
                         type="text"
-                        placeholder="movie title"
+                        placeholder="book title"
                         value={ title }
                         onChange={(e) => setTitle(e.target.value)}
                         className="title-input"
                     />
-                    <div className="rewatch-group">
+                    <div className="reread-group">
                         <label className="checkbox-label">
                             <input
                                 type="checkbox"
-                                checked={ rewatch }
-                                onChange={(e) => setRewatch(e.target.checked)}
+                                checked={ reread }
+                                onChange={(e) => setReread(e.target.checked)}
                                 className="checkbox"
                             />
-                            Rewatched
+                            Reread
                         </label>
                     </div>
                 </div>
 
-                <div className="movie-info">
+                <div className="book-info">
                     <div className="info-row">
-                        <span className="info-label">Director</span>
+                        <span className="info-label">Author</span>
                         <input
                             type="text"
-                            value={ director }
-                            onChange={(e) => setDirector(e.target.value)}
+                            value={ author }
+                            onChange={(e) => setAuthor(e.target.value)}
                             className="info-input"
                         />
                     </div>
@@ -106,23 +108,32 @@ const MovieContent: React.FC<MovieContentProps> = ({
                     </div>
 
                     <div className="info-row">
-                        <span className="info-label">Cast</span>
+                        <span className="info-label">Publisher</span>
                         <input
                             type="text"
-                            value={ actors }
-                            onChange={(e) => setActors(e.target.value)}
+                            value={ publisher }
+                            onChange={(e) => setPublisher(e.target.value)}
                             className="info-input"
                         />
                     </div>
 
                     <div className="info-row">
-                        <span className="info-label">Date</span>
-                        <input
-                            type="date"
-                            value={ releaseDate }
-                            onChange={(e) => setReleaseDate(e.target.value)}
-                            className="info-input"
-                        />
+                        <span className="info-label">Period</span>
+                        <div className="date-range">
+                            <input
+                                type="date"
+                                value={ startDate }
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="date-input"
+                            />
+                            <span className="date-separator"> ~ </span>
+                            <input
+                                type="date"
+                                value={ endDate }
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="date-input"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -149,7 +160,7 @@ const MovieContent: React.FC<MovieContentProps> = ({
                 <div className="input-group">
                     <span className="comment-label">Comment</span>
                     <textarea
-                        placeholder="영화에 대한 생각을 적어보세요."
+                        placeholder="책에 대한 생각을 적어보세요."
                         value={ comment }
                         onChange={(e) => setComment(e.target.value)}
                         className="comment-textarea"
@@ -161,4 +172,4 @@ const MovieContent: React.FC<MovieContentProps> = ({
     )
 }
 
-export default MovieContent
+export default BookContent
