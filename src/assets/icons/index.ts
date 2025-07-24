@@ -11,3 +11,6 @@ export { default as NoteIcon } from './NoteIcon';
 export { default as TimeIcon } from './TimeIcon';
 export { default as ColorIcon } from './ColorIcon';
 export { default as RoundArrowIcon } from './RoundArrowIcon';
+
+export { default as XIcon } from './XIcon';
+export { default as CheckIcon } from './CheckIcon';
