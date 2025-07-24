@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { CheckIcon, XIcon } from '../../assets/icons';
 import TrashBinIcon from '../../assets/icons/TrashBinIcon';
+import MomentContent from './MomentContent';
+import { render } from '@testing-library/react';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -13,6 +15,21 @@ interface DiaryModalBaseProps {
         diaryType: DiaryType;
         imageUrl: string;
         title: string;
+        // 각 타입별 추가 데이터들
+        location?: string;
+        memo?: string;
+        director?: string;
+        genre?: string;
+        actors?: string;
+        releaseDate?: string;
+        author?: string;
+        publisher?: string;
+        startDate?: string;
+        endDate?: string;
+        rewatch?: boolean;
+        reread?: boolean;
+        rating?: number;
+        comment?: string;
     } | null;
 }
 
@@ -65,6 +82,40 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         
     };
 
+    // 저장
+    const handleSave = () => {
+
+    }
+
+    // 삭제
+    const handleDelete = () => {
+    
+    }
+
+    // 탭에 따른 컨텐츠 렌더링
+    const renderContent = () => {
+        const commonProps = {
+            imagePreview,
+            onImageUpload: handleImageUpload
+        };
+
+        switch (activeTab) {
+            case 'DAILY':
+                return (
+                    <MomentContent
+                        { ...commonProps }
+                        initialData={diaryData?.diaryType === 'DAILY' ? {
+                            title: diaryData.title,
+                            location: diaryData.location,
+                            memo: diaryData.memo
+                        } : undefined}
+                    />
+                );
+            default:
+                return null;
+        }
+    }
+
     if (!isOpen) return null;
 
     return (
@@ -113,7 +164,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     </div>
 
                     <div className="diary-modal-content">
-
+                        { renderContent() }
                     </div>
                 </div>
 

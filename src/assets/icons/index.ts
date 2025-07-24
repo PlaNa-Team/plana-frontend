@@ -14,3 +14,5 @@ export { default as RoundArrowIcon } from './RoundArrowIcon';
 
 export { default as XIcon } from './XIcon';
 export { default as CheckIcon } from './CheckIcon';
+export { default as TrashBinIcon } from './TrashBinIcon';
+export { default as LocationIcon } from './LocationIcon';
