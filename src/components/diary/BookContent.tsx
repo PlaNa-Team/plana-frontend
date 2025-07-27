@@ -148,9 +148,11 @@ const BookContent: React.FC<BookContentProps> = ({
                                 onClick={() => handleStarClick(star)}
                             >
                                 {star <= rating ? (
-                                    <StarFullIcon className="star-icon filled"/>
+                                    <StarFullIcon className="star-icon filled"
+                                    fill="var(--color-xl)"/>
                                 ): (
-                                    <StarEmptyIcon className="star-icon empty"/>
+                                    <StarEmptyIcon className="star-icon empty"
+                                    fill="var(--color-xl)"/>
                                 )}
                             </button>
                         ))}
