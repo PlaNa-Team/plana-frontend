@@ -38,41 +38,34 @@ const BookContent: React.FC<BookContentProps> = ({
 
     return (
         <div className="book-content">
-            <div className="image-section">
-                <div className="image-upload">
-                    {imagePreview ? (
-                        <img 
-                            src={ imagePreview }
-                            alt="Book Cover"
-                            className="preview-image"
+            <div className="first-row">
+                <div className="image-section">
+                    <div className="image-upload">
+                        {imagePreview ? (
+                            <img 
+                                src={ imagePreview }
+                                alt="Book Cover"
+                                className="preview-image"
+                            />
+                        ) : (
+                            <div className="image-placeholder">
+                                <span>책 표지를 업로드하세요.</span>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={ onImageUpload }
+                            className="file-input"
+                            id="book-image-upload"
                         />
-                    ) : (
-                        <div className="image-placeholder">
-                            <span>책 표지를 업로드하세요.</span>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={ onImageUpload }
-                        className="file-input"
-                        id="book-image-upload"
-                    />
-                    <label htmlFor="book-image-upload" className="upload-button">
-                        표지 선택
-                    </label>
+                        <label htmlFor="book-image-upload" className="upload-button">
+                            표지 선택
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <div className="input-section">
-                <div className="input-group title-row">
-                    <input
-                        type="text"
-                        placeholder="book title"
-                        value={ title }
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="title-input"
-                    />
+                <div className="input-section">
                     <div className="reread-group">
                         <label className="checkbox-label">
                             <input
@@ -84,9 +77,17 @@ const BookContent: React.FC<BookContentProps> = ({
                             Reread
                         </label>
                     </div>
-                </div>
 
-                <div className="book-info">
+                    <div className="title-row">
+                        <input
+                            type="text"
+                            placeholder="book title"
+                            value={ title }
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="title-input"
+                        />
+                    </div>
+
                     <div className="info-row">
                         <span className="info-label">Author</span>
                         <input
@@ -116,27 +117,11 @@ const BookContent: React.FC<BookContentProps> = ({
                             className="info-input"
                         />
                     </div>
-
-                    <div className="info-row">
-                        <span className="info-label">Period</span>
-                        <div className="date-range">
-                            <input
-                                type="date"
-                                value={ startDate }
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="date-input"
-                            />
-                            <span className="date-separator"> ~ </span>
-                            <input
-                                type="date"
-                                value={ endDate }
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="date-input"
-                            />
-                        </div>
-                    </div>
                 </div>
-
+            </div>
+                
+            <div className="second-row">
+                <div className="rate-period">
                 <div className="rating-group">
                     <span className="rating-label">Rate</span>
                     <div className="stars">
@@ -149,17 +134,39 @@ const BookContent: React.FC<BookContentProps> = ({
                             >
                                 {star <= rating ? (
                                     <StarFullIcon className="star-icon filled"
-                                    fill="var(--color-xl)"/>
+                                    fill="var(--color-xl)"
+                                    width="20"/>
                                 ): (
                                     <StarEmptyIcon className="star-icon empty"
-                                    fill="var(--color-xl)"/>
+                                    fill="var(--color-xl)"
+                                    width="20"/>
                                 )}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="input-group">
+                <div className="info-row">
+                    <span className="info-label">Period</span>
+                    <div className="date-range">
+                        <input
+                            type="date"
+                            value={ startDate }
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="date-input"
+                        />
+                        <span className="date-separator"> ~ </span>
+                        <input
+                            type="date"
+                            value={ endDate }
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className="date-input"
+                        />
+                    </div>
+                </div>
+                </div>
+
+                <div className="comment-group">
                     <span className="comment-label">Comment</span>
                     <textarea
                         placeholder="책에 대한 생각을 적어보세요."

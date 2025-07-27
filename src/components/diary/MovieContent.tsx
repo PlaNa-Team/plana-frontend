@@ -36,41 +36,34 @@ const MovieContent: React.FC<MovieContentProps> = ({
 
     return (
         <div className="movie-content">
-            <div className="image-section">
-                <div className="image-upload">
-                    {imagePreview ? (
-                        <img 
-                            src={ imagePreview }
-                            alt="Movie Poster"
-                            className="preview-image"
+            <div className="first-row">
+                <div className="image-section">
+                    <div className="image-upload">
+                        {imagePreview ? (
+                            <img 
+                                src={ imagePreview }
+                                alt="Movie Poster"
+                                className="preview-image"
+                            />
+                        ) : (
+                            <div className="image-placeholder">
+                                <span>영화 포스터를 업로드하세요.</span>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={ onImageUpload }
+                            className="file-input"
+                            id="movie-image-upload"
                         />
-                    ) : (
-                        <div className="image-placeholder">
-                            <span>영화 포스터를 업로드하세요.</span>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={ onImageUpload }
-                        className="file-input"
-                        id="movie-image-upload"
-                    />
-                    <label htmlFor="movie-image-upload" className="upload-button">
-                        포스터 선택
-                    </label>
+                        <label htmlFor="movie-image-upload" className="upload-button">
+                            포스터 선택
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <div className="input-section">
-                <div className="input-group title-row">
-                    <input
-                        type="text"
-                        placeholder="movie title"
-                        value={ title }
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="title-input"
-                    />
+                <div className="input-section">
                     <div className="rewatch-group">
                         <label className="checkbox-label">
                             <input
@@ -82,9 +75,17 @@ const MovieContent: React.FC<MovieContentProps> = ({
                             Rewatched
                         </label>
                     </div>
-                </div>
 
-                <div className="movie-info">
+                    <div className="title-row">
+                        <input
+                            type="text"
+                            placeholder="movie title"
+                            value={ title }
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="title-input"
+                        />
+                    </div>
+
                     <div className="info-row">
                         <span className="info-label">Director</span>
                         <input
@@ -116,7 +117,7 @@ const MovieContent: React.FC<MovieContentProps> = ({
                     </div>
 
                     <div className="info-row">
-                        <span className="info-label">Date</span>
+                        <span className="info-label">Release</span>
                         <input
                             type="date"
                             value={ releaseDate }
@@ -125,7 +126,9 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         />
                     </div>
                 </div>
+            </div>
 
+            <div className="second-row">
                 <div className="rating-group">
                     <span className="rating-label">Rate</span>
                     <div className="stars">
@@ -137,16 +140,20 @@ const MovieContent: React.FC<MovieContentProps> = ({
                                 onClick={() => handleStarClick(star)}
                             >
                                 {star <= rating ? (
-                                    <StarFullIcon className="star-icon filled"/>
+                                    <StarFullIcon className="star-icon filled"
+                                    fill="var(--color-xl)"
+                                    width="20"/>
                                 ): (
-                                    <StarEmptyIcon className="star-icon empty"/>
+                                    <StarEmptyIcon className="star-icon empty"
+                                    fill="var(--color-xl)"
+                                    width="20"/>
                                 )}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="input-group">
+                <div className="comment-group">
                     <span className="comment-label">Comment</span>
                     <textarea
                         placeholder="영화에 대한 생각을 적어보세요."

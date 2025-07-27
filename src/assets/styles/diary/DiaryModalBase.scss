@@ -154,9 +154,20 @@
 .movie-content,
 .book-content {
     display: flex;
+    flex-direction: column;
     gap: $spacing-4;
     height: 100%;
     padding: $spacing-4;
+
+    .first-row {
+        display: flex;
+        gap: $spacing-4;
+    }
+
+    .second-row {
+        position: relative;
+        top: -10px;
+    }
 
     .image-section {
         flex-shrink: 0;
@@ -180,13 +191,7 @@
 
 // MOMENT 스타일
 .moment-content {
-    display: flex;
-    flex-direction: column;
-
     .first-row {
-        display: flex;
-        gap: $spacing-4;
-        
         .input-section {
             flex: 1;
             display: flex;
@@ -253,16 +258,32 @@
 // MOVIE & BOOK 공통 스타일
 .movie-content,
 .book-content {
-    .movie-info,
-    .book-info {
+    .input-section {
+        flex: 1;
         display: flex;
         flex-direction: column;
-        gap: $spacing-2;;
-    }
+        gap: $spacing-2;
 
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: end;
+            justify-items: end;
+            font-size: $font-size-sm;
+        }
+
+        .title-input {
+            border: 1px solid var(--color-sm);
+            padding: $spacing-2;
+            width: 95%;
+            font-size: $font-size-base;
+        }
+    }
+    
     .info-row {
         display: flex;
         align-items: center;
+        justify-content: end;
         gap: $spacing-3;
 
         .info-label {
@@ -273,16 +294,13 @@
         }
 
         .info-input {
-            flex: 1;
+            width: 70%;
             padding: $spacing-1;
-            border: 1px solid var(--color-md);
+            border: none;
+            border-bottom: 1px solid var(--color-sm);
             background: var(--color-xs);
             color: var(--color-xl);
             font-size: $font-size-sm;
-
-            &[type="date"] {
-                color-scheme: light dark;
-            }
         }
     }
 
@@ -290,7 +308,6 @@
         display: flex;
         align-items: center;
         gap: $spacing-1;
-        margin: $spacing-2 0;
 
         .stars {
             display: flex;
@@ -298,52 +315,64 @@
         }
     }
 
-    .comment-label {
-        font-size: $font-size-sm;
-        font-weight: $font-weight-medium;
-        color: var(--color-lg);
-        margin-bottom: $spacing-2;
-    }
+    .comment-group {
+        display: flex;
+        gap: $spacing-3;
+        margin-top: $spacing-1;
 
-    .comment-textarea {
-        padding: $spacing-2;
-        border: 1px solid var(--color-md);
-        background: var(--color-xs);
-        color: var(--color-xl);
-        font-size: $font-size-sm;
-        resize: vertical;
-
-        &::placeholder {
-            color: var(--color-md);
+        .comment-label {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: var(--color-lg);
+        }
+    
+        .comment-textarea {
+            flex: 1;
+            padding: $spacing-2;
+            height: 12vh;
+            border: 1px solid var(--color-sm);
+            background: var(--color-xs);
+            color: var(--color-xl);
+            font-size: $font-size-sm;
+            resize: none;
+    
+            &::placeholder {
+                color: var(--color-md);
+            }
         }
     }
 }
 
 // BOOK 스타일
 .book-content {
+    .rate-period {
+        @include flex-between;
+    }
+
     .date-range {
         display: flex;
         align-items: center;
-        gap: $spacing-2;
+        gap: $spacing-1;
         flex: 1;
 
         .date-input {
             flex: 1;
-            padding: $spacing-2;
-            border: 1px solid var(--color-md);
-            border-radius: $border-radius-sm;
+            padding: $spacing-1;
+            border: none;
             background: var(--color-xs);
             color: var(--color-xl);
             font-size: $font-size-sm;
-
-            &[type="date"] {
-                color-scheme: light dark;
-            }
         }
 
         .date-separator {
             font-size: $font-size-sm;
             color: var(--color-lg);
         }
+    }
+}
+
+.movie-content {
+    .second-row {
+        top: -9%;
     }
 }
