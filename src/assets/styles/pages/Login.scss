@@ -176,21 +176,6 @@
   }
 }
 
-.notion {
-  font-size: 0.8125rem; // 13px → rem 변환
-  color: var(--color-md);
-  margin-right: 2.8125rem; // 45px → rem 변환
-  transition: text-decoration 0.2s ease;
-
-  &:hover {
-    text-decoration: underline;
-  }
-
-  @media (max-width: 768px) {
-    margin-right: 0;
-  }
-}
-
 .error-message {
   color: #ff0000;
   font-size: 0.75rem; // 12px → rem 변환
@@ -200,49 +185,21 @@
   font-family: $font-family-base;
 }
 
-// 접근성 및 추가 개선
-.login-container {
-  // 다크모드 지원
-  &.dark {
-    .input-wrapper {
-      border-color: var(--color-md);
-      background-color: var(--color-sm);
-    }
+.signup-section {
+  @include flex-between;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem; // 20px → rem 변환
+  margin-top: 0.5rem;
+}
 
-    .form-input {
-      color: var(--color-xl);
-      
-      &::placeholder {
-        color: var(--color-md);
-      }
-    }
+.signup-link {
+  font-size: 0.8125rem; // 13px → rem 변환
+  color: var(--color-md);
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 
-// 로딩 상태 스타일
-.login-button {
-  &:disabled {
-    position: relative;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      width: 1rem;
-      height: 1rem;
-      border: 0.125rem solid transparent;
-      border-top: 0.125rem solid currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      display: none;
-    }
-    
-    &[aria-busy="true"]::after {
-      display: block;
-    }
-  }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}

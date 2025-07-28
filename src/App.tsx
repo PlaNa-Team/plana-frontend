@@ -11,7 +11,8 @@ import { useAppSelector } from './store';
 // 페이지 컴포넌트들
 import Landing from './pages/Landing';
 import { Login } from './pages/auth';           // auth/index.ts에서 export된 Login
-import { SignUpPage } from './pages/auth'; 
+import { SignUpPage } from './pages/auth';      
+import { PasswordSearchPage } from './pages/auth'; 
 import { Calendar } from './pages/calendar';    // calendar/index.ts에서 export된 Calendar
 import { Diary } from './pages/diary';          // diary/index.ts에서 export된 Diary
 import { Project } from './pages/project';      // project/index.ts에서 export된 Project
@@ -32,6 +33,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUpPage/>} />
+          <Route path="/passwordsearch" element={<PasswordSearchPage/>}/>
           
           {/* 메인 앱 페이지들 (레이아웃 적용) */}
           <Route path="/calendar" element={
