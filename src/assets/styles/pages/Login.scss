@@ -176,19 +176,6 @@
   }
 }
 
-.signup-section {
-  @include flex-center;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 1.25rem; // 20px → rem 변환
-  gap: 0.5rem; // 8px → rem 변환
-
-  @media (max-width: 768px) {
-    @include flex-column-center;
-    gap: 0.75rem; // 12px → rem 변환
-  }
-}
-
 .notion {
   font-size: 0.8125rem; // 13px → rem 변환
   color: var(--color-md);
@@ -201,23 +188,6 @@
 
   @media (max-width: 768px) {
     margin-right: 0;
-  }
-}
-
-.signup-link {
-  font-size: 0.8125rem; // 13px → rem 변환
-  color: var(--color-md);
-  font-weight: $font-weight-normal;
-  text-decoration: none;
-  margin-left: 1.25rem; // 20px → rem 변환
-  transition: text-decoration 0.2s ease;
-
-  &:hover {
-    text-decoration: underline;
-  }
-
-  @media (max-width: 768px) {
-    margin-left: 0;
   }
 }
 
