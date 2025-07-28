@@ -158,7 +158,7 @@ const Login: React.FC = () => {
           </div>
 
           <div className="login-options">
-            <Link to="/password-search" className="find-account">
+            <Link to="/passwordsearch" className="find-account">
               비밀번호 찾기
             </Link>
           </div>
@@ -170,6 +170,12 @@ const Login: React.FC = () => {
           >
             {isLoading ? '로그인 중...' : '로그인하기'}
           </button>
+
+          <div className="signup-section">
+            <Link to="/signup" className="signup-link">
+              계정 만들기
+            </Link>
+          </div>
         </form>
       </div>
     </div>
