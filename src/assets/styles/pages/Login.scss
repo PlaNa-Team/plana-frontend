@@ -1,0 +1,278 @@
+.login-container {
+  @include flex-column-center;
+  min-height: 100vh;
+  padding: $spacing-md;
+  background-color: var(--color-xs);
+  font-family: $font-family-base;
+}
+
+.login-header {
+  text-align: center;
+  font-weight: $font-weight-bold;
+
+  @media (max-width: 768px) {
+    margin-top: 5rem; // 80px → rem 변환
+    margin-bottom: 1.25rem; // 20px → rem 변환
+  }
+}
+
+.title {
+  font-size: 3rem; // 48px → rem 변환
+  font-weight: $font-weight-bold;
+  color: var(--color-xl);
+  margin-bottom: 0.75rem; // 12px → rem 변환
+  line-height: $line-height-tight;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem; // 20px → rem 변환
+  }
+}
+
+.subtitle {
+  font-size: 3rem; // 48px → rem 변환
+  color: var(--color-xl);
+  margin-bottom: 1.25rem; // 20px → rem 변환
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem; // 20px → rem 변환
+    margin-bottom: 0;
+  }
+}
+
+.subtitle2 {
+  font-size: 3rem; // 48px → rem 변환
+  color: var(--color-xl);
+  margin-bottom: 1.25rem; // 20px → rem 변환
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.login-box {
+  @include flex-column-center;
+  width: 100%;
+  max-width: 27.1875rem; // 435px → rem 변환
+  height: auto; // 고정 높이 제거
+  min-height: 25.75rem; // 최소 높이로 변경
+  overflow: visible; // overflow 변경
+  padding: $spacing-md;
+  margin: 0 auto; // 중앙 정렬
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    min-height: auto;
+    padding: 1.25rem $spacing-md;
+    margin: 0 $spacing-md; // 좌우 여백
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    margin: 0 $spacing-sm;
+  }
+}
+
+.login-form {
+  width: 100%;
+  @include flex-column;
+}
+
+.form-title {
+  font-size: $font-size-2xl; // 1.5rem (24px)
+  font-weight: $font-weight-semibold;
+  margin-bottom: 2.5rem; // 40px → rem 변환
+  text-align: center;
+  color: var(--color-xl);
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.25rem; // 20px → rem 변환
+  }
+}
+
+.form-group {
+  margin-bottom: $spacing-md; // 1rem (16px)
+}
+
+.input-wrapper {
+  position: relative;
+  @include flex-center;
+  align-items: center;
+  border: $border-width-sm solid var(--color-sm);
+  border-radius: $border-radius-md;
+  overflow: hidden;
+  width: 100%;
+  transition: border-color 0.2s ease;
+
+  &.error {
+    border-color: #ff0000;
+  }
+}
+
+.input-icon {
+  @include flex-center;
+  width: 3rem; 
+  height: 3rem; 
+  flex-shrink: 0;
+
+  svg {
+    width: 1.75rem; 
+    height: 1.75rem;
+  }
+}
+
+.form-input {
+  flex: 1;
+  padding: 0.875rem 1rem; 
+  border: none;
+  font-size: $font-size-sm; 
+  outline: none;
+  background: transparent;
+  color: var(--color-xl);
+  font-family: $font-family-base;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.login-options {
+  @include flex-between;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem; // 20px → rem 변환
+}
+
+.find-account {
+  font-size: 0.8125rem; // 13px → rem 변환
+  color: var(--color-md);
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login-button {
+  @include flex-center;
+  gap: 0.5rem; // 8px → rem 변환
+  width: 100%   ;
+  height: 3.5rem; // 40px → rem 변환
+  background-color: var(--color-md);
+  color: var(--color-xs);
+  border: none;
+  border-radius: $border-radius-lg;
+  font-size: $font-size-base; // 1rem (16px)
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: $font-family-base;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.signup-section {
+  @include flex-center;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 1.25rem; // 20px → rem 변환
+  gap: 0.5rem; // 8px → rem 변환
+
+  @media (max-width: 768px) {
+    @include flex-column-center;
+    gap: 0.75rem; // 12px → rem 변환
+  }
+}
+
+.notion {
+  font-size: 0.8125rem; // 13px → rem 변환
+  color: var(--color-md);
+  margin-right: 2.8125rem; // 45px → rem 변환
+  transition: text-decoration 0.2s ease;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+  }
+}
+
+.signup-link {
+  font-size: 0.8125rem; // 13px → rem 변환
+  color: var(--color-md);
+  font-weight: $font-weight-normal;
+  text-decoration: none;
+  margin-left: 1.25rem; // 20px → rem 변환
+  transition: text-decoration 0.2s ease;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 0.75rem; // 12px → rem 변환
+  margin-top: 0.3125rem; // 5px → rem 변환
+  text-align: left;
+  padding-left: 0.3125rem; // 5px → rem 변환
+  font-family: $font-family-base;
+}
+
+// 접근성 및 추가 개선
+.login-container {
+  // 다크모드 지원
+  &.dark {
+    .input-wrapper {
+      border-color: var(--color-md);
+      background-color: var(--color-sm);
+    }
+
+    .form-input {
+      color: var(--color-xl);
+      
+      &::placeholder {
+        color: var(--color-md);
+      }
+    }
+  }
+}
+
+// 로딩 상태 스타일
+.login-button {
+  &:disabled {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      width: 1rem;
+      height: 1rem;
+      border: 0.125rem solid transparent;
+      border-top: 0.125rem solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    
+    &[aria-busy="true"]::after {
+      display: block;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
