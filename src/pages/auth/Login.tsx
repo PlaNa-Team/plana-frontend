@@ -170,13 +170,6 @@ const Login: React.FC = () => {
           >
             {isLoading ? '로그인 중...' : '로그인하기'}
           </button>
-
-          <div className="signup-section">
-            <span className="notion">PlaNa가 처음이신가요?</span>
-            <Link to="/signup" className="signup-link">
-              계정 만들기
-            </Link>
-          </div>
         </form>
       </div>
     </div>
