@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import OneTimePasswordField from '../../components/ui/OneTimePasswordField';
 
 interface PasswordSearchForm {
   email: string;
-  verificationCode: string;
 }
 
 const PasswordSearchPage: React.FC = () => {
@@ -12,23 +11,19 @@ const PasswordSearchPage: React.FC = () => {
   
   // 폼 데이터 상태
   const [formData, setFormData] = useState<PasswordSearchForm>({
-    email: '',
-    verificationCode: ''
+    email: ''
   });
 
   // 유효성 검사 상태
   const [errors, setErrors] = useState({
-    emailError: '',
-    verificationError: ''
+    emailError: ''
   });
 
   // UI 상태
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [timer, setTimer] = useState(180); // 3분
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 임시 핸들러들 (나중에 구현)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -37,38 +32,34 @@ const PasswordSearchPage: React.FC = () => {
     }));
   };
 
-  const validateEmail = () => {
-    // 이메일 유효성 검사 로직 (나중에 구현)
-    console.log('이메일 유효성 검사');
-  };
-
   const sendVerificationEmail = () => {
-    // 이메일 인증 발송 로직 (나중에 구현)
     console.log('인증코드 발송');
+    setIsEmailSent(true);
+    setIsModalOpen(true);
   };
 
-  const verifyCode = () => {
-    // 인증 코드 확인 로직 (나중에 구현)
-    console.log('인증코드 확인');
+  const verifyCode = async (code: string): Promise<boolean> => {
+    console.log('인증코드 확인:', code);
+    
+    // 임시로 '123456'만 올바른 코드로 처리
+    if (code === '123456') {
+      setIsVerified(true);
+      setIsModalOpen(false);
+      return true;
+    } else {
+      console.log('잘못된 인증번호');
+      return false;
+    }
   };
 
   const sendTempPassword = () => {
-    // 임시 비밀번호 발송 로직 (나중에 구현)
     console.log('임시 비밀번호 발송');
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
     <div className="ps-page">
       <div className="logo-container">
-        <h1 className="logo">
-          Plana
-        </h1>
+        <h1 className="logo">Plana</h1>
       </div>
       
       <div className="ps-container">
@@ -103,43 +94,13 @@ const PasswordSearchPage: React.FC = () => {
           </button>
         </div>
 
-        {/* 인증코드 확인 */}
-        <div className="form-group">
-          <label className="input-label">인증코드 확인*</label>
-          <div className="input-with-button">
-            <div className={`input-wrapper-with-timer ${isVerified ? 'success' : ''}`}>
-              <input
-                type="text"
-                name="verificationCode"
-                placeholder="인증코드를 입력하세요."
-                value={formData.verificationCode}
-                onChange={handleInputChange}
-                className="form-input2"
-                disabled={!isEmailSent || isVerified || !isTimerRunning}
-              />
-              {isTimerRunning && !isVerified && (
-                <span className="timer">{formatTime(timer)}</span>
-              )}
-            </div>
-            <button 
-              className={`verify-button ${formData.verificationCode && !isVerified ? 'active' : ''}`}
-              disabled={!formData.verificationCode || isVerified || !isTimerRunning}
-              onClick={verifyCode}
-            >
-              {isVerified ? '완료' : '인증'}
-            </button>
-          </div>
-          {errors.verificationError && <div className="error-message">{errors.verificationError}</div>}
-          {isVerified && <div className="success-message">인증이 완료되었습니다!</div>}
-        </div>
-
         {/* 비밀번호 찾기 버튼 */}
         <div className="to-search">
           <button 
             className="temp-password-button"
             onClick={sendTempPassword}
             disabled={!isVerified}
-            >
+          >
             비밀번호 찾기
           </button>
         </div>
@@ -151,6 +112,13 @@ const PasswordSearchPage: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* 인증코드 입력 모달 */}
+      <OneTimePasswordField 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onVerify={verifyCode}
+      />
     </div>
   );
 };

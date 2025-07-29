@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import OneTimePasswordField from '../../components/ui/OneTimePasswordField';
 
 interface SignUpForm {
   email: string;
-  verificationCode: string;
   password: string;
   confirmPassword: string;
   name: string;
   gender: '남성' | '여성' | '';
-  affiliation: string;
   privacyChecked: boolean;
   termsChecked: boolean;
 }
@@ -17,15 +15,13 @@ interface SignUpForm {
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   
-  // 폼 데이터 상태 (기능 구현은 나중에)
+  // 폼 데이터 상태
   const [formData, setFormData] = useState<SignUpForm>({
     email: '',
-    verificationCode: '',
     password: '',
     confirmPassword: '',
     name: '',
     gender: '',
-    affiliation: '',
     privacyChecked: false,
     termsChecked: false
   });
@@ -33,7 +29,6 @@ const SignUpPage: React.FC = () => {
   // 유효성 검사 상태
   const [errors, setErrors] = useState({
     emailError: '',
-    verificationError: '',
     passwordError: '',
     confirmPasswordError: '',
     nameError: ''
@@ -44,23 +39,13 @@ const SignUpPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [timer, setTimer] = useState(180); // 3분
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 임시 핸들러들 (나중에 구현)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
     }));
   };
 
@@ -71,33 +56,34 @@ const SignUpPage: React.FC = () => {
     }));
   };
 
-  const sendVerificationEmail = () => {
-    // 이메일 인증 발송 로직 (나중에 구현)
-    console.log('이메일 인증 발송');
+  const verifyCode = async (code: string): Promise<boolean> => {
+    console.log('인증코드 확인:', code);
+    
+    // 임시로 '123456'만 올바른 코드로 처리
+    if (code === '123456') {
+      setIsVerified(true);
+      setIsModalOpen(false);
+      return true;
+    } else {
+      console.log('잘못된 인증번호');
+      return false;
+    }
   };
 
-  const verifyCode = () => {
-    // 인증 코드 확인 로직 (나중에 구현)
-    console.log('인증 코드 확인');
+  const sendVerificationEmail = () => {
+    console.log('이메일 인증 발송');
+    setIsEmailSent(true);
+    setIsModalOpen(true);
   };
 
   const submitForm = () => {
-    // 회원가입 제출 로직 (나중에 구현)
     console.log('회원가입 제출', formData);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
     <div className="signup-page">
       <div className="logo-container">
-        <h1 className="logo">
-          Plana
-        </h1>
+        <h1 className="logo">Plana</h1>
       </div>
       
       <div className="signup-container">
@@ -133,34 +119,11 @@ const SignUpPage: React.FC = () => {
           </div>
 
           {/* 인증코드 확인 */}
-          <div className="form-group">
-            <label className="input-label">인증코드 확인*</label>
-            <div className="input-with-button">
-              <div className={`input-wrapper-with-timer ${isVerified ? 'success' : ''}`}>
-                <input
-                  type="text"
-                  name="verificationCode"
-                  placeholder="인증코드를 입력하세요."
-                  value={formData.verificationCode}
-                  onChange={handleInputChange}
-                  className="form-input2"
-                  disabled={!isEmailSent || isVerified || !isTimerRunning}
-                />
-                {isTimerRunning && !isVerified && (
-                  <span className="timer">{formatTime(timer)}</span>
-                )}
-              </div>
-              <button 
-                className={`button verify-button ${formData.verificationCode && !isVerified ? 'active' : ''}`}
-                disabled={!formData.verificationCode || isVerified || !isTimerRunning}
-                onClick={verifyCode}
-              >
-                {isVerified ? '완료' : '인증'}
-              </button>
-            </div>
-            {errors.verificationError && <div className="error-message">{errors.verificationError}</div>}
-            {isVerified && <div className="success-message">인증이 완료되었습니다!</div>}
-          </div>
+          <OneTimePasswordField 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onVerify={verifyCode}
+          />
           
           {/* 비밀번호 입력 */}
           <div className="form-group">
@@ -279,13 +242,13 @@ const SignUpPage: React.FC = () => {
 
         {/* 완료 버튼 */}
         <div className="form-section">
-            <button 
-                className="complete-button"
-                onClick={submitForm}
-                disabled={!formData.privacyChecked || !formData.termsChecked}
-            >
+          <button 
+            className="complete-button"
+            onClick={submitForm}
+            disabled={!formData.privacyChecked || !formData.termsChecked}
+          >
             완료
-        </button>
+          </button>
         </div>
       </div>
     </div>
