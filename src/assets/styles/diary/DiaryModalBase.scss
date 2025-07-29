@@ -270,6 +270,7 @@
             justify-content: end;
             justify-items: end;
             font-size: $font-size-sm;
+            color: var(--color-xl);
         }
 
         .title-input {
@@ -277,6 +278,8 @@
             padding: $spacing-2;
             width: 95%;
             font-size: $font-size-base;
+            background-color: var(--color-xs);
+            color: var(--color-xl);
         }
     }
     
@@ -308,6 +311,7 @@
         display: flex;
         align-items: center;
         gap: $spacing-1;
+        color: var(--color-xl);
 
         .stars {
             display: flex;
@@ -373,6 +377,6 @@
 
 .movie-content {
     .second-row {
-        top: -9%;
+        top: -6%;
     }
 }

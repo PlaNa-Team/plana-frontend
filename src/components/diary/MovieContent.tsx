@@ -122,7 +122,7 @@ const MovieContent: React.FC<MovieContentProps> = ({
                             type="date"
                             value={ releaseDate }
                             onChange={(e) => setReleaseDate(e.target.value)}
-                            className="info-input"
+                            className="date-input"
                         />
                     </div>
                 </div>
