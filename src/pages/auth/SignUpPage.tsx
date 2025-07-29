@@ -113,6 +113,7 @@ const SignUpPage: React.FC = () => {
               className="button email-button" 
               onClick={sendVerificationEmail}
               disabled={!formData.email || isEmailSent}
+              title={isEmailSent ? "새로고침 하여 재 입력하시오" : ""}
             >
               {isEmailSent ? '인증코드 발송완료' : '인증코드 발송'}
             </button>
