@@ -8,6 +8,7 @@
     "@fullcalendar/react": "^6.1.18",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-one-time-password-field": "^0.1.7",
     "@radix-ui/react-switch": "^1.2.5",
     "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-table": "^8.21.3",
