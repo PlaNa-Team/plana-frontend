@@ -59,7 +59,7 @@ const PasswordSearchPage: React.FC = () => {
   return (
     <div className="ps-page">
       <div className="logo-container">
-        <h1 className="logo">Plana</h1>
+        <h1 className="logo">PlaNa</h1>
       </div>
       
       <div className="ps-container">
@@ -83,7 +83,6 @@ const PasswordSearchPage: React.FC = () => {
               onChange={handleInputChange}
               className="form-input"
             />
-          </div>
           {errors.emailError && <div className="error-message">{errors.emailError}</div>}
           <button 
             className="email-button"
@@ -93,6 +92,7 @@ const PasswordSearchPage: React.FC = () => {
           >
             {isEmailSent ? '인증코드 발송완료' : '인증코드 발송'}
           </button>
+          </div>
         </div>
 
         {/* 비밀번호 찾기 버튼 */}
