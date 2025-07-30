@@ -1,7 +1,6 @@
 // 다이어리 모드 관련 상태 관리
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { access } from 'fs';
 
 interface MomentData {
   title: string;
