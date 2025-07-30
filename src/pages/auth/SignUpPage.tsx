@@ -83,7 +83,7 @@ const SignUpPage: React.FC = () => {
   return (
     <div className="signup-page">
       <div className="logo-container">
-        <h1 className="logo">Plana</h1>
+        <h1 className="logo">PlaNa</h1>
       </div>
       
       <div className="signup-container">
@@ -107,7 +107,6 @@ const SignUpPage: React.FC = () => {
                 className="form-input"
                 disabled={isEmailSent}
               />
-            </div>
             {errors.emailError && <div className="error-message">{errors.emailError}</div>}
             <button 
               className="button email-button" 
@@ -117,6 +116,7 @@ const SignUpPage: React.FC = () => {
             >
               {isEmailSent ? '인증코드 발송완료' : '인증코드 발송'}
             </button>
+            </div>
           </div>
 
           {/* 인증코드 확인 */}
