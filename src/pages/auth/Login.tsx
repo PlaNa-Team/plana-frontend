@@ -99,7 +99,7 @@ const Login: React.FC = () => {
           일정 관리를 더 쉽고, 빠르고, 정확하게!
         </h2>
         <p className="subtitle">
-          Plana
+          PlaNa
         </p>
       </div>
 
