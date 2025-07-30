@@ -203,3 +203,119 @@
   }
 }
 
+.social-login-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  
+  .social-button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    
+    &:nth-child(2) {
+      margin: 0 2rem 0 2rem;
+    }
+    
+    // 기본 상태: 원형 아이콘 보이기
+    .social-icon {
+      display: block;
+    }
+    
+    // 가상요소 초기 숨김
+    &::before {
+      display: none;
+    }
+  }
+  
+  // 모바일에서 아이콘 전환
+  @media (max-width: 400px) {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+    
+    .social-button {
+      width: 100%;
+
+      &:nth-child(2) {
+        margin: 0;
+      }
+      
+      // 원래 아이콘 숨기기
+      .social-icon {
+        display: none;
+      }
+      
+      // 가상요소로 텍스트 버튼 생성
+      &::before {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 45px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+      
+      // 각 소셜별 스타일
+      &.kakao::before {
+        content: "카카오";
+        background-color: #F5E02E;
+        color: #3C1E1E;
+      }
+      
+      &.naver::before {
+        content: "네이버";
+        background-color: #03C75A;
+        color: white;
+      }
+      
+      &.google::before {
+        content: "구글";
+        background-color: white;
+        color: #333;
+        border: 1px solid #CDCDCD;
+      }
+      
+      // 호버 효과
+      &:hover::before {
+        opacity: 0.9;
+        transform: scale(1.02);
+      }
+    }
+  }
+}
+
+.divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.divider-text {
+  text-wrap-mode: nowrap;
+  margin: 0 0.1rem 0 0.1rem;
+  font-size: 0.9rem; // 13px → rem 변환
+  color: var(--color-md);
+  text-decoration: none;
+}
+
+.divider-line1{
+  width: 100%;
+  height: 0.1rem;
+  border-radius: 1rem;
+  background-color: var(--color-md);
+  opacity: 0.5;
+}
