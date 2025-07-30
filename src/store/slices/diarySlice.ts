@@ -1,31 +1,105 @@
 // 다이어리 모드 관련 상태 관리
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { access } from 'fs';
+
+interface MomentData {
+  title: string;
+  location: string;
+  memo: string;
+}
+
+interface MovieData {
+  title: string;
+  director: string;
+  genre: string;
+  actors: string;
+  releaseDate: string;
+  rewatch: boolean;
+  rating: number;
+  comment: string;
+}
+
+interface BookData {
+  title: string;
+  author: string;
+  genre: string;
+  publisher: string;
+  startDate: string;
+  endDate: string;
+  reread: boolean;
+  rating: number;
+  comment: string;
+}
 
 // 다이어리 모드에서 관리할 데이터 타입
 interface DiaryState {
-  entries: any[];
+  currentMomentData: MomentData;
+  currentMovieData: MovieData;
+  currentBookData: BookData;
   selectedDate: string | null;
 }
 
 const initialState: DiaryState = {
-    // 다이어리 목록 ( 나중에 구체적으로 정의 )
-  entries: [],
-    // 현재 선택된 날짜
+  currentMomentData: {
+    title: '',
+    location: '',
+    memo: ''
+  },
+  currentMovieData: {
+    title: '',
+    director: '',
+    genre: '',
+    actors: '',
+    releaseDate: '',
+    rewatch: false,
+    rating: 0,
+    comment: ''
+  },
+  currentBookData: {
+    title: '',
+    author: '',
+    genre: '',
+    publisher: '',
+    startDate: '',
+    endDate: '',
+    reread: false,
+    rating: 0,
+    comment: ''
+  },
   selectedDate: null,
 };
 
 const diarySlice = createSlice({
   name: 'diary',
-    // 시작할 때의 기본 값 (빈 배열, null )
   initialState,
   reducers: {
-    // 날짜 선택하는 함수
-    setSelectedDate: (state, action) => {
+    setSelectedDate: (state, action: PayloadAction<string | null>)=> {
       state.selectedDate = action.payload;
     },
-  },
+    updateMomentData: (state, action: PayloadAction<Partial<MomentData>>) => {
+      state.currentMomentData = { ...state.currentMomentData, ...action.payload };
+    },
+    updateMovieData: (state, action: PayloadAction<Partial<MovieData>>) => {
+      state.currentMovieData = { ...state.currentMovieData, ...action.payload };
+    },
+    updateBookData: (state, action: PayloadAction<Partial<BookData>>) => {
+      state.currentBookData = { ...state.currentBookData, ...action.payload };
+    },
+    clearCurrentData: (state) => {
+      state.currentMomentData = initialState.currentMomentData;
+      state.currentMovieData = initialState.currentMovieData;
+      state.currentBookData = initialState.currentBookData;
+    }
+  }
 });
 
-export const { setSelectedDate } = diarySlice.actions;
+export const {
+  setSelectedDate,
+  updateMomentData,
+  updateMovieData,
+  updateBookData,
+  clearCurrentData
+} = diarySlice.actions;
+
 export default diarySlice.reducer;

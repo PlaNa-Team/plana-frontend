@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useRef } from 'react'
 import { StarEmptyIcon, StarFullIcon } from '../../assets/icons';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { updateMovieData } from '../../store/slices/diarySlice';
 
 interface MovieContentProps {
     imagePreview: string;
     onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onDataChange?: (hasChanges: boolean) => void;
     initialData?: {
         title?: string;
         director?: string;
@@ -19,26 +22,69 @@ interface MovieContentProps {
 const MovieContent: React.FC<MovieContentProps> = ({
     imagePreview,
     onImageUpload,
+    onDataChange,
     initialData
 }) => {
-    const [ title, setTitle ] = useState(initialData?.title || '');
-    const [ director, setDirector ] = useState(initialData?.director || '');
-    const [ genre, setGenre ] = useState(initialData?.genre || '');
-    const [ actors, setActors ] = useState(initialData?.actors || '');
-    const [ releaseDate, setReleaseDate ] = useState(initialData?.releaseDate || '');
-    const [ rewatch, setRewatch ] = useState(initialData?.rewatch || false);
-    const [ rating, setRating ] = useState(initialData?.rating || 0);
-    const [ comment, setComment ] = useState(initialData?.comment || '');
+    const dispatch = useAppDispatch();
+    const movieData = useAppSelector(state => state.diary.currentMovieData);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMovieData({ title: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleDirectorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMovieData({ director: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleGenreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMovieData({ genre: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleActorsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMovieData({ actors: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleReleaseDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMovieData({ releaseDate: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleRewatchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMovieData({ rewatch: e.target.checked }));
+        onDataChange?.(true);
+    };
 
     const handleStarClick = (selectedRating: number) => {
-        setRating(selectedRating);
-    }
+        dispatch(updateMovieData({ rating: selectedRating }));
+        onDataChange?.(true);
+    };
+
+    const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        dispatch(updateMovieData({ comment: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    // 이미지 클릭 핸들러
+    const handleImageClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    // 이미지 업로드 매핑
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onImageUpload(e);
+        onDataChange?.(true);
+    };
 
     return (
         <div className="movie-content">
             <div className="first-row">
                 <div className="image-section">
-                    <div className="image-upload">
+                    <div className="image-upload" onClick={ handleImageClick } style={{ cursor: 'pointer' }}>
                         {imagePreview ? (
                             <img 
                                 src={ imagePreview }
@@ -51,15 +97,19 @@ const MovieContent: React.FC<MovieContentProps> = ({
                             </div>
                         )}
                         <input
+                            ref={ fileInputRef }
                             type="file"
                             accept="image/*"
-                            onChange={ onImageUpload }
+                            onChange={ handleFileChange }
                             className="file-input"
                             id="movie-image-upload"
+                            style={{ display: 'none' }}
                         />
-                        <label htmlFor="movie-image-upload" className="upload-button">
-                            포스터 선택
-                        </label>
+                        {!imagePreview && (
+                            <label htmlFor="movie-image-upload" className="upload-button">
+                                포스터 선택
+                            </label>
+                        )}
                     </div>
                 </div>
 
@@ -68,8 +118,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         <label className="checkbox-label">
                             <input
                                 type="checkbox"
-                                checked={ rewatch }
-                                onChange={(e) => setRewatch(e.target.checked)}
+                                checked={ movieData.rewatch }
+                                onChange={ handleRewatchChange }
                                 className="checkbox"
                             />
                             Rewatched
@@ -80,8 +130,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         <input
                             type="text"
                             placeholder="movie title"
-                            value={ title }
-                            onChange={(e) => setTitle(e.target.value)}
+                            value={ movieData.title }
+                            onChange={ handleTitleChange }
                             className="title-input"
                         />
                     </div>
@@ -90,8 +140,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         <span className="info-label">Director</span>
                         <input
                             type="text"
-                            value={ director }
-                            onChange={(e) => setDirector(e.target.value)}
+                            value={ movieData.director }
+                            onChange={ handleDirectorChange }
                             className="info-input"
                         />
                     </div>
@@ -100,8 +150,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         <span className="info-label">Genre</span>
                         <input
                             type="text"
-                            value={ genre }
-                            onChange={(e) => setGenre(e.target.value)}
+                            value={ movieData.genre }
+                            onChange={ handleGenreChange }
                             className="info-input"
                         />
                     </div>
@@ -110,8 +160,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         <span className="info-label">Cast</span>
                         <input
                             type="text"
-                            value={ actors }
-                            onChange={(e) => setActors(e.target.value)}
+                            value={ movieData.actors }
+                            onChange={ handleActorsChange }
                             className="info-input"
                         />
                     </div>
@@ -120,8 +170,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                         <span className="info-label">Release</span>
                         <input
                             type="date"
-                            value={ releaseDate }
-                            onChange={(e) => setReleaseDate(e.target.value)}
+                            value={ movieData.releaseDate }
+                            onChange={ handleReleaseDateChange }
                             className="date-input"
                         />
                     </div>
@@ -136,10 +186,10 @@ const MovieContent: React.FC<MovieContentProps> = ({
                             <button
                                 key={ star }
                                 type="button"
-                                className={`star ${star <= rating ? 'filled' : 'empty'}`}
+                                className={`star ${star <= movieData.rating ? 'filled' : 'empty'}`}
                                 onClick={() => handleStarClick(star)}
                             >
-                                {star <= rating ? (
+                                {star <= movieData.rating ? (
                                     <StarFullIcon className="star-icon filled"
                                     fill="var(--color-xl)"
                                     width="20"/>
@@ -157,8 +207,8 @@ const MovieContent: React.FC<MovieContentProps> = ({
                     <span className="comment-label">Comment</span>
                     <textarea
                         placeholder="영화에 대한 생각을 적어보세요."
-                        value={ comment }
-                        onChange={(e) => setComment(e.target.value)}
+                        value={ movieData.comment }
+                        onChange={ handleCommentChange }
                         className="comment-textarea"
                         rows={6}
                     />

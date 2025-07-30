@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useRef } from 'react'
 import { LocationIcon } from '../../assets/icons';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { updateMomentData } from '../../store/slices/diarySlice';
 
 interface MomentContentProps {
     imagePreview: string;
     onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onDataChange?: (hasChange: boolean) => void;
     initialData?: {
         title?: string;
         location?: string;
@@ -14,17 +17,44 @@ interface MomentContentProps {
 const MomentContent: React.FC<MomentContentProps> = ({
     imagePreview,
     onImageUpload,
+    onDataChange,
     initialData
 }) => {
-    const [ title, setTitle ] = useState(initialData?.title || '');
-    const [ location, setLocation ] = useState(initialData?.location || '');
-    const [ memo, setMemo ] = useState(initialData?.memo || '');
+    const dispatch = useAppDispatch();
+    const momentData = useAppSelector(state => state.diary.currentMomentData);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMomentData({ title: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(updateMomentData({ location: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    const handleMemoChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        dispatch(updateMomentData({ memo: e.target.value }));
+        onDataChange?.(true);
+    };
+
+    // 이미지 클릭 핸들러
+    const handleImageClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    // 이미지 업로드 매핑
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onImageUpload(e);
+        onDataChange?.(true);
+    };
 
     return (
         <div className="moment-content">
             <div className="first-row">
                 <div className="image-section">
-                    <div className="image-upload">
+                    <div className="image-upload" onClick={ handleImageClick } style={{ cursor: 'pointer' }}>
                         {imagePreview ? (
                             <img 
                                 src={ imagePreview }
@@ -37,15 +67,19 @@ const MomentContent: React.FC<MomentContentProps> = ({
                             </div>
                         )}
                         <input
+                            ref={ fileInputRef }
                             type="file"
                             accept="image/*"
-                            onChange={ onImageUpload }
+                            onChange={ handleFileChange }
                             className="file-input"
                             id="moment-image-upload"
+                            style={{ display: 'none'}}
                         />
-                        <label htmlFor="moment-image-upload" className="upload-button">
-                            이미지 선택
-                        </label>
+                        {!imagePreview && (
+                            <label htmlFor="moment-image-upload" className="upload-button">
+                                이미지 선택
+                            </label>
+                        )}
                     </div>
                 </div>
 
@@ -53,8 +87,8 @@ const MomentContent: React.FC<MomentContentProps> = ({
                     <input
                         type="text"
                         placeholder="title"
-                        value={ title }
-                        onChange={(e) => setTitle(e.target.value)}
+                        value={ momentData.title }
+                        onChange={ handleTitleChange }
                         className="title-input"
                     />
 
@@ -66,8 +100,8 @@ const MomentContent: React.FC<MomentContentProps> = ({
                         />
                         <input
                             type="text"
-                            value={ location }
-                            onChange={(e) => setLocation(e.target.value)}
+                            value={ momentData.location }
+                            onChange={ handleLocationChange }
                             className="location-input"
                         />
                     </div>
@@ -78,8 +112,8 @@ const MomentContent: React.FC<MomentContentProps> = ({
                 <div className="memo-group">
                     <span className="memo-label">Memo</span>
                     <textarea
-                        value={ memo }
-                        onChange={(e) => setMemo(e.target.value)}
+                        value={ momentData.memo }
+                        onChange={ handleMemoChange }
                         className="memo-textarea"
                         rows={8}
                     />
