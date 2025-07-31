@@ -51,7 +51,7 @@ const OneTimePasswordField: React.FC<OneTimePasswordFieldProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay-otp" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-body">
           <OTP.Root 
