@@ -1,14 +1,16 @@
-import React from 'react';
+import React , { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { BellIcon, PersonIcon } from '../../assets/icons';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { toggleTheme } from '../../store/slices/themeSlice';
 import { RootState } from '../../store';
+import MyPageModal from '../ui/MyPageModal';
 
 function Header() {
     const location = useLocation();
     const dispatch = useDispatch();
+    const [isMyPageModalOpen, setIsMyPageModalOpen] = useState(false);
 
     // Redux store에서 현재 테마 상태 가져오기
     const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
@@ -26,9 +28,8 @@ function Header() {
         dispatch(toggleTheme());
     };
 
-    const currentMode = getCurrentMode();
-
   return (
+    <>
     <div className="header">
         <div className="header__title">
             <div className="header__user">우감자의</div>
@@ -36,11 +37,13 @@ function Header() {
         </div>
         <div className="header__icons">
             <BellIcon fill="var(--color-xl)" />
-            <PersonIcon 
-                fill="var(--color-xl)"
-                width="18"
-                height="18"
-            />
+            <div onClick={() => setIsMyPageModalOpen(true)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <PersonIcon 
+                    fill="var(--color-xl)"
+                    width="18"
+                    height="18"
+                />
+            </div>
             <div className="header__theme-switch">
                 <ThemeSwitch 
                     isDarkMode={ isDarkMode }
@@ -49,6 +52,9 @@ function Header() {
             </div>
         </div>
     </div>
+
+    <MyPageModal isOpen={isMyPageModalOpen} onClose={() => setIsMyPageModalOpen(false)}/>
+    </>
   );
 }
 
