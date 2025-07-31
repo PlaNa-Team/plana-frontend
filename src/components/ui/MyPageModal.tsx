@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface MyPageModalProps {
   isOpen: boolean;
@@ -9,6 +9,19 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   isOpen, 
   onClose 
 }) => {
+  // 모달이 열릴 때 body 스크롤 막기
+  useEffect(() => {
+  if (isOpen) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+  
+  return () => {
+    document.body.style.overflow = '';
+  };
+}, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -16,7 +29,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
       <div className="mypage-modal" onClick={(e) => e.stopPropagation()}>
         <div className="mypage-modal__header">
           <div className="mypage-modal__title-section">
-            <div className="mypage-modal__user">로그인한 유저의</div>
+            <div className="mypage-modal__user">우감자</div>
             <h1 className="mypage-modal__title">MyPage</h1>
             <button className="mypage-modal__close-btn" onClick={onClose}>
               ×
@@ -42,7 +55,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
               
               <div className="mypage-modal__info-row">
                 <div className="mypage-modal__label">비밀번호</div>
-                <div className="mypage-modal__value">인증이 필요합니다</div>
+                <div className="mypage-modal__value">인증이 필요합니다.</div>
               </div>
             </div>
             
