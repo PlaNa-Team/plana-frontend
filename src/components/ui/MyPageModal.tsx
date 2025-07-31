@@ -16,7 +16,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
       <div className="mypage-modal" onClick={(e) => e.stopPropagation()}>
         <div className="mypage-modal__header">
           <div className="mypage-modal__title-section">
-            <div className="mypage-modal__user">우감자</div>
+            <div className="mypage-modal__user">로그인한 유저의</div>
             <h1 className="mypage-modal__title">MyPage</h1>
             <button className="mypage-modal__close-btn" onClick={onClose}>
               ×
