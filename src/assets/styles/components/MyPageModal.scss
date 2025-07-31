@@ -10,6 +10,10 @@
   justify-content: center;
   align-items: center;
   z-index: $z-index-modal;
+
+  body.modal-open {
+  overflow: hidden;
+}
 }
 
 .mypage-modal {
