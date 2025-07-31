@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { CheckIcon, XIcon } from '../../assets/icons';
+import { useAppSelector, useAppDispatch } from '../../store';
+import { clearCurrentData } from '../../store/slices/diarySlice';
+
 import TrashBinIcon from '../../assets/icons/TrashBinIcon';
 import MomentContent from './MomentContent';
-import { render } from '@testing-library/react';
 import MovieContent from './MovieContent';
 import BookContent from './BookContent';
+import CustomToast from '../ui/Toast';
+import CustomAlertDialog from '../ui/AlertDialog';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -43,7 +47,19 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
 }) => {
     const [ activeTab, setActiveTab ] = useState<DiaryType>('DAILY');
     const [ imagePreview, setImagePreview ] = useState<string>('');
+    const [ hasChanges, setHasChanges ] = useState(false);
+    const [ friendTags, setFriendTags ] = useState<string[]>([]);
+    const [ friendInput, setFriendInput ] = useState('');
+    const [ showToast, setShowToast ] = useState(false);
 
+    // 경고 모달 관련 상태
+    const [ showConfirmDialog, setShowConfirmDialog ] = useState(false);
+    const [ confirmMessage, setConfirmMessage ] = useState<string>('');
+    const pendingActionRef = useRef<(() => void) | null>(null);
+
+    const dispatch = useAppDispatch();
+    const { currentMomentData, currentMovieData, currentBookData } = useAppSelector(state => state.diary);
+    
     // 모달이 열릴 떄 기존 데이터가 있으면 해당 탭으로 설정
     useEffect(() => {
         if (isOpen && diaryData) {
@@ -55,10 +71,71 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         }
     }, [ isOpen, diaryData ]);
 
+    // 현재 탭에 데이터가 있는지 확인하는 함수
+    const hasDataInCurrentTab = (): boolean => {
+        if (imagePreview) return true;
+        if (friendTags.length > 0) return true;
+
+        switch (activeTab) {
+            case 'DAILY':
+                return !!(currentMomentData.title || currentMomentData.location || currentMomentData.memo);
+            case 'MOVIE':
+                return !!(currentMovieData.title || currentMovieData.director || currentMovieData.genre || 
+                         currentMovieData.actors || currentMovieData.comment || currentMovieData.rating > 0);
+            case 'BOOK':
+                return !!(currentBookData.title || currentBookData.author || currentBookData.genre || 
+                         currentBookData.publisher || currentBookData.comment || currentBookData.rating > 0);
+            default:
+                return false;
+        }
+    };
+
+    // 경고 모달 메시지
+    const showConfirmation = (message: string, action: () => void) => {
+        setConfirmMessage(message);
+        pendingActionRef.current = action;
+        setShowConfirmDialog(true);
+    };
+
+    // 경고 모달 - 확인 버튼 클릭
+    const handleConfirmAction = () => {
+        if (pendingActionRef.current) {
+            pendingActionRef.current();
+        }
+        // 상태 초기화
+        setShowConfirmDialog(false);
+        pendingActionRef.current = null;
+        setConfirmMessage('');
+    };
+
+    // 경고 모달 - 취소 버튼 클릭
+    const handleConfirmCancel = () => {
+        setShowConfirmDialog(false);
+        pendingActionRef.current = null;
+        setConfirmMessage('');
+    };
+
+    // 모달 닫기 핸들러
+    const handleCloseAttempt = () => {
+        if (hasChanges) {
+            showConfirmation("수정된 내용이 사라집니다. 진행하시겠습니까?", () => {
+                // 상태 초기화 후 모달 닫기
+                setHasChanges(false);
+                dispatch(clearCurrentData());
+                setImagePreview('');
+                setFriendTags([]);
+                setFriendInput('');
+                onClose();
+            });
+        } else {
+            onClose();
+        }
+    };
+
     // 모달 외부 클릭시 닫기
     const handleBackdropClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
-            onClose();
+            handleCloseAttempt();
         }
     };
 
@@ -69,36 +146,76 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
+                setHasChanges(true);
             };
             reader.readAsDataURL(file);
         }
     };
-
+    
     // 탭 변경 핸들러
     const handleTabChange = (tab: DiaryType) => {
-        setActiveTab(tab);
+        if (hasDataInCurrentTab() && tab !== activeTab) {
+            showConfirmation("현재 기록이 사라집니다. 이동하시겠습니까?", () => {
+                setActiveTab(tab);
+                dispatch(clearCurrentData());
+                setImagePreview('');
+                setFriendTags([]);
+                setFriendInput('');
+                setHasChanges(false);
+            });
+        } else {
+            setActiveTab(tab);
+        }
     };
 
     // 친구 태그 제거 핸들러
     const handleRemoveTag = (tagToRemove: string) => {
-        
+        setFriendTags(prev => prev.filter(tag => tag !== tagToRemove));
+        setHasChanges(true);
+    };
+
+    // 친구 태그 추가 핸들러
+    const handleAddTag = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && friendInput.trim()) {
+            const newTag = friendInput.startsWith('@') ? friendInput : `@${friendInput}`;
+
+            if (!friendTags.includes(newTag)) {
+                setFriendTags(prev => [...prev, newTag]);
+                setHasChanges(true);
+            }
+            setFriendInput('');
+        }
     };
 
     // 저장
     const handleSave = () => {
-
+        setShowToast(true);
+        setHasChanges(false);
     }
 
-    // 삭제
-    const handleDelete = () => {
-    
+    // 삭제 핸들러
+    const handleDeleteAttempt = () => {
+        showConfirmation("현재 기록이 삭제됩니다. 진행하시겠습니까?", () => {
+            dispatch(clearCurrentData());
+            setImagePreview('');
+            setFriendTags([]);
+            setFriendInput('');
+            setHasChanges(false);
+            onClose();
+        });
+    };
+
+    // 데이터 변경 핸들러
+    const handleDataChange = (changed: boolean) => {
+        setHasChanges(changed);
     }
 
     // 탭에 따른 컨텐츠 렌더링
     const renderContent = () => {
         const commonProps = {
             imagePreview,
-            onImageUpload: handleImageUpload
+            onImageUpload: handleImageUpload,
+            onDataChange: handleDataChange
         };
 
         switch (activeTab) {
@@ -159,11 +276,12 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 <div className="diary-modal-header">
                     <XIcon
                         className="diary-modal-close"
-                        onClick={onClose}
+                        onClick={ handleCloseAttempt }
                         fill="var(--color-xl)"
                     />
                     <CheckIcon
                         className="diary-modal-save"
+                        onClick={ handleSave }
                         fill="var(--color-xl)"
                     />
                 </div>
@@ -208,17 +326,18 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                         <input
                             type="text"
                             placeholder="Friend"
+                            value={ friendInput }
+                            onChange={(e) => setFriendInput(e.target.value)}
+                            onKeyDown={ handleAddTag }
                         />
                     </div>
                     <div className="diary-friend-tags">
-                        <span className="diary-friend-tag">
-                        @woogamjaa
-                        <button onClick={() => handleRemoveTag('@woogamjaa')}>×</button>
-                        </span>
-                        <span className="diary-friend-tag">
-                        @my_sky_corolla
-                        <button onClick={() => handleRemoveTag('@my_sky_corolla')}>×</button>
-                        </span>
+                        { friendTags.map(tag => (
+                            <span key={ tag } className="diary-friend-tag">
+                                { tag }
+                                <button onClick={() => handleRemoveTag(tag)}>×</button>
+                            </span>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -227,11 +346,27 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 <TrashBinIcon
                     className="diary-modal-delete-icon"
                     fill="var(--color-xl)"
-                    onClick={() => {
-                        // 삭제 로직 구현
-                    }}
+                    onClick={ handleDeleteAttempt }
                 />
             </div>
+
+            <CustomAlertDialog
+                title="확인"
+                description={ confirmMessage }
+                isOpen={ showConfirmDialog }
+                onOpenChange={ setShowConfirmDialog }
+                onConfirm={ handleConfirmAction }
+                onCancel={ handleConfirmCancel }
+                confirmText='확인'
+                cancelText='취소'
+            />
+
+            <CustomToast
+                title="저장 성공"
+                description="작성하신 내용이 성공적으로 저장되었습니다."
+                isOpen={ showToast }
+                onOpenChange={ setShowToast }
+            />
         </div>
     )
 }
