@@ -1,0 +1,213 @@
+// MyPage Modal 스타일
+.mypage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: $z-index-modal;
+}
+
+.mypage-modal {
+  background-color: var(--color-xs);
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: $shadow-xl;
+
+  &__header {
+    background-color: var(--color-xs);
+    padding: 1.5rem 2rem;
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+  }
+
+  &__title-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  &__user {
+    font-size: $font-size-sm;
+    color: var(--color-lg);
+    font-weight: $font-weight-medium;
+    position: absolute;
+    left: 0;
+    top: -0.5rem;
+  }
+
+  &__title {
+    font-size: $font-size-4xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-xl);
+    margin: 0;
+    flex: 1;
+    text-align: left;
+  }
+
+  &__close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--color-lg);
+    cursor: pointer;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius-sm;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--color-md);
+      color: var(--color-xl);
+    }
+  }
+
+  &__content {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__section {
+    border-bottom: 0.0625rem solid var(--color-sm);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__info-list {
+    background-color: var(--color-sm);
+    flex: 1;
+    padding: 1.5rem 0;
+  }
+
+  &__section-title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-xl);
+    margin: 0 0 1.5rem 0;
+    padding: 0rem 0rem 0rem 1rem;
+  }
+
+  &__info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 0.0625rem solid var(--color-sm);
+    background-color: var(--color-xs);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-base;
+    color: var(--color-md);
+    font-weight: $font-weight-medium;
+    flex: 1;
+  }
+
+  &__value {
+    font-size: $font-size-base;
+    color: var(--color-md);
+    font-weight: $font-weight-medium;
+    text-align: right;
+    max-width: 50%;
+  }
+
+  &__button-group {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0rem 1rem;
+    background-color: var(--color-sm);
+    border-left: 0.0625rem solid var(--color-md);
+    min-width: 10rem;
+    justify-content: flex-end;
+    align-items: stretch;
+  }
+
+  &__action-btn {
+    width: 20vw;  // 뷰포트 너비의 20%
+    max-width: 6rem;  // 최대 크기 제한
+    min-width: 4rem;  // 최소 크기 제한
+    text-align: center;
+    background-color: var(--color-xs);
+    color: #267373;
+    border: 0.0625rem solid var(--color-sm);
+    border-radius: $border-radius-xl;
+    padding: 0.75rem 1rem;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    text-wrap-mode: nowrap;
+    cursor: pointer;
+    
+    @media (max-width: 480px) {    
+      max-width: 4rem;     
+      min-width: 2.8rem;    
+      font-size: 0.625rem;
+      padding: 0.4rem 0.3rem;
+    }
+  }
+}
+
+// 모바일 반응형
+@media (max-width: 768px) {
+  .mypage-modal {
+    width: 100%;
+    height: 100%;
+
+    &__header {
+      padding: 1rem 1.5rem;
+    }
+
+    &__title {
+      font-size: $font-size-3xl;
+    }
+
+    &__info-list {
+      padding: 1rem 0;
+    }
+
+    &__button-group {
+      padding: 1rem 1.5rem;
+      // flex-direction: column;
+      border-left: none;
+      min-width: auto;
+    }
+
+    &__info-row {
+      align-items: flex-start;
+      gap: 0.25rem;
+      padding: 0.75rem 1rem;
+    }
+
+    &__value {
+      text-align: left;
+      max-width: 100%;
+    }
+  }
+}
+
+// 태블릿 반응형
+@media (max-width: 1024px) and (min-width: 769px) {
+  .mypage-modal {
+    width: 100%;
+    height: 100%;
+    
+    &__button-group {
+      min-width: 8rem;
+    }
+  }
+}
