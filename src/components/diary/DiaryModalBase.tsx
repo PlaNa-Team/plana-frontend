@@ -8,7 +8,6 @@ import MomentContent from './MomentContent';
 import MovieContent from './MovieContent';
 import BookContent from './BookContent';
 import CustomToast from '../ui/Toast';
-import CustomAlertDialog from '../ui/AlertDialog';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -52,84 +51,29 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     const [ friendInput, setFriendInput ] = useState('');
     const [ showToast, setShowToast ] = useState(false);
 
-    // 경고 모달 관련 상태
-    const [ showConfirmDialog, setShowConfirmDialog ] = useState(false);
-    const [ confirmMessage, setConfirmMessage ] = useState<string>('');
-    const pendingActionRef = useRef<(() => void) | null>(null);
-
     const dispatch = useAppDispatch();
     const { currentMomentData, currentMovieData, currentBookData } = useAppSelector(state => state.diary);
     
-    // 모달이 열릴 떄 기존 데이터가 있으면 해당 탭으로 설정
+    // 모달이 열릴 때 기존 데이터가 있으면 해당 탭으로 설정
     useEffect(() => {
         if (isOpen && diaryData) {
             setActiveTab(diaryData.diaryType);
-            setImagePreview(diaryData.imageUrl);
+            setImagePreview(diaryData.imageUrl || '');
         } else if (isOpen && !diaryData) {
             setActiveTab('DAILY');
             setImagePreview('');
         }
-    }, [ isOpen, diaryData ]);
-
-    // 현재 탭에 데이터가 있는지 확인하는 함수
-    const hasDataInCurrentTab = (): boolean => {
-        if (imagePreview) return true;
-        if (friendTags.length > 0) return true;
-
-        switch (activeTab) {
-            case 'DAILY':
-                return !!(currentMomentData.title || currentMomentData.location || currentMomentData.memo);
-            case 'MOVIE':
-                return !!(currentMovieData.title || currentMovieData.director || currentMovieData.genre || 
-                         currentMovieData.actors || currentMovieData.comment || currentMovieData.rating > 0);
-            case 'BOOK':
-                return !!(currentBookData.title || currentBookData.author || currentBookData.genre || 
-                         currentBookData.publisher || currentBookData.comment || currentBookData.rating > 0);
-            default:
-                return false;
-        }
-    };
-
-    // 경고 모달 메시지
-    const showConfirmation = (message: string, action: () => void) => {
-        setConfirmMessage(message);
-        pendingActionRef.current = action;
-        setShowConfirmDialog(true);
-    };
-
-    // 경고 모달 - 확인 버튼 클릭
-    const handleConfirmAction = () => {
-        if (pendingActionRef.current) {
-            pendingActionRef.current();
-        }
-        // 상태 초기화
-        setShowConfirmDialog(false);
-        pendingActionRef.current = null;
-        setConfirmMessage('');
-    };
-
-    // 경고 모달 - 취소 버튼 클릭
-    const handleConfirmCancel = () => {
-        setShowConfirmDialog(false);
-        pendingActionRef.current = null;
-        setConfirmMessage('');
-    };
+    }, [ isOpen, diaryData?.id ]); // diaryData 전체가 아닌 id만 의존성으로 설정
 
     // 모달 닫기 핸들러
     const handleCloseAttempt = () => {
-        if (hasChanges) {
-            showConfirmation("수정된 내용이 사라집니다. 진행하시겠습니까?", () => {
-                // 상태 초기화 후 모달 닫기
-                setHasChanges(false);
-                dispatch(clearCurrentData());
-                setImagePreview('');
-                setFriendTags([]);
-                setFriendInput('');
-                onClose();
-            });
-        } else {
-            onClose();
-        }
+        // 상태 초기화 후 모달 닫기
+        setHasChanges(false);
+        dispatch(clearCurrentData());
+        setImagePreview('');
+        setFriendTags([]);
+        setFriendInput('');
+        onClose();
     };
 
     // 모달 외부 클릭시 닫기
@@ -154,18 +98,12 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     
     // 탭 변경 핸들러
     const handleTabChange = (tab: DiaryType) => {
-        if (hasDataInCurrentTab() && tab !== activeTab) {
-            showConfirmation("현재 기록이 사라집니다. 이동하시겠습니까?", () => {
-                setActiveTab(tab);
-                dispatch(clearCurrentData());
-                setImagePreview('');
-                setFriendTags([]);
-                setFriendInput('');
-                setHasChanges(false);
-            });
-        } else {
-            setActiveTab(tab);
-        }
+        setActiveTab(tab);
+        dispatch(clearCurrentData());
+        setImagePreview('');
+        setFriendTags([]);
+        setFriendInput('');
+        setHasChanges(false);
     };
 
     // 친구 태그 제거 핸들러
@@ -195,14 +133,12 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
 
     // 삭제 핸들러
     const handleDeleteAttempt = () => {
-        showConfirmation("현재 기록이 삭제됩니다. 진행하시겠습니까?", () => {
-            dispatch(clearCurrentData());
-            setImagePreview('');
-            setFriendTags([]);
-            setFriendInput('');
-            setHasChanges(false);
-            onClose();
-        });
+        dispatch(clearCurrentData());
+        setImagePreview('');
+        setFriendTags([]);
+        setFriendInput('');
+        setHasChanges(false);
+        onClose();
     };
 
     // 데이터 변경 핸들러
@@ -349,17 +285,6 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     onClick={ handleDeleteAttempt }
                 />
             </div>
-
-            <CustomAlertDialog
-                title="확인"
-                description={ confirmMessage }
-                isOpen={ showConfirmDialog }
-                onOpenChange={ setShowConfirmDialog }
-                onConfirm={ handleConfirmAction }
-                onCancel={ handleConfirmCancel }
-                confirmText='확인'
-                cancelText='취소'
-            />
 
             <CustomToast
                 title="저장 성공"
