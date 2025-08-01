@@ -1,0 +1,204 @@
+// MyPagePwBtnModal.scss
+
+.mypagebtn-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1060;
+}
+
+.mypagebtn-modal {
+  background: white;
+  border-radius: 1vw;
+  min-width: 30vw;
+  box-shadow: 0 0.5vh 2vh rgba(0, 0, 0, 0.15);
+  position: relative;
+  
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3vh;
+    padding: 3.5rem;
+  }
+  
+  &__title-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1vh;
+    width: 100%;
+    position: relative;
+  }
+  
+  &__closebtn {
+    position: absolute;
+    top: -1vh;
+    right: -0.5vw;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5vh;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+  }
+  
+  &__title1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5vh;
+  }
+  
+  &__title2 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1vh;
+  }
+  
+  &__title3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1vh;
+  }
+  
+  &__inputbox {
+    width: 100%;
+    height: 12vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    
+    &-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #333;
+      text-align: left;
+    }
+    
+    &-insert {
+      width: 100%;
+      
+      input {
+        width: 100%;
+        padding: 1.5vh 1vw;
+        border: 1px solid #ddd;
+        border-radius: 0.5vw;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        
+        &:focus {
+          border-color: #007bff;
+        }
+        
+        &::placeholder {
+          color: #999;
+        }
+      }
+    }
+    
+    &-tostmsg-box-false {
+      color: #d32f2f;
+      border-radius: 0.3vw;
+      font-size: 0.7rem;
+      text-align: left;
+    }
+  }
+  
+  &__password-update {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    
+    .mypagebtn-modal__inputbox-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #333;
+      text-align: left;
+    }
+    
+    .mypagebtn-modal__inputbox-insert {
+      width: 100%;
+      
+      input {
+        width: 100%;
+        padding: 1.5vh 1vw;
+        border: 1px solid #ddd;
+        border-radius: 0.5vw;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        
+        &::placeholder {
+          color: #999;
+        }
+      }
+    }
+  }
+  
+  &__checkbtn,
+  &__update-btn {
+    width: 100%;
+    height: 5vh;
+    background-color: var(--color-md);
+    color: var(--color-xs);
+    border: none;
+    border-radius: 0.5vw;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1vh;
+    text-align: center;
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  &__update-btn {
+    background-color: var(--color-md);
+  }
+}
+
+// // 반응형 조정
+// @media (max-width: 768px) {
+//   .mypagebtn-modal {
+//     width: 95vw;
+//     max-width: none;
+//     min-width: none;
+//     padding: 4vh 4vw;
+    
+//     &__title1 {
+//       font-size: 1.6rem;
+//     }
+    
+//     &__title2 {
+//       font-size: 0.85rem;
+//     }
+    
+//     &__title3 {
+//       font-size: 1.1rem;
+//     }
+//   }
+// }
