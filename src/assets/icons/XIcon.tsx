@@ -25,7 +25,7 @@ const XIcon: React.FC<XIconProps> = ({
             className={ className }
             onClick={ onClick }
         >
-        <path d="M1 24L12.5 12.5M12.5 12.5L24 1M12.5 12.5L1 1M12.5 12.5L24 24" stroke={ fill } stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M1 24L12.5 12.5M12.5 12.5L24 1M12.5 12.5L1 1M12.5 12.5L24 24" stroke={ fill } strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
     );
 };

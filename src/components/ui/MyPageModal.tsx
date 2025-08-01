@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import MyPagePwBtnModal from '../ui/MyPagePwBtnModal';
 
 interface MyPageModalProps {
   isOpen: boolean;
@@ -9,6 +10,9 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   isOpen, 
   onClose 
 }) => {
+
+  const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
+
   // 모달이 열릴 때 body 스크롤 막기
   useEffect(() => {
   if (isOpen) {
@@ -25,6 +29,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   if (!isOpen) return null;
 
   return (
+    <>
     <div className="mypage-modal-overlay" onClick={onClose}>
       <div className="mypage-modal" onClick={(e) => e.stopPropagation()}>
         <div className="mypage-modal__header">
@@ -62,7 +67,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
             <div className="mypage-modal__button-group">
               <button className="mypage-modal__action-btn">이름 변경</button>
               <button className="mypage-modal__action-btn">닉네임 변경</button>
-              <button className="mypage-modal__action-btn">비밀번호 변경</button>
+              <button className="mypage-modal__action-btn" onClick={() => setIsMyPagePwModalOpen(true)} >비밀번호 변경</button>
             </div>
           </div>
 
@@ -105,6 +110,9 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
         </div>
       </div>
     </div>
+
+    <MyPagePwBtnModal isOpen={isMyPagePwModalOpen} onClose={() => setIsMyPagePwModalOpen(false)} />
+    </>
   );
 };
 
