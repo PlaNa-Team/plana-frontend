@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MyPagePwBtnModal from '../ui/MyPagePwBtnModal';
 import MyPageNicknameBtnModal from "../ui/MyPageNicknameBtnModal";
+import MyPageNameBtnModal from "./MyPagenameBtnModal";
 
 interface MyPageModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
 
   const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
   const [isMyPageNicknameModalOpen, setisMyPageNicknameModalOpen] = useState(false);
+  const [isMyPageNameModalOpen, setisMyPageNameModalOpen] = useState(false);
 
   // 모달이 열릴 때 body 스크롤 막기
   useEffect(() => {
@@ -67,7 +69,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
             </div>
             
             <div className="mypage-modal__button-group">
-              <button className="mypage-modal__action-btn">이름 변경</button>
+              <button className="mypage-modal__action-btn" onClick={() => setisMyPageNameModalOpen(true)}>이름 변경</button>
               <button className="mypage-modal__action-btn" onClick={() => setisMyPageNicknameModalOpen(true)}>닉네임 변경</button>
               <button className="mypage-modal__action-btn" onClick={() => setIsMyPagePwModalOpen(true)} >비밀번호 변경</button>
             </div>
@@ -115,6 +117,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
 
     <MyPagePwBtnModal isOpen={isMyPagePwModalOpen} onClose={() => setIsMyPagePwModalOpen(false)} />
     <MyPageNicknameBtnModal isOpen={isMyPageNicknameModalOpen} onClose={() => setisMyPageNicknameModalOpen(false)}/>
+    <MyPageNameBtnModal isOpen={isMyPageNameModalOpen} onClose={()=> setisMyPageNameModalOpen(false)}/>
     </>
   );
 };
