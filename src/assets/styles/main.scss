@@ -46,10 +46,9 @@
 
 // Diary ( 다이어리 관련 스타일 )
 @import 'diary/DiaryCalendar'; // 다이어리 캘린더 스타일
+@import 'diary/DiaryModalBase'; // 다이어리 모달 기본 스타일
 
 //auth ( 유저인증 및 가입 페이지 관련 스타일 )
 @import 'pages/Login.scss';
 @import 'pages/SignUpPage.scss';
 @import 'pages/PasswordSearchPage.scss';
-
-@import 'diary/DiaryModalBase'; // 다이어리 모달 기본 스타일
