@@ -1,0 +1,394 @@
+.diary-modal-backdrop {
+    @include flex-column-center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-backdrop);
+    @include flex-center;
+    z-index: $z-index-modal;
+}
+
+.diary-modal {
+    background: var(--color-sm);
+    border-radius: $border-radius-lg;
+    width: 70%;
+    max-width: 614px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: $shadow-lg;
+
+    &-header {
+        @include flex-between;
+        background: var(--color-xs);
+        border: none;
+        border-radius: $border-radius-lg $border-radius-lg 0 0;
+        padding: $spacing-2 $spacing-3;
+        position: sticky;
+        top: 0;
+    }
+
+    &-close, &-save {
+        @include flex-center;
+        width: 20px;
+        border: none;
+        cursor: pointer;
+    }
+
+    &-main {
+        display: flex;
+        gap: 0;
+        padding: $spacing-4;
+        padding-bottom: 0;
+    }
+
+    &-sidebar {
+        width: 30px;
+        @include flex-column;
+        flex-shrink: 0;
+    }
+
+    &-tabs {
+        margin-top: $spacing-4;
+
+    }
+
+    &-content {
+        width: 100%;
+        height: 50vh;
+        background: var(--color-xs);
+        border-radius: $border-radius-lg;
+        z-index: 10;
+    }
+
+    &-friend-tags {
+        display: flex;
+        align-items: center;
+        padding: $spacing-2;
+        border: none;
+        border-radius: 0 0 $border-radius-lg $border-radius-lg;
+    }
+
+    &-delete {
+        margin-top: $spacing-8;
+        width: 50px;
+        height: 50px;
+        border-radius: $border-radius-full;
+        background: var(--color-xs);
+        @include flex-center;
+
+        &-icon {
+            width: 25px;
+        }
+    }
+}
+
+.diary-tab {
+    width: 25px;
+    height: 70px;
+    padding: $spacing-1;
+    border-radius: $border-radius-lg 0 0 $border-radius-lg;
+    background: transparent;
+    text-align: center;
+    line-height: 0.7;
+    cursor: pointer;
+    position: relative;
+    background: var(--color-md);
+
+    &-text {
+        font-size: $font-size-xs;
+        color: var(--color-xl);
+        font-weight: $font-weight-semibold;
+    }
+
+    &.active {
+        background: var(--color-xs);
+        
+        .diary-tab-text {
+            font-weight: $font-weight-bold;
+        }
+    }
+}
+
+.diary-friend {
+    &-input {
+        input {
+            background: var(--color-sm);
+            border: 1px solid var(--color-md);
+            padding: $spacing-2;
+            min-height: 32px;
+            box-sizing: border-box;
+            margin-left: $spacing-10;
+        }
+
+        &::placeholder {
+            color: var(--color-md);
+        }
+    }
+
+    &-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-2;
+        padding: 0 $spacing-2;
+    }
+    
+    &-tag {
+        display: flex;
+        align-items: center;
+        gap: $spacing-1;
+        padding: $spacing-1 $spacing-2;
+        background: var(--color-xs);
+        border-radius: $border-radius-xl;
+        font-size: $font-size-xs;
+        color: var(--color-lg);
+        cursor: pointer;
+
+        button {
+            background: none;
+            border: none;
+            color: var(--color-lg);
+            cursor: pointer;
+            padding: 2px 4px;
+            margin-left: 4px;
+        }
+    }
+}
+
+// 각 다이어리 콘텐츠 스타일
+
+// 공통 스타일
+.moment-content,
+.movie-content,
+.book-content {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-4;
+    height: 100%;
+    padding: $spacing-4;
+    padding-bottom: 0;
+
+    .first-row {
+        display: flex;
+        gap: $spacing-4;
+    }
+
+    .second-row {
+        position: relative;
+        top: -10px;
+    }
+
+    .image-section {
+        flex-shrink: 0;
+        width: 240px;
+
+        .image-upload {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: var(--color-sm);
+
+            .preview-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+}
+
+// MOMENT 스타일
+.moment-content {
+    .first-row {
+        .input-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-2;
+            padding-top: 7rem;
+
+            .title-input {
+                padding: $spacing-2;
+                border: 1px solid var(--color-sm);
+                background-color: var(--color-xs);
+                color: var(--color-xl);
+            }
+        }
+    }
+
+    .location-group {
+        @include flex-center;
+
+        .location-label {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: var(--color-lg);
+            margin-right: $spacing-2;
+        }
+
+        .location-input {
+            flex: 1;
+            background-color: var(--color-xs);
+            color: var(--color-xl);
+            border: none;
+            border-bottom: 1px solid var(--color-sm);
+            padding: $spacing-2 $spacing-1;
+        }
+    }
+}
+
+.memo-group {
+    display: flex;
+    gap: $spacing-2;
+
+    .memo-label {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: var(--color-lg);
+    }
+
+    .memo-textarea {
+        flex: 1;
+        height: 15vh;
+        padding: $spacing-2;
+        border: 1px solid var(--color-sm);
+        background: var(--color-xs);
+        color: var(--color-xl);
+        font-size: $font-size-sm;
+        resize: none;
+
+        &::placeholder {
+            color: var(--color-md);
+        }
+    }
+}
+
+// MOVIE & BOOK 공통 스타일
+.movie-content,
+.book-content {
+    .input-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-2;
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: end;
+            justify-items: end;
+            font-size: $font-size-sm;
+            color: var(--color-xl);
+        }
+
+        .title-input {
+            border: 1px solid var(--color-sm);
+            padding: $spacing-2;
+            width: 95%;
+            font-size: $font-size-base;
+            background-color: var(--color-xs);
+            color: var(--color-xl);
+        }
+    }
+    
+    .info-row {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        gap: $spacing-3;
+
+        .info-label {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: var(--color-lg);
+            text-align: left;
+        }
+
+        .info-input {
+            width: 70%;
+            padding: $spacing-1;
+            border: none;
+            border-bottom: 1px solid var(--color-sm);
+            background: var(--color-xs);
+            color: var(--color-xl);
+            font-size: $font-size-sm;
+        }
+    }
+
+    .rating-group {
+        display: flex;
+        align-items: center;
+        gap: $spacing-1;
+        color: var(--color-xl);
+
+        .stars {
+            display: flex;
+            gap: $spacing-1;
+        }
+    }
+
+    .comment-group {
+        display: flex;
+        gap: $spacing-3;
+        margin-top: $spacing-1;
+
+        .comment-label {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: var(--color-lg);
+        }
+    
+        .comment-textarea {
+            flex: 1;
+            padding: $spacing-2;
+            height: 12vh;
+            border: 1px solid var(--color-sm);
+            background: var(--color-xs);
+            color: var(--color-xl);
+            font-size: $font-size-sm;
+            resize: none;
+    
+            &::placeholder {
+                color: var(--color-md);
+            }
+        }
+    }
+}
+
+// BOOK 스타일
+.book-content {
+    .rate-period {
+        @include flex-between;
+    }
+
+    .date-range {
+        display: flex;
+        align-items: center;
+        gap: $spacing-1;
+        flex: 1;
+
+        .date-input {
+            flex: 1;
+            padding: $spacing-1;
+            border: none;
+            background: var(--color-xs);
+            color: var(--color-xl);
+            font-size: $font-size-sm;
+        }
+
+        .date-separator {
+            font-size: $font-size-sm;
+            color: var(--color-lg);
+        }
+    }
+}
+
+.movie-content {
+    .second-row {
+        top: -6%;
+    }
+}

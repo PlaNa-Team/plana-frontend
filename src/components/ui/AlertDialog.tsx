@@ -1,32 +1,71 @@
 import * as React from "react";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 
-const AlertDialogDemo = () => (
-	<AlertDialog.Root>
-		<AlertDialog.Trigger asChild>
-			<button className="Button violet">Delete account</button>
-		</AlertDialog.Trigger>
-		<AlertDialog.Portal>
-			<AlertDialog.Overlay className="AlertDialogOverlay" />
-			<AlertDialog.Content className="AlertDialogContent">
-				<AlertDialog.Title className="AlertDialogTitle">
-					Are you absolutely sure?
-				</AlertDialog.Title>
-				<AlertDialog.Description className="AlertDialogDescription">
-					This action cannot be undone. This will permanently delete your
-					account and remove your data from our servers.
-				</AlertDialog.Description>
-				<div style={{ display: "flex", gap: 25, justifyContent: "flex-end" }}>
-					<AlertDialog.Cancel asChild>
-						<button className="Button mauve">Cancel</button>
-					</AlertDialog.Cancel>
-					<AlertDialog.Action asChild>
-						<button className="Button red">Yes, delete account</button>
-					</AlertDialog.Action>
-				</div>
-			</AlertDialog.Content>
-		</AlertDialog.Portal>
-	</AlertDialog.Root>
-);
+interface CustomAlertDialogProps {
+	title: string;
+	description: string;
+	isOpen: boolean;
+	onOpenChange: (open: boolean) => void;
+	confirmText?: string;
+	cancelText?: string;
+	onConfirm?: () => void;
+	onCancel?: () => void;
+}
 
-export default AlertDialogDemo;
+const CustomAlertDialog: React.FC<CustomAlertDialogProps> = ({
+	title,
+	description,
+	isOpen,
+	onOpenChange,
+	confirmText = "확인",
+	cancelText = "취소",
+	onConfirm,
+	onCancel
+}) => {
+	const handleConfirm = () => {
+		if (onConfirm) {
+			onConfirm();
+		}
+		onOpenChange(false);
+	};
+
+	const handleCancel = () => {
+		if (onCancel) {
+			onCancel();
+		}
+		onOpenChange(false);
+	};
+
+	return (
+		<AlertDialog.Root 
+			open={ isOpen }
+			onOpenChange={ onOpenChange }
+		>
+			<AlertDialog.Portal>
+				<AlertDialog.Overlay className="AlertDialogOverlay" />
+				<AlertDialog.Content className="AlertDialogContent">
+					<AlertDialog.Title className="AlertDialogTitle">
+						{ title }
+					</AlertDialog.Title>
+					<AlertDialog.Description className="AlertDialogDescription">
+						{ description }
+					</AlertDialog.Description>
+					<div style={{ display: "flex", gap: 25, justifyContent: "flex-end" }}>
+						<AlertDialog.Cancel asChild>
+							<button className="Button mauve" onClick={ handleCancel }>
+								{ cancelText }
+							</button>
+						</AlertDialog.Cancel>
+						<AlertDialog.Action asChild>
+							<button className="Button red" onClick={ handleConfirm }>
+								{ confirmText }
+							</button>
+						</AlertDialog.Action>
+					</div>
+				</AlertDialog.Content>
+			</AlertDialog.Portal>
+		</AlertDialog.Root>
+	);
+};
+
+export default CustomAlertDialog;
