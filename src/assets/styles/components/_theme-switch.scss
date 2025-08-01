@@ -17,6 +17,7 @@ button {
     display: flex;
     align-items: center;
     padding: 2px;
+    z-index: $z-index-sticky;
   
     // 아이콘 컨테이너
     &__icons {
