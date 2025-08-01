@@ -6,7 +6,6 @@ export { default as CalendarIcon } from './CalendarIcon';
 export { default as DiaryIcon } from './DiaryIcon';
 export { default as ProjectIcon } from './ProjectIcon';
 export { default as TagIcon } from './TagIcon'; 
-export { default as LocationIcon } from './LocationIcon';
 export { default as NoteIcon } from './NoteIcon';
 export { default as TimeIcon } from './TimeIcon';
 export { default as ColorIcon } from './ColorIcon';
