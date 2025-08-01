@@ -1,6 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import CalendarBase from '../../components/ui/CalendarBase';
 import { createEntityAdapter } from '@reduxjs/toolkit';
+import DiaryModalBase from '../../components/diary/DiaryModalBase';
 
 interface DiaryCalendarProps {
     id: number;
@@ -14,26 +15,30 @@ const DiaryCalendar: React.FC = () => {
     const DiaryData: DiaryCalendarProps[] = [
         {
             id: 1,
-            diaryDate: '2025-07-01',
+            diaryDate: '2025-08-01',
             diaryType: 'DAILY',
             imageUrl: '/images/temp1.png',
             title: 'My first diary entry'
         },
         {
             id: 2,
-            diaryDate: '2025-07-02',
+            diaryDate: '2025-08-02',
             diaryType: 'BOOK',
             imageUrl: '/images/temp2.png',
             title: 'Book review'
         },
         {
             id: 3,
-            diaryDate: '2025-07-03',
+            diaryDate: '2025-08-03',
             diaryType: 'MOVIE',
             imageUrl: '/images/temp3.jpg',
             title: 'Movie thoughts'
         }
     ];
+
+    const [ isModalOpen, setIsModalOpen ] = useState(false);
+    const [ selectedDate, setSelectedDate ] = useState<string | null>(null);
+    const [ selectedDiaryData, setSelectedDiaryData ] = useState<DiaryCalendarProps | null>(null);
 
     // 날짜별 다이어리 매핑
     const diaryMap = React.useMemo(() => {
@@ -45,8 +50,17 @@ const DiaryCalendar: React.FC = () => {
     }, [DiaryData]);
 
     // 날짜 클릭 핸들러
-    const handleDateClcik = useCallback((date: string) => {
-        
+    const handleDateClick = useCallback((date: string) => {
+        const diaryData = diaryMap.get(date);
+        setSelectedDate(date);
+        setSelectedDiaryData(diaryData || null);
+        setIsModalOpen(true);
+    }, [diaryMap]);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+        setSelectedDate(null);
+        setSelectedDiaryData(null);
     }, []);
 
     // 커스텀 날짜 셀 랜더링
@@ -55,10 +69,15 @@ const DiaryCalendar: React.FC = () => {
         const dayNumber = dayInfo.date.getDate();
         const diaryData = diaryMap.get(dateStr);
 
+        // 클릭 핸들러를 각 셀에 직접 추가
+        const handleCellClick = () => {
+            handleDateClick(dateStr);
+        };
+
         // 다이어리 데이터가 있는 경우
         if (diaryData) {
             return (
-                <div className="diary-day-cell">
+                <div className="diary-day-cell" onClick={handleCellClick}>
                     <div className="diary-image-container">
                         <img
                             src={diaryData.imageUrl}
@@ -75,7 +94,7 @@ const DiaryCalendar: React.FC = () => {
 
         // 다이어리 데이터가 없는 경우
         return (
-            <div className="diary-day-cell empty">
+            <div className="diary-day-cell empty" onClick={handleCellClick}>
                 <div className='diary-empty-content'>
                     <div className="diary-date-number">
                         {dayNumber}
@@ -83,13 +102,12 @@ const DiaryCalendar: React.FC = () => {
                 </div>
             </div>
         );
-    }, [diaryMap]);
+    }, [diaryMap, handleDateClick]);
 
   return (
     <div className="diary-calendar-container">
         <CalendarBase
             className="diary-calendar"
-            onDateClick={handleDateClcik}
             dayCellContent={renderDayCellContent}
             headerToolbar={{
                 left: 'prev',
@@ -99,6 +117,12 @@ const DiaryCalendar: React.FC = () => {
             height="auto"
             selectable= {true}
             editable= {false}
+        />
+        <DiaryModalBase
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            selectedDate={selectedDate}
+            diaryData={selectedDiaryData}
         />
     </div>
   )

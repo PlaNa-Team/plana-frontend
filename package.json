@@ -10,6 +10,7 @@
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-one-time-password-field": "^0.1.7",
     "@radix-ui/react-switch": "^1.2.5",
+    "@radix-ui/react-toast": "^1.2.14",
     "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-table": "^8.21.3",
     "@testing-library/dom": "^10.4.0",

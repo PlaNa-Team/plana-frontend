@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { JournalDetailSchedule } from '../../types'
 import { ScheduleTable } from './projectDetail'
-import DeleteConfirmDialog from './DeleteConfirmDialog';
+import CustomAlertDialog from '../ui/AlertDialog'
 
 interface ProjectDetailTableProps {
     projectId: number;
@@ -16,6 +16,9 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
     initialSchedules = [],
     onSchedulesChange
 }) => {
+    // 경고모달 상태 관리
+    const [ isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen ] = useState(false);
+
     // 새 스케줄 생성 헬퍼 함수
     const createNewSchedule = (): JournalDetailSchedule => {
         const currentDate = new Date().toISOString().split('T')[0];
@@ -82,8 +85,12 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
         );
     };
 
-    const deleteProject = () => {
-        console.log('프로젝트 삭제: ', projectId);
+    const handleDeleteProject = () => {
+        setIsDeleteProjectDialogOpen(true);
+    };
+
+    const confirmDeleteProject = () => {
+        // 프로젝트 삭제 로직
     };
 
     return (
@@ -96,7 +103,6 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                     schedules={currentSchedules}
                     onUpdateSchedule={updateSchedule}
                     onDeleteSchedule={deleteSchedule}
-                    onAddNewSchedule={addNewSchedule}
                 />
             </div>
 
@@ -121,19 +127,26 @@ const ProjectDetailTable: React.FC<ProjectDetailTableProps> = ({
                         isPast={true}
                         onUpdateSchedule={updateSchedule}
                         onDeleteSchedule={deleteSchedule}
-                        onAddNewSchedule={addNewSchedule}
                     />
                 </div>
             )}
 
             {/* 프로젝트 삭제 버튼 */}
             <div className="project-detail__delete">
-                <DeleteConfirmDialog onDelete={deleteProject}>
-                    <button className="delete-project-button">
-                        현재 프로젝트 삭제
-                    </button>
-                </DeleteConfirmDialog>
+                <button className="delete-project-button" onClick={ handleDeleteProject }>
+                    현재 프로젝트 삭제
+                </button>
             </div>
+
+            <CustomAlertDialog
+                title="프로젝트 삭제"
+                description='현재 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+                isOpen={ isDeleteProjectDialogOpen }
+                onOpenChange={ setIsDeleteProjectDialogOpen }
+                confirmText='삭제'
+                cancelText='취소'
+                onConfirm={ confirmDeleteProject }
+            />
         </div>
     );
 };
