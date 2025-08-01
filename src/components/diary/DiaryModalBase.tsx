@@ -210,16 +210,22 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         <div className="diary-modal-backdrop" onClick={handleBackdropClick}>
             <div className="diary-modal">
                 <div className="diary-modal-header">
-                    <XIcon
+                    <button 
                         className="diary-modal-close"
                         onClick={ handleCloseAttempt }
-                        fill="var(--color-xl)"
-                    />
-                    <CheckIcon
+                    >
+                        <XIcon
+                            fill="var(--color-xl)"
+                        />
+                    </button>
+                    <button 
                         className="diary-modal-save"
                         onClick={ handleSave }
-                        fill="var(--color-xl)"
-                    />
+                    >
+                        <CheckIcon
+                            fill="var(--color-xl)"
+                        />
+                    </button>
                 </div>
 
                 <div className="diary-modal-main">
@@ -278,13 +284,15 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 </div>
             </div>
 
-            <div className="diary-modal-delete">
+            <button 
+                className="diary-modal-delete"
+                onClick={ handleDeleteAttempt }
+            >
                 <TrashBinIcon
                     className="diary-modal-delete-icon"
                     fill="var(--color-xl)"
-                    onClick={ handleDeleteAttempt }
                 />
-            </div>
+            </button>
 
             <CustomToast
                 title="저장 성공"
