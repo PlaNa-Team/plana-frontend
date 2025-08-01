@@ -68,7 +68,7 @@ const MyPagePwBtnModal: React.FC<MyPagePwBtnModalProps> = ({
                         </button>
                         <div className="mypagebtn-modal__title1">PlaNa</div>
                         <div className="mypagebtn-modal__title2">플래나와 함께 일상을 기록해봐요!</div>
-                        <div className="mypagebtn-modal__title3">사용자 인증</div>
+                        <div className="mypagebtn-modal__title3">비밀번호 변경</div>
                     </div>
 
                     {/* 비밀번호 확인 단계 */}
