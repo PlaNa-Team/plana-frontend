@@ -130,15 +130,15 @@
 
     // 색상별 스타일
     &.black { background-color: #000000; }
-    &.pink { background-color: #ec4899; }
-    &.red { background-color: #ef4444; }
-    &.orange { background-color: #f97316; }
-    &.yellow { background-color: #eab308; }
-    &.green { background-color: #22c55e; }
-    &.blue { background-color: #3b82f6; }
-    &.purple { background-color: #8b5cf6; }
-    &.gray { background-color: #6b7280; }
-    &.white { background-color: #ffffff; border-color: var(--color-md); }
+    &.pink { background-color: $tag-pink; }
+    &.red { background-color: $tag-red; }
+    &.orange { background-color: $tag-orange; }
+    &.yellow { background-color: $tag-yellow; }
+    &.green { background-color: $tag-green; }
+    &.blue { background-color: $tag-blue; }
+    &.purple { background-color: $tag-purple; }
+    &.gray { background-color: $tag-gray; }
+    &.white { background-color: $tag-white; border: 1px solid var(--color-md); }
   }
 
   // 색상 인디케이터 (제목 옆)
@@ -148,15 +148,15 @@
     border-radius: 0.125rem;
     
     &.black { background-color: #000000; }
-    &.pink { background-color: #ec4899; }
-    &.red { background-color: #ef4444; }
-    &.orange { background-color: #f97316; }
-    &.yellow { background-color: #eab308; }
-    &.green { background-color: #22c55e; }
-    &.blue { background-color: #3b82f6; }
-    &.purple { background-color: #8b5cf6; }
-    &.gray { background-color: #6b7280; }
-    &.white { background-color: #ffffff; border: 1px solid var(--color-md); }
+    &.pink { background-color: $tag-pink; }
+    &.red { background-color: $tag-red; }
+    &.orange { background-color: $tag-orange; }
+    &.yellow { background-color: $tag-yellow; }
+    &.green { background-color: $tag-green; }
+    &.blue { background-color: $tag-blue; }
+    &.purple { background-color: $tag-purple; }
+    &.gray { background-color: $tag-gray; }
+    &.white { background-color: $tag-white; border-color: var(--color-md); }
   }
 }
 
@@ -188,7 +188,7 @@
     height: 1.25rem;
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid var(--color-sm);
+    border: 1px solid var(--color-sm);
     position: relative;
 
     &:hover {
@@ -222,15 +222,15 @@
 
     // 색상별 배경색
     &.black { background-color: #000000; }
-    &.pink { background-color: #ec4899; }
-    &.red { background-color: #ef4444; }
-    &.orange { background-color: #f97316; }
-    &.yellow { background-color: #eab308; }
-    &.green { background-color: #22c55e; }
-    &.blue { background-color: #3b82f6; }
-    &.purple { background-color: #8b5cf6; }
-    &.gray { background-color: #6b7280; }
-    &.white { background-color: #ffffff; border-color: var(--color-md); }
+    &.pink { background-color: $tag-pink; }
+    &.red { background-color: $tag-red; }
+    &.orange { background-color: $tag-orange; }
+    &.yellow { background-color: $tag-yellow; }
+    &.green { background-color: $tag-green; }
+    &.blue { background-color: $tag-blue; }
+    &.purple { background-color: $tag-purple; }
+    &.gray { background-color: $tag-gray; }
+    &.white { background-color: $tag-white; border-color: var(--color-md); }
   }
 }
 
@@ -340,12 +340,10 @@
   }
 
   .tag {
-    background: var(--color-sm);
-    border: 1px solid var(--color-md);
+    padding: 0.4rem 0.75rem;
     border-radius: 1rem;
-    padding: 0.25rem 0.75rem;
     font-size: 0.75rem;
-    color: var(--color-lg);
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 
@@ -376,73 +374,57 @@
   }
 }
 .tag {
-  background: var(--color-sm);
-  border: 1px solid var(--color-md);
-  border-radius: 1rem;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
   &:hover {
     opacity: 0.8;
     transform: scale(0.95);
   }
 
   // 색상별 스타일
-  &.red {
-    background: #fef2f2;
-    color: #dc2626;
-    border-color: #fecaca;
-  }
-
-  &.blue {
-    background: #eff6ff;
-    color: #2563eb;
-    border-color: #bfdbfe;
-  }
-
-  &.green {
-    background: #f0fdf4;
-    color: #16a34a;
-    border-color: #bbf7d0;
-  }
-
-  &.yellow {
-    background: #fefce8;
-    color: #ca8a04;
-    border-color: #fef3c7;
-  }
-
-  &.purple {
-    background: #faf5ff;
-    color: #9333ea;
-    border-color: #e9d5ff;
-  }
-
   &.pink {
-    background: #fdf2f8;
-    color: #ec4899;
-    border-color: #fbcfe8;
+    background: $tag-pink;
+    color: darken($tag-pink, 50%);
+  }
+
+  &.red {
+    background: $tag-red;
+    color: darken($tag-red, 50%);
   }
 
   &.orange {
-    background: #fff7ed;
-    color: #ea580c;
-    border-color: #fed7aa;
+    background: $tag-orange;
+    color: darken($tag-orange, 50%);
   }
 
-  &.gray {
-    background: #f9fafb;
-    color: #6b7280;
-    border-color: #e5e7eb;
+  &.yellow {
+    background: $tag-yellow;
+    color: darken($tag-yellow, 50%);
   }
 
-  &.white {
-    background: #ffffff;
-    color: #374151;
-    border-color: #d1d5db;
+  &.green {
+    background: $tag-green;
+    color: darken($tag-green, 50%);
   }
+
+    &.blue {
+      background: $tag-blue;
+      color: darken($tag-blue, 50%);
+    }
+  
+    &.purple {
+      background: $tag-purple;
+      color: darken($tag-purple, 50%);
+    }
+  
+    &.gray {
+      background: $tag-gray;
+      color: darken($tag-gray, 50%);
+    }
+
+    &.white {
+      background: #ffffff;
+      color: #374151;
+      border-color: #d1d5db;
+    }
 }
 
 /* 위치 입력 */

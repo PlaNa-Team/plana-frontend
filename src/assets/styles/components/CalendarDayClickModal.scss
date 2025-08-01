@@ -143,15 +143,15 @@
   flex-shrink: 0;
 
   &.meeting {
-    background-color: #ef4444;
+    background-color: $tag-red;
   }
 
   &.personal {
-    background-color: #22c55e;
+    background-color: $tag-green;
   }
 
   &.work {
-    background-color: #3b82f6;
+    background-color: $tag-blue;
   }
 }
 
