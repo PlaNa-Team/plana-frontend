@@ -15,21 +15,21 @@ const DiaryCalendar: React.FC = () => {
     const DiaryData: DiaryCalendarProps[] = [
         {
             id: 1,
-            diaryDate: '2025-07-01',
+            diaryDate: '2025-08-01',
             diaryType: 'DAILY',
             imageUrl: '/images/temp1.png',
             title: 'My first diary entry'
         },
         {
             id: 2,
-            diaryDate: '2025-07-02',
+            diaryDate: '2025-08-02',
             diaryType: 'BOOK',
             imageUrl: '/images/temp2.png',
             title: 'Book review'
         },
         {
             id: 3,
-            diaryDate: '2025-07-03',
+            diaryDate: '2025-08-03',
             diaryType: 'MOVIE',
             imageUrl: '/images/temp3.jpg',
             title: 'Movie thoughts'
