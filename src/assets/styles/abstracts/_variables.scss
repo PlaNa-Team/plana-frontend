@@ -41,11 +41,16 @@ $dark-color: (
     @include apply-theme($dark-color);
 }
 
-// 프로젝트 모드 - state, 별 토글
-
-
-
-
+// 달력 태그 색상
+$tag-pink: #FFBCD1;
+$tag-red: #FF8888;
+$tag-orange: #FFAF73;
+$tag-yellow: #FFF06A;
+$tag-green: #C2FF9E;
+$tag-blue: #B8FFFD;
+$tag-purple: #D7AAFF;
+$tag-gray: #E2E3E5;
+$tag-white: #FFFFFF;
 
 // -----------------------------------------------------------------------------
 // 폰트 변수 (Font Variables)
