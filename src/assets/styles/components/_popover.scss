@@ -1,0 +1,158 @@
+// 알림 팝오버 스타일
+.notification-popover {
+    background-color: var(--color-xs);
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    border: $border-width-sm solid var(--color-sm);
+    min-width: 20rem;
+    max-width: 24rem;
+    max-height: 25rem;
+    z-index: $z-index-popover;
+    overflow: hidden;
+  
+    &__header {
+      padding: $spacing-4;
+      border-bottom: $border-width-sm solid var(--color-sm);
+      @include flex-between;
+    }
+  
+    &__title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: var(--color-xl);
+      margin: 0;
+    }
+  
+    &__unread-count {
+      font-size: $font-size-sm;
+      color: var(--color-md);
+      background-color: var(--color-sm);
+      padding: $spacing-1 $spacing-2;
+      border-radius: $border-radius-xl;
+    }
+  
+    &__content {
+      max-height: 18rem;
+      overflow-y: auto;
+    }
+  
+    &__loading,
+    &__empty {
+      padding: $spacing-6;
+      text-align: center;
+      color: var(--color-md);
+      font-size: $font-size-sm;
+    }
+  
+    &__list {
+      padding: 0;
+    }
+  
+    &__arrow {
+      fill: var(--color-xs);
+      filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
+    }
+  }
+  
+  // 개별 알림 아이템
+  .notification-item {
+    padding: $spacing-3 $spacing-4;
+    border-bottom: $border-width-sm solid var(--color-sm);
+    transition: background-color 0.2s ease;
+  
+    &:hover {
+      background-color: var(--color-sm);
+    }
+  
+    &:last-child {
+      border-bottom: none;
+    }
+  
+    &__header {
+      display: flex;
+      gap: $spacing-2;
+      align-items: flex-start;
+    }
+  
+    &__unread-indicator {
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: #ef4444; // 빨간색
+      border-radius: $border-radius-full;
+      margin-top: $spacing-1;
+      flex-shrink: 0;
+    }
+  
+    &__content {
+      flex: 1;
+    }
+  
+    &__message {
+      font-size: $font-size-sm;
+      color: var(--color-xl);
+      margin: 0 0 $spacing-1 0;
+      line-height: $line-height-base;
+    }
+  
+    &__time {
+      font-size: $font-size-xs;
+      color: var(--color-md);
+    }
+  
+    &__actions {
+      margin-top: $spacing-3;
+      display: flex;
+      gap: $spacing-2;
+    }
+  
+    &__button {
+      padding: $spacing-1 $spacing-3;
+      border-radius: $border-radius-md;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+      border: $border-width-sm solid;
+      cursor: pointer;
+      transition: all 0.2s ease;
+  
+      &--accept {
+        background-color: #10b981; // 초록색
+        color: white;
+        border-color: #10b981;
+  
+        &:hover {
+          background-color: #059669;
+          border-color: #059669;
+        }
+      }
+  
+      &--reject {
+        background-color: transparent;
+        color: var(--color-md);
+        border-color: var(--color-md);
+  
+        &:hover {
+          background-color: var(--color-sm);
+          color: var(--color-lg);
+          border-color: var(--color-lg);
+        }
+      }
+    }
+  }
+  
+  // 종 아이콘에 표시될 빨간 원
+  .notification-bell {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  
+    &__badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background-color: #ef4444; // 빨간색
+      border-radius: $border-radius-full;
+      border: 1px solid var(--color-xs);
+    }
+  }

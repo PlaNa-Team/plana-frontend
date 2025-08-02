@@ -15,6 +15,9 @@ function Header() {
     // Redux store에서 현재 테마 상태 가져오기
     const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
 
+    // 알림 관련 상태 가져오기
+    const unreadCount = useSelector((state: RootState) => state.notifications.unreadCount);
+
     // 현재 경로를 기준으로 모드 결정
     const getCurrentMode = () => {
         const path = location.pathname;
@@ -44,6 +47,12 @@ function Header() {
                     height="18"
                 />
             </div>
+            
+            <PersonIcon 
+                fill="var(--color-xl)"
+                width="18"
+                height="18"
+            />
             <div className="header__theme-switch">
                 <ThemeSwitch 
                     isDarkMode={ isDarkMode }
