@@ -58,11 +58,19 @@ const SignUpPage: React.FC = () => {
     }));
 
     // 에러 메시지 초기화 (사용자가 입력을 시작하면)
-    if (errors[`${name}Error` as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev,
-        [`${name}Error`]: ''
-      }));
+    const errorKey = `${name}Error` as keyof typeof errors;
+    if (name === 'login_id' && errors.loginIdError) {
+      setErrors(prev => ({ ...prev, loginIdError: '' }));
+    } else if (name === 'name' && errors.nameError) {
+      setErrors(prev => ({ ...prev, nameError: '' }));
+    } else if (name === 'nickname' && errors.nicknameError) {
+      setErrors(prev => ({ ...prev, nicknameError: '' }));
+    } else if (name === 'email' && errors.emailError) {
+      setErrors(prev => ({ ...prev, emailError: '' }));
+    } else if (name === 'password' && errors.passwordError) {
+      setErrors(prev => ({ ...prev, passwordError: '' }));
+    } else if (name === 'confirmPassword' && errors.confirmPasswordError) {
+      setErrors(prev => ({ ...prev, confirmPasswordError: '' }));
     }
   };
 
@@ -121,11 +129,10 @@ const SignUpPage: React.FC = () => {
 
     setErrors(newErrors);
 
-    // 모든 에러가 없고, 필수 체크박스가 모두 선택되었는지 확인
+    // 모든 에러가 없고, 이메일 인증이 완료되었는지 확인
     const hasErrors = Object.values(newErrors).some(error => error !== '');
-    const hasRequiredChecks = formData.privacyChecked && formData.termsChecked && isVerified;
-
-    return !hasErrors && hasRequiredChecks;
+    
+    return !hasErrors && isVerified;
   };
 
   // 인증 코드 확인
@@ -192,6 +199,12 @@ const SignUpPage: React.FC = () => {
     }
   };
 
+  // 폼 제출 핸들러
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitForm();
+  };
+
   return (
     <div className="signup-page">
       <div className="logo-container">
@@ -200,6 +213,7 @@ const SignUpPage: React.FC = () => {
       
       <div className="signup-container">
         <h2 className="signup-title">계정 만들기</h2>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-section">
             <div className="form-group">
               <label className="input-label">아이디*</label>
@@ -353,13 +367,14 @@ const SignUpPage: React.FC = () => {
 
         <div className="form-section">
           <button 
+            type="submit"
             className="complete-button"
-            onClick={submitForm}
-            disabled={!formData.privacyChecked || !formData.termsChecked || isSubmitting}
+            disabled={isSubmitting}
           >
             {isSubmitting ? '처리중...' : '제출'}
           </button>
         </div>
+        </form>
       </div>
     </div>
   );
