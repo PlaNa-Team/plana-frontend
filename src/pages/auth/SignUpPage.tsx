@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import OneTimePasswordField from '../../components/ui/OneTimePasswordField';
 
 // JSON API 스펙에 맞춘 인터페이스 (기존 필드들도 유지)
@@ -58,7 +58,6 @@ const SignUpPage: React.FC = () => {
     }));
 
     // 에러 메시지 초기화 (사용자가 입력을 시작하면)
-    const errorKey = `${name}Error` as keyof typeof errors;
     if (name === 'login_id' && errors.loginIdError) {
       setErrors(prev => ({ ...prev, loginIdError: '' }));
     } else if (name === 'name' && errors.nameError) {
