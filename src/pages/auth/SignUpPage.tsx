@@ -49,6 +49,8 @@ const SignUpPage: React.FC = () => {
   const [isVerified, setIsVerified] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false); // 이메일 버튼 리셋
+  const [isIdVerified, setIsIdVerified] = useState(false); // 아이디 버튼 리셋
 
   // 입력값 변경 핸들러
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +59,16 @@ const SignUpPage: React.FC = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // 아이디나 이메일 값이 변경되면 인증 상태 초기화
+    if (name === 'login_id' && (isIdSent || isIdVerified)) {
+      setIsIdSent(false);
+      setIsIdVerified(false);
+    }
+    if (name === 'email' && (isEmailSent || isEmailVerified)) {
+      setIsEmailSent(false);
+      setIsEmailVerified(false);
+    }
 
     // 에러 메시지 초기화 (사용자가 입력을 시작하면)
     if (name === 'login_id' && errors.loginIdError) {
@@ -244,9 +256,8 @@ const SignUpPage: React.FC = () => {
                   className="button email-button" 
                   onClick={sendVerificationId}
                   disabled={!formData.login_id || isIdSent}
-                  title={isIdSent ? "새로고침 하여 재 입력하시오" : ""}
                 >
-              {isIdSent ? '체크완료' : '중복체크'}
+              {isIdVerified ? '사용가능' : isIdSent ? '확인중...' : '중복체크'}
             </button>
               </div>
               {errors.loginIdError && <div className="error-message">{errors.loginIdError}</div>}
@@ -305,9 +316,8 @@ const SignUpPage: React.FC = () => {
               className="button email-button" 
               onClick={sendVerificationEmail}
               disabled={!formData.email || isEmailSent}
-              title={isEmailSent ? "새로고침 하여 재 입력하시오" : ""}
             >
-              {isEmailSent ? '인증코드 발송완료' : '인증코드 발송'}
+              {isEmailVerified ? '인증완료' : isEmailSent ? '발송완료' : '인증코드 발송'}
             </button>
             </div>
             {errors.emailError && <div className="error-message">{errors.emailError}</div>}
@@ -316,7 +326,12 @@ const SignUpPage: React.FC = () => {
           {/* 인증코드 확인 */}
           <OneTimePasswordField 
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => { setIsModalOpen(false);
+              // 인증 완료 안하고 모달 닫으면 발송 상태 초기화
+                if (!isEmailVerified) {
+                  setIsEmailSent(false);
+                }
+              }}
             onVerify={verifyCode}
           />
 
