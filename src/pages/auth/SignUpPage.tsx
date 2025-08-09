@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OneTimePasswordField from '../../components/ui/OneTimePasswordField';
+import { authAPI } from '../../services/api';
+import { SignUpRequest } from '../../types';
 
 // JSON API 스펙에 맞춘 인터페이스 (기존 필드들도 유지)
-interface SignUpForm {
-  email: string;
-  password: string;
+interface SignUpForm extends SignUpRequest {
   confirmPassword: string;
-  name: string;
-  login_id: string;
-  nickname: string;
-  provider: string;
   privacyChecked: boolean;
   termsChecked: boolean;
 }
@@ -28,7 +24,7 @@ const SignUpPage: React.FC = () => {
     nickname: '',
     provider: 'LOCAL',
     privacyChecked: false,
-    termsChecked: false
+    termsChecked: false,
   });
 
   // 유효성 검사 상태 - 새 필드들 추가
@@ -177,9 +173,9 @@ const SignUpPage: React.FC = () => {
 
     // 아이디 중복 체크 발송
   const sendVerificationId = () => {
-    const login_id_Error = validateLoginId(formData.login_id);
-    if (login_id_Error) {
-      setErrors(prev => ({ ...prev, login_id_Error }));
+    const loginIdError  = validateLoginId(formData.login_id);
+    if (loginIdError ) {
+      setErrors(prev => ({ ...prev, loginIdError  }));
       return;
     }
 
@@ -190,35 +186,23 @@ const SignUpPage: React.FC = () => {
 
   // 회원가입 제출
   const submitForm = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
+    
     setIsSubmitting(true);
 
     try {
-      // API에 보낼 데이터 (클라이언트 전용 필드 제외)
-      const apiData = {
-        name: formData.name,
-        login_id: formData.login_id,
-        email: formData.email,
-        password: formData.password,
-        nickname: formData.nickname,
-        provider: formData.provider
-      };
-
+      // 구조 분해 할당(3개 타입) + Rest 연산자(3개 타입을 제외한 ...별칭) = formData 엔 필요데이터만.
+      const { confirmPassword, privacyChecked, termsChecked, ...apiData } = formData;
+      
       console.log('회원가입 데이터:', apiData);
+      const response = await authAPI.signUp(apiData as SignUpRequest);
       
-      // TODO: 실제 API 호출
-      // const response = await api.signUp(apiData);
-      // console.log('회원가입 성공:', response);
-      
-      // 성공 시 로그인 페이지로 이동
+      console.log('회원가입 성공:', response);
       navigate('/login');
       
     } catch (error) {
       console.error('회원가입 실패:', error);
-      // 에러 처리 로직
+      alert(error instanceof Error ? error.message : '회원가입 실패');
     } finally {
       setIsSubmitting(false);
     }
@@ -253,6 +237,7 @@ const SignUpPage: React.FC = () => {
                 />
 
                 <button 
+                  type="button"
                   className="button email-button" 
                   onClick={sendVerificationId}
                   disabled={!formData.login_id || isIdSent}
@@ -313,6 +298,7 @@ const SignUpPage: React.FC = () => {
               />
             
             <button 
+              type="button"
               className="button email-button" 
               onClick={sendVerificationEmail}
               disabled={!formData.email || isEmailSent}
