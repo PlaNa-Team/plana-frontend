@@ -45,6 +45,7 @@ const SignUpPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isIdSent, setIsIdSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,6 +163,19 @@ const SignUpPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+    // 아이디 중복 체크 발송
+  const sendVerificationId = () => {
+    const login_id_Error = validateLoginId(formData.login_id);
+    if (login_id_Error) {
+      setErrors(prev => ({ ...prev, login_id_Error }));
+      return;
+    }
+
+    console.log('아이디 중복체크 요청:', formData.login_id);
+     setIsIdSent(true);
+
+  };
+
   // 회원가입 제출
   const submitForm = async () => {
     if (!validateForm()) {
@@ -225,6 +239,15 @@ const SignUpPage: React.FC = () => {
                   onChange={handleInputChange}
                   className="form-input"
                 />
+
+                <button 
+                  className="button email-button" 
+                  onClick={sendVerificationId}
+                  disabled={!formData.login_id || isIdSent}
+                  title={isIdSent ? "새로고침 하여 재 입력하시오" : ""}
+                >
+              {isIdSent ? '체크완료' : '중복체크'}
+            </button>
               </div>
               {errors.loginIdError && <div className="error-message">{errors.loginIdError}</div>}
             </div>
