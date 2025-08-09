@@ -191,11 +191,19 @@ const SignUpPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // 구조 분해 할당(3개 타입) + Rest 연산자(3개 타입을 제외한 ...별칭) = formData 엔 필요데이터만.
-      const { confirmPassword, privacyChecked, termsChecked, ...apiData } = formData;
+      // 구조 분해 할당(3개 타입) + Rest 연산자(3개 타입을 제외한 ...별칭) = formData 로 
+      const requestData = {
+      name: formData.name,
+      login_id: formData.login_id,
+      email: formData.email,
+      password: formData.password,
+      passwordConfirm: formData.confirmPassword,  // 필드명 변경
+      nickname: formData.nickname,
+      provider: formData.provider
+    };
       
-      console.log('회원가입 데이터:', apiData);
-      const response = await authAPI.signUp(apiData as SignUpRequest);
+      console.log('회원가입 데이터:', requestData);
+      const response = await authAPI.signUp(requestData as SignUpRequest);
       
       console.log('회원가입 성공:', response);
       navigate('/login');
