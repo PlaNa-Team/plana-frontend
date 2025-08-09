@@ -9,8 +9,9 @@
 // 나중에 API 호출할 때 파일 수정해서 사용하기
 
 import axios, { AxiosResponse, AxiosError } from 'axios';
+import { User, SignUpRequest , Diary, Project } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 // API 응답 타입 정의
 export interface ApiResponse<T = any> {
@@ -60,4 +61,20 @@ apiClient.interceptors.response.use(
   }
 );
 
+//인증 관련 API 
+export const authAPI = {
+  // 회원가입
+  signUp: async (userData: SignUpRequest): Promise<SignUpRequest> => {
+    try {
+      const response = await apiClient.post<ApiResponse<SignUpRequest>>('/auth/signup', userData);
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '회원가입에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+}
 export default apiClient;

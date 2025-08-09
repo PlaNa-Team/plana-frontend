@@ -14,3 +14,12 @@ export interface User {
   provider: Provider;
   refreshToken: string;
 }
+
+export interface SignUpRequest {
+  name: string;
+  login_id: string;    
+  email: string;
+  password: string;
+  nickname: string;
+  provider: string;
+}
