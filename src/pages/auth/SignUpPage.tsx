@@ -284,7 +284,7 @@ const SignUpPage: React.FC = () => {
                   value={formData.loginId}
                   onChange={handleInputChange}
                   className="form-input"
-                  disabled={isIdSent}
+                  disabled={isIdSent} // 중복체크 중일 때 입력 비활성화
                 />
 
                 <button 
