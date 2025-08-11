@@ -9,7 +9,7 @@
 // 나중에 API 호출할 때 파일 수정해서 사용하기
 
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { User, SignUpRequest , Diary, Project } from '../types';
+import { SignUpRequest , IdCheckResponse } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
@@ -71,6 +71,22 @@ export const authAPI = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || '회원가입에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+    checkedId: async (loginId: string): Promise<IdCheckResponse> => {
+    try {
+      const response = await apiClient.get<IdCheckResponse>(`/members/check-id?loginId=${loginId}`);
+      
+      // 백엔드에서 200으로 성공/실패 모두 보내므로 응답 데이터를 그대로 반환
+      return response.data;
+      
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // 실제 HTTP 에러 (400, 500 등)
+        const errorMessage = error.response?.data?.message || '아이디 중복 확인에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');

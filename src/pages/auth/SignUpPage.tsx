@@ -135,6 +135,10 @@ const SignUpPage: React.FC = () => {
       confirmPasswordError: validateConfirmPassword(formData.password, formData.confirmPassword)
     };
 
+    if (!isIdVerified) {
+      newErrors.loginIdError = '아이디 중복체크를 완료해주세요.';
+    }
+
     setErrors(newErrors);
 
     // 모든 에러가 없고, 이메일 인증이 완료되었는지 확인
@@ -171,17 +175,31 @@ const SignUpPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-    // 아이디 중복 체크 발송
-  const sendVerificationId = () => {
-    const loginIdError  = validateLoginId(formData.login_id);
-    if (loginIdError ) {
-      setErrors(prev => ({ ...prev, loginIdError  }));
+  // 아이디 중복 체크 함수
+  const sendVerificationId = async () => {
+    const loginIdError = validateLoginId(formData.login_id);
+    if (loginIdError) {
+      setErrors(prev => ({ ...prev, loginIdError }));
       return;
     }
-
-    console.log('아이디 중복체크 요청:', formData.login_id);
-     setIsIdSent(true);
-
+    setIsIdSent(true);
+    try {
+      const response = await authAPI.checkedId(formData.login_id);
+      
+      setIsIdVerified(response.available);
+      setErrors(prev => ({ 
+        ...prev, 
+        loginIdError: response.available ? '' : response.message 
+      }));
+    } catch (error) {
+      setIsIdVerified(false);
+      setErrors(prev => ({ 
+        ...prev, 
+        loginIdError: error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.' 
+      }));
+    } finally {
+      setIsIdSent(false);
+    }
   };
 
   // 회원가입 제출
@@ -242,18 +260,27 @@ const SignUpPage: React.FC = () => {
                   value={formData.login_id}
                   onChange={handleInputChange}
                   className="form-input"
+                  disabled={isIdSent} // 중복체크 중일 때 입력 비활성화
                 />
 
                 <button 
                   type="button"
-                  className="button email-button" 
+                  className={`button email-button ${isIdVerified ? 'success' : ''}`}
                   onClick={sendVerificationId}
                   disabled={!formData.login_id || isIdSent}
                 >
-              {isIdVerified ? '사용가능' : isIdSent ? '확인중...' : '중복체크'}
-            </button>
+                  {isIdSent 
+                    ? '확인중...' 
+                    : isIdVerified 
+                      ? '사용가능' 
+                      : '중복체크'
+                  }
+                </button>
               </div>
               {errors.loginIdError && <div className="error-message">{errors.loginIdError}</div>}
+              {!errors.loginIdError && isIdVerified && (
+                <div className="success-message">사용 가능한 아이디입니다!</div>
+              )}
             </div>
 
           <div className="form-group">
