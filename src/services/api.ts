@@ -85,7 +85,6 @@ export const authAPI = {
       
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // 실제 HTTP 에러 (400, 500 등)
         const errorMessage = error.response?.data?.message || '아이디 중복 확인에 실패했습니다.';
         throw new Error(errorMessage);
       }

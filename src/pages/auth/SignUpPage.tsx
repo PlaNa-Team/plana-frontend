@@ -205,30 +205,36 @@ const SignUpPage: React.FC = () => {
   // 회원가입 제출
   const submitForm = async () => {
     if (!validateForm()) return;
-    
     setIsSubmitting(true);
-
     try {
-      // 구조 분해 할당(3개 타입) + Rest 연산자(3개 타입을 제외한 ...별칭) = formData 로 
       const requestData = {
       name: formData.name,
       login_id: formData.login_id,
       email: formData.email,
       password: formData.password,
-      passwordConfirm: formData.confirmPassword,  // 필드명 변경
+      passwordConfirm: formData.confirmPassword,  
       nickname: formData.nickname,
       provider: formData.provider
     };
-      
-      console.log('회원가입 데이터:', requestData);
       const response = await authAPI.signUp(requestData as SignUpRequest);
-      
       console.log('회원가입 성공:', response);
       navigate('/login');
       
     } catch (error) {
+    // 백엔드에서 보내주는 구체적인 에러 메시지 표시
+    const errorMessage = error instanceof Error ? error.message : '회원가입에 실패했습니다.';
+      // 에러 유형에 따른 처리
+      if (errorMessage.includes('이메일')) {
+        setErrors(prev => ({ ...prev, emailError: errorMessage }));
+      } else if (errorMessage.includes('비밀번호')) {
+        setErrors(prev => ({ ...prev, passwordError: errorMessage }));
+      } else if (errorMessage.includes('아이디')) {
+        setErrors(prev => ({ ...prev, loginIdError: errorMessage }));
+      } else {
+        // 일반적인 에러는 alert로 표시
+        alert(errorMessage);
+      }
       console.error('회원가입 실패:', error);
-      alert(error instanceof Error ? error.message : '회원가입 실패');
     } finally {
       setIsSubmitting(false);
     }
