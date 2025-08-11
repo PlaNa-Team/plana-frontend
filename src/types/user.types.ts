@@ -23,3 +23,9 @@ export interface SignUpRequest {
   nickname: string;
   provider: string;
 }
+
+export interface IdCheckResponse {
+  status: number;
+  available: boolean;
+  message: string;
+}
