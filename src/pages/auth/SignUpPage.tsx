@@ -20,7 +20,7 @@ const SignUpPage: React.FC = () => {
     password: '',
     confirmPassword: '',
     name: '',
-    login_id: '',
+    loginId: '',
     nickname: '',
     provider: 'LOCAL',
     privacyChecked: false,
@@ -57,17 +57,17 @@ const SignUpPage: React.FC = () => {
     }));
     
     // 아이디나 이메일 값이 변경되면 인증 상태 초기화
-    if (name === 'login_id' && (isIdSent || isIdVerified)) {
+    if (name === 'loginId') {
       setIsIdSent(false);
       setIsIdVerified(false);
     }
-    if (name === 'email' && (isEmailSent || isEmailVerified)) {
+    if (name === 'email') {
       setIsEmailSent(false);
       setIsEmailVerified(false);
     }
 
     // 에러 메시지 초기화 (사용자가 입력을 시작하면)
-    if (name === 'login_id' && errors.loginIdError) {
+    if (name === 'loginId' && errors.loginIdError) {
       setErrors(prev => ({ ...prev, loginIdError: '' }));
     } else if (name === 'name' && errors.nameError) {
       setErrors(prev => ({ ...prev, nameError: '' }));
@@ -127,7 +127,7 @@ const SignUpPage: React.FC = () => {
   // 전체 폼 유효성 검사
   const validateForm = (): boolean => {
     const newErrors = {
-      loginIdError: validateLoginId(formData.login_id),
+      loginIdError: validateLoginId(formData.loginId),
       nameError: validateName(formData.name),
       nicknameError: validateNickname(formData.nickname),
       emailError: validateEmail(formData.email),
@@ -176,16 +176,16 @@ const SignUpPage: React.FC = () => {
 
     try  {
       const response = await authAPI.verifyEmailCode(formData.email, code);
-      
-      if (response.verified) {
-        setIsVerified(true);
-        setIsEmailVerified(true);
-        setIsEmailSent(false);
 
-        console.log('인증 성공:', response.message);
-        return true;
-      }
-      return false;
+    if (response.verified === true) {
+          // ✅ 성공 (200)
+          setIsVerified(true);
+          setIsEmailVerified(true);
+          setIsEmailSent(false);
+          return true;
+        } else {
+          return false;
+        }
 
     } catch (error) {
       setIsEmailVerified(false);
@@ -194,18 +194,16 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-
-
   // 아이디 중복 체크 함수
   const sendVerificationId = async () => {
-    const loginIdError = validateLoginId(formData.login_id);
+    const loginIdError = validateLoginId(formData.loginId);
     if (loginIdError) {
       setErrors(prev => ({ ...prev, loginIdError }));
       return;
     }
     setIsIdSent(true);
     try {
-      const response = await authAPI.checkedId(formData.login_id);
+      const response = await authAPI.checkedId(formData.loginId);
       
       setIsIdVerified(response.available);
       setErrors(prev => ({ 
@@ -230,7 +228,7 @@ const SignUpPage: React.FC = () => {
     try {
       const requestData = {
       name: formData.name,
-      login_id: formData.login_id,
+      loginId: formData.loginId,
       email: formData.email,
       password: formData.password,
       passwordConfirm: formData.confirmPassword,  
@@ -282,19 +280,19 @@ const SignUpPage: React.FC = () => {
               <div className={`input-wrapper ${errors.loginIdError ? 'error' : ''}`}>
                 <input
                   type="text"
-                  name="login_id"
+                  name="loginId"
                   placeholder="아이디를 입력해 주세요."
-                  value={formData.login_id}
+                  value={formData.loginId}
                   onChange={handleInputChange}
                   className="form-input"
-                  disabled={isIdSent} // 중복체크 중일 때 입력 비활성화
+                  disabled={isIdSent}
                 />
 
                 <button 
                   type="button"
                   className={`button email-button ${isIdVerified ? 'success' : ''}`}
                   onClick={sendVerificationId}
-                  disabled={!formData.login_id || isIdSent}
+                  disabled={!formData.loginId || isIdSent || isIdVerified}
                 >
                   {isIdSent 
                     ? '확인중...' 
@@ -361,9 +359,9 @@ const SignUpPage: React.FC = () => {
             
             <button 
               type="button"
-              className="button email-button" 
+              className={`button email-button ${isEmailVerified ? 'success' : ''}`}
               onClick={sendVerificationEmail}
-              disabled={!formData.email || isEmailSent}
+              disabled={!formData.email || isEmailSent || isEmailVerified}
             >
               {isEmailVerified ? '인증완료' : isEmailSent ? '발송완료' : '인증코드 발송'}
             </button>

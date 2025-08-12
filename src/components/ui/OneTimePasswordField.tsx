@@ -4,7 +4,7 @@ import * as OTP from "@radix-ui/react-one-time-password-field";
 interface OneTimePasswordFieldProps {
   isOpen?: boolean;
   onClose?: () => void;
-  onVerify?: (code: string) => void;
+  onVerify?: (code: string) => Promise<boolean>;
 }
 
 const OneTimePasswordField: React.FC<OneTimePasswordFieldProps> = ({ 
@@ -14,39 +14,50 @@ const OneTimePasswordField: React.FC<OneTimePasswordFieldProps> = ({
 }) => {
   const [value, setValue] = React.useState('');
   const [isError, setIsError] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleComplete = async (code: string) => {
     if (code.length === 6 && onVerify) {
-      await onVerify(code);
-      // 인증 실패 시 에러 상태 설정 (PasswordSearchPage에서 처리)
-      if (code !== '123456') {
+      setIsLoading(true);
+      setIsError(false);
+      
+      try {
+        const isSuccess = await onVerify(code);
+        
+        if (isSuccess) {
+          setValue('');
+          setIsError(false);
+          if (onClose) onClose();
+        } else {
+          setIsError(true);
+          setValue('');
+        }
+      } catch (error) {
         setIsError(true);
-        setValue(''); // 입력값 초기화
+        setValue('');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
   const handleValueChange = (val: string) => {
     setValue(val);
-    setIsError(false); // 새로 입력 시작하면 에러 상태 해제
+    setIsError(false);
     
     if (val.length === 6) {
       handleComplete(val);
     }
   };
 
-  // 임시로 인증번호 검증 (실제로는 서버에서 처리)
-  const mockVerification = (code: string) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (code === '123456') { // 올바른 인증번호
-          resolve(true);
-        } else { // 틀린 인증번호
-          reject(new Error('잘못된 인증번호'));
-        }
-      }, 500);
-    });
-  };
+  // 모달 열릴 때마다 상태 초기화
+  React.useEffect(() => {
+    if (isOpen) {
+      setValue('');
+      setIsError(false);
+      setIsLoading(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

@@ -17,7 +17,7 @@ export interface User {
 
 export interface SignUpRequest {
   name: string;
-  login_id: string;    
+  loginId: string;    
   email: string;
   password: string;
   nickname: string;
