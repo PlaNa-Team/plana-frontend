@@ -11,6 +11,7 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { SignUpRequest , IdCheckResponse } from '../types';
 
+// 환경변수에서 API URL 가져오기
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 // API 응답 타입 정의
@@ -76,16 +77,40 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-    checkedId: async (loginId: string): Promise<IdCheckResponse> => {
+  //아이디 중복체크
+  checkedId: async (loginId: string): Promise<IdCheckResponse> => {
     try {
       const response = await apiClient.get<IdCheckResponse>(`/members/check-id?loginId=${loginId}`);
-      
-      // 백엔드에서 200으로 성공/실패 모두 보내므로 응답 데이터를 그대로 반환
       return response.data;
-      
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || '아이디 중복 확인에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+  // 이메일 인증 코드 발송
+  sendEmailVerification: async (email: string) => {
+    try {
+      const response = await apiClient.post('/auth/email/verification-code', { email });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '이메일 인증 코드 발송에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+  // 이메일 인증 코드 확인
+  verifyEmailCode: async (email: string, code: string) => {
+    try {
+      const response = await apiClient.post('/auth/email/verify', { email, code });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '이메일 인증에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');
