@@ -138,42 +138,63 @@ const SignUpPage: React.FC = () => {
     if (!isIdVerified) {
       newErrors.loginIdError = '아이디 중복체크를 완료해주세요.';
     }
-
+     if (!isVerified) {
+    newErrors.emailError = '이메일 인증을 완료해주세요.';
+    }
     setErrors(newErrors);
 
     // 모든 에러가 없고, 이메일 인증이 완료되었는지 확인
     const hasErrors = Object.values(newErrors).some(error => error !== '');
-    
     return !hasErrors && isVerified;
   };
 
-  // 인증 코드 확인
-  const verifyCode = async (code: string): Promise<boolean> => {
-    console.log('인증코드 확인:', code);
-    
-    // 임시로 '123456'만 올바른 코드로 처리
-    if (code === '123456') {
-      setIsVerified(true);
-      setIsModalOpen(false);
-      return true;
-    } else {
-      console.log('잘못된 인증번호');
-      return false;
-    }
-  };
-
-  // 이메일 인증 발송
-  const sendVerificationEmail = () => {
+    // 이메일 인증 발송
+  const sendVerificationEmail = async () => {
     const emailError = validateEmail(formData.email);
     if (emailError) {
       setErrors(prev => ({ ...prev, emailError }));
       return;
     }
-
-    console.log('이메일 인증 발송:', formData.email);
     setIsEmailSent(true);
-    setIsModalOpen(true);
+
+    try {
+      const response = await authAPI.sendEmailVerification(formData.email);
+      console.log('이메일 인증 발송:', response.message);
+      setIsModalOpen(true);
+
+    } catch (error) {
+      setIsEmailSent(false);
+      setErrors(prev => ({ 
+        ...prev, 
+        emailError: error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.' 
+      }));
+    }
   };
+
+  // 인증 코드 확인
+  const verifyCode = async (code: string): Promise<boolean> => {
+
+    try  {
+      const response = await authAPI.verifyEmailCode(formData.email, code);
+      
+      if (response.verified) {
+        setIsVerified(true);
+        setIsEmailVerified(true);
+        setIsEmailSent(false);
+
+        console.log('인증 성공:', response.message);
+        return true;
+      }
+      return false;
+
+    } catch (error) {
+      setIsEmailVerified(false);
+      console.error('인증 실패:', error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.');
+      return false;
+    }
+  };
+
+
 
   // 아이디 중복 체크 함수
   const sendVerificationId = async () => {
