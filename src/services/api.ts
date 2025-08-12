@@ -146,6 +146,10 @@ export const authAPI = {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        if (error.response && error.response.data) {
+          console.log('백엔드 응답 (400/410):', error.response.data);
+          return error.response.data; 
+        }
         const errorMessage = error.response?.data?.message || '이메일 인증에 실패했습니다.';
         throw new Error(errorMessage);
       }

@@ -178,6 +178,7 @@ const SignUpPage: React.FC = () => {
       const response = await authAPI.verifyEmailCode(formData.email, code);
 
     if (response.verified === true) {
+          // ✅ 성공 (200)
           setIsVerified(true);
           setIsEmailVerified(true);
           setIsEmailSent(false);
@@ -284,7 +285,7 @@ const SignUpPage: React.FC = () => {
                   value={formData.loginId}
                   onChange={handleInputChange}
                   className="form-input"
-                  disabled={isIdSent} // 중복체크 중일 때 입력 비활성화
+                  disabled={isIdSent}
                 />
 
                 <button 
