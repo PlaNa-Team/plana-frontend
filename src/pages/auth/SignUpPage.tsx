@@ -178,7 +178,6 @@ const SignUpPage: React.FC = () => {
       const response = await authAPI.verifyEmailCode(formData.email, code);
 
     if (response.verified === true) {
-          // ✅ 성공 (200)
           setIsVerified(true);
           setIsEmailVerified(true);
           setIsEmailSent(false);
