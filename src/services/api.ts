@@ -156,5 +156,18 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
+  // 로그인
+  login: async (loginData: { loginId: string; password: string }) => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ accessToken: string }>>('/auth/login', loginData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '로그인에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
 }
 export default apiClient;
