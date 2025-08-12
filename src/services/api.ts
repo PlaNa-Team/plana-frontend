@@ -23,6 +23,7 @@ const getAuthActions = () => {
   }
 };
 
+// 환경변수에서 API URL 가져오기
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 export interface ApiResponse<T = any> {
@@ -112,7 +113,7 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-  
+  //아이디 중복체크
   checkedId: async (loginId: string): Promise<IdCheckResponse> => {
     try {
       const response = await apiClient.get<IdCheckResponse>(`/members/check-id?loginId=${loginId}`);
@@ -125,7 +126,7 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-  
+  // 이메일 인증 코드 발송
   sendEmailVerification: async (email: string) => {
     try {
       const response = await apiClient.post('/auth/email/verification-code', { email });
@@ -138,36 +139,18 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-  
+  // 이메일 인증 코드 확인
   verifyEmailCode: async (email: string, code: string) => {
     try {
       const response = await apiClient.post('/auth/email/verify', { email, code });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if (error.response && error.response.data) {
-          return error.response.data; 
-        }
         const errorMessage = error.response?.data?.message || '이메일 인증에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-  
-  // 백엔드 LoginResponseDto 구조에 맞춤
-  login: async (loginData: { email: string; password: string }): Promise<LoginResponseDto> => {
-    try {
-      const response = await apiClient.post<LoginResponseDto>('/auth/login', loginData);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || '로그인에 실패했습니다.';
-        throw new Error(errorMessage);
-      }
-      throw new Error('네트워크 오류가 발생했습니다.');
-    }
-  }
 }
-
 export default apiClient;
