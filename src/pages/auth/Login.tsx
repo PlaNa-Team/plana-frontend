@@ -151,7 +151,7 @@ const Login: React.FC = () => {
                 onChange={handleInputChange}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-                autoComplete="off"
+         
               />
             </div>
             {emailError && <div className="error-message">{emailError}</div>}
