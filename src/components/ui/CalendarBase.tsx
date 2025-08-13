@@ -8,7 +8,12 @@ import {
   setHolidays,
   setLoadingHolidays,
   selectHolidays,
-  selectIsLoadingHolidays
+  selectIsLoadingHolidays,
+  selectEvents,
+  selectIsLoadingEvents,
+  selectEventsError,
+  fetchMonthlySchedules,
+  updateCurrentDate
 } from '../../store/slices/calendarSlice';
 import { HolidayItem } from '../../types/calendar.types';
 
@@ -58,11 +63,17 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   className = ''
 }) => {
   const dispatch = useAppDispatch();
+  // ✅ 기존 공휴일 관련 (그대로 유지)
   const holidays = useAppSelector(selectHolidays);
   const isLoadingHolidays = useAppSelector(selectIsLoadingHolidays);
+  
+  // 🆕 일정 관련 추가 (아직 사용 안 함)
+  const scheduleEvents = useAppSelector(selectEvents);
+  const isLoadingEvents = useAppSelector(selectIsLoadingEvents);
+  const eventsError = useAppSelector(selectEventsError);
+  
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const loadedYears = useRef<Set<string>>(new Set());
 
   // 🆕 날짜 클릭 핸들러 추가 (커스텀 이벤트 발생)
@@ -265,7 +276,8 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   };
 
   const handleDatesSet = React.useCallback(
-    (dateInfo: any) => {
+    async (dateInfo: any) => {
+      // ✅ 기존 로직 그대로 유지
       if (onDatesSet) {
         onDatesSet(dateInfo);
       }
@@ -275,37 +287,74 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
       const middleDate = new Date(
         (startDate.getTime() + endDate.getTime()) / 2
       );
-      const currentYear = middleDate.getFullYear().toString();
+      
+      const currentYear = middleDate.getFullYear();
+      const currentMonth = middleDate.getMonth() + 1;
+      const currentYearStr = currentYear.toString();
 
-      loadHolidays(currentYear);
+      // ✅ 기존 공휴일 로딩 유지
+      loadHolidays(currentYearStr);
       updateCalendar();
+
+      // 🆕 일정 API 호출만 추가 (콘솔로만 확인)
+      try {
+        console.log(`📅 ${currentYear}년 ${currentMonth}월 일정 조회 시작`);
+        
+        // 🔄 Redux 상태 업데이트
+        dispatch(updateCurrentDate({ start: dateInfo.start.toISOString() }));
+        
+        // 🚀 API 호출
+        const result = await dispatch(fetchMonthlySchedules({ 
+          year: currentYear, 
+          month: currentMonth 
+        })).unwrap();
+        
+        console.log('✅ 일정 데이터:', result);
+      } catch (error) {
+        console.error('❌ 일정 로드 실패:', error);
+      }
     },
-    [onDatesSet, loadHolidays, updateCalendar]
+    [onDatesSet, dispatch, loadHolidays, updateCalendar]
   );
 
+  // 🆕 컴포넌트 마운트시에도 현재 월 데이터 로드
   useEffect(() => {
-    const currentYear = new Date().getFullYear().toString();
-    loadHolidays(currentYear);
-  }, [loadHolidays]);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    
+    console.log('🚀 초기 일정 데이터 로드');
+    dispatch(fetchMonthlySchedules({ year: currentYear, month: currentMonth }));
+  }, [dispatch]);
 
-  useEffect(() => {
-    if (!isLoadingHolidays && holidays.length > 0) {
-      const timer = setTimeout(() => {
-        applyDateColors();
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [holidays.length, isLoadingHolidays, applyDateColors]);
 
   return (
     <div className={`calendar-base ${className}`} ref={containerRef}>
+      {/* 🆕 개발자 도구용 정보 표시 (나중에 제거) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '10px', 
+          right: '10px', 
+          background: '#f0f0f0', 
+          padding: '5px', 
+          fontSize: '12px',
+          zIndex: 1000
+        }}>
+          Redux 일정: {scheduleEvents.length}개 | 로딩: {isLoadingEvents ? 'Y' : 'N'}
+        </div>
+      )}
+
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView={initialView}
         headerToolbar={headerToolbar}
         height={height}
+        
+        // 🔄 아직은 props events 사용 (나중에 scheduleEvents로 교체)
         events={events}
+        
         editable={editable}
         selectable={selectable}
         selectMirror={true}
@@ -317,8 +366,11 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         eventClick={onEventClick}
         eventDrop={onEventDrop}
         eventResize={onEventResize}
-        dateClick={handleDateClick} // 🆕 날짜 클릭 이벤트 연결
+        dateClick={handleDateClick}
+        
+        // 🆕 API 호출 포함된 핸들러
         datesSet={handleDatesSet}
+        
         viewDidMount={handleViewDidMount}
         loading={handleLoading}
         eventContent={eventContent}
