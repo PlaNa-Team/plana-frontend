@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
+import { useAppDispatch } from '../../store';
+import { loginSuccess, setError, clearError } from '../../store/slices/authSlice';
 
 interface LoginForm {
   email: string;
@@ -9,6 +11,7 @@ interface LoginForm {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState<LoginForm>({
     email: '',
     password: ''
@@ -48,6 +51,7 @@ const Login: React.FC = () => {
     // 로그인 실패 메시지 초기화
     if (loginFailed) {
       setLoginFailed(false);
+      dispatch(clearError());
     }
   };
 
@@ -61,6 +65,7 @@ const Login: React.FC = () => {
 
     setIsLoading(true);
     setLoginFailed(false);
+    dispatch(clearError());
 
     try {
       const loginData = {
@@ -71,18 +76,28 @@ const Login: React.FC = () => {
       const response = await authAPI.login(loginData); 
       
       if (response.data && response.data.accessToken) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        if (response.data.refreshToken) {
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-        }
+          dispatch(loginSuccess({
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken as string,
+            user: response.data.user || {
+              // 임시 사용자 정보 (백엔드에서 제공될 때까지)
+              id: 'temp-id',
+              email: formData.email,
+              name: '사용자'
+            }
+        }));
       }
       navigate('/calendar');
 
     } catch (error) {
       console.error('로그인 에러:', error);
       setLoginFailed(true);
-      if ( error instanceof Error) {
-        console.log('로그인 실패:', error.message);
+      
+      // ✅ Redux 에러 상태도 업데이트
+      if (error instanceof Error) {
+        dispatch(setError(error.message));
+      } else {
+        dispatch(setError('로그인에 실패했습니다.'));
       }
     } finally {
       setIsLoading(false);
