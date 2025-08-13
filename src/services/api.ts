@@ -102,20 +102,30 @@ apiClient.interceptors.response.use(
 
 // API 응답을 FullCalendar 형식으로 변환하는 함수
 export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['data']['schedules']): CalendarEvent[] => {
-  return schedules.map(schedule => ({
-    id: schedule.virtualId || schedule.id.toString(),
-    title: schedule.title,
-    start: schedule.startAt,
-    end: schedule.endAt,
-    allDay: schedule.isAllDay,
-    backgroundColor: schedule.color,
-    borderColor: schedule.color,
-    extendedProps: {
-      categoryName: schedule.categoryName,
-      isRecurring: schedule.isRecurring,
-      originalId: schedule.id
+  return schedules.map(schedule => {
+    // 💡 allDay 이벤트일 경우에만 end 날짜에 하루를 더하는 로직 추가
+    let adjustedEnd = schedule.endAt;
+    if (schedule.isAllDay) {
+      const endDate = new Date(schedule.endAt);
+      endDate.setDate(endDate.getDate() + 1);
+      adjustedEnd = endDate.toISOString();
     }
-  }));
+    
+    return {
+      id: schedule.virtualId || schedule.id.toString(),
+      title: schedule.title,
+      start: schedule.startAt,
+      end: adjustedEnd, // 🔄 수정된 adjustedEnd 사용
+      allDay: schedule.isAllDay,
+      backgroundColor: schedule.color,
+      borderColor: schedule.color,
+      extendedProps: {
+        categoryName: schedule.categoryName,
+        isRecurring: schedule.isRecurring,
+        originalId: schedule.id
+      }
+    };
+  });
 };
 
 export const authAPI = {
