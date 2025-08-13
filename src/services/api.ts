@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
+import { MonthlyScheduleResponse, CalendarEvent } from '../types/calendar.types';
 
 let store: any = null;
 
@@ -99,6 +100,24 @@ apiClient.interceptors.response.use(
   }
 );
 
+// API 응답을 FullCalendar 형식으로 변환하는 함수
+export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['data']['schedules']): CalendarEvent[] => {
+  return schedules.map(schedule => ({
+    id: schedule.virtualId || schedule.id.toString(),
+    title: schedule.title,
+    start: schedule.startAt,
+    end: schedule.endAt,
+    allDay: schedule.isAllDay,
+    backgroundColor: schedule.color,
+    borderColor: schedule.color,
+    extendedProps: {
+      categoryName: schedule.categoryName,
+      isRecurring: schedule.isRecurring,
+      originalId: schedule.id
+    }
+  }));
+};
+
 export const authAPI = {
   signUp: async (userData: SignUpRequest): Promise<SignUpRequest> => {
     try {
@@ -169,5 +188,26 @@ export const authAPI = {
     }
   }
 }
+
+
+// API 객체에 추가할 함수
+export const calendarAPI = {
+  // 월간 일정 조회
+  getMonthlySchedules: async (year: number, month: number): Promise<MonthlyScheduleResponse> => {
+    try {
+      const response = await apiClient.get<MonthlyScheduleResponse>(
+        `/calendars?year=${year}&month=${month}`
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '일정 조회에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  }
+};
+
 
 export default apiClient;
