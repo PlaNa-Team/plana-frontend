@@ -16,7 +16,7 @@ const Calendar: React.FC = () => {
 
   // 날짜 변경 핸들러
   const handleDatesSet = (dateInfo: any) => {
-    dispatch(updateCurrentDate({ start: dateInfo.start }));
+    dispatch(updateCurrentDate({ start: new Date(dateInfo.start).toISOString() }));
   };
 
   // 일정 추가 모달 열기
