@@ -82,3 +82,40 @@ export interface HolidayApiResponse {
     };
   };
 }
+
+// 월간 일정 조회 API 응답 타입
+export interface MonthlyScheduleResponse {
+  status: number;
+  message: string;
+  data: {
+    year: number;
+    month: number;
+    schedules: Array<{
+      id: number;
+      title: string;
+      startAt: string;
+      endAt: string;
+      isAllDay: boolean;
+      color: string;
+      isRecurring: boolean;
+      categoryName: string;
+      virtualId?: string;
+    }>;
+  };
+}
+
+// FullCalendar 이벤트 형식 (기존 Schedule과 구분하기 위해)
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end?: string;
+  allDay?: boolean;
+  backgroundColor?: string;
+  borderColor?: string;
+  extendedProps?: {
+    categoryName?: string;
+    isRecurring?: boolean;
+    originalId?: number;
+  };
+}
