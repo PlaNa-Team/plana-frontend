@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../store';
+import { useAppDispatch } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 import MyPagePwBtnModal from '../ui/MyPagePwBtnModal';
 import MyPageNicknameBtnModal from "../ui/MyPageNicknameBtnModal";
@@ -17,7 +17,6 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
 
   const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
   const [isMyPageNicknameModalOpen, setisMyPageNicknameModalOpen] = useState(false);
