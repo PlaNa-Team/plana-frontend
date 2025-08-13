@@ -162,7 +162,7 @@ export const authAPI = {
   },
   
   // ✅ 로그인 (응답 타입 확장)
-  login: async (loginData: { loginId: string; password: string }) => {
+  login: async (loginData: { email: string; password: string }) => {
     try {
       const response = await apiClient.post<ApiResponse<{ 
         accessToken: string; 
