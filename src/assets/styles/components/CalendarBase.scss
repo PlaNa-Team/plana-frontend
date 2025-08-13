@@ -136,7 +136,16 @@
   .fc {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
   }
-  
+  .fc-scroller {
+    overflow-y: hidden !important;
+  }
+  // .fc-col-header  {
+  //   width: 100% !important;
+  // }
+  // .fc-scrollgrid-sync-table  {
+  //   width: 100% !important;
+  // }
+
   .fc-theme-standard .fc-scrollgrid {
     border-color: var(--color-sm) !important;
   }
@@ -186,6 +195,21 @@
     padding: 2px 6px !important;
     margin: 1px 2px !important;
   }
+
+  .fc-daygrid-day-bottom {
+    display: flex !important;
+    justify-self: start !important;
+    width: auto !important;
+    font-size: 12px !important;
+    color: var(--color-lg) !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+    margin: 0 !important;
+       .custom-more-link {
+      background-color: none !important;
+    }
+  }
+
 }
 
 // === 반응형 설정 ===
