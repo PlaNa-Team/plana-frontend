@@ -68,6 +68,7 @@
     justify-content: center;
     border-radius: $border-radius-sm;
     transition: all 0.2s ease;
+    margin-left: 1.5rem;
 
     &:hover {
       background-color: var(--color-md);
