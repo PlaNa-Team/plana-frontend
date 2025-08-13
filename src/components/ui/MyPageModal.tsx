@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { logout } from '../../store/slices/authSlice';
 import MyPagePwBtnModal from '../ui/MyPagePwBtnModal';
 import MyPageNicknameBtnModal from "../ui/MyPageNicknameBtnModal";
 import MyPageNameBtnModal from "./MyPagenameBtnModal";
@@ -12,10 +15,33 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   isOpen, 
   onClose 
 }) => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
   const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
   const [isMyPageNicknameModalOpen, setisMyPageNicknameModalOpen] = useState(false);
   const [isMyPageNameModalOpen, setisMyPageNameModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = () => {
+    try {
+    setIsLoggingOut(true);
+    dispatch(logout());
+
+    onClose();
+    navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 중 오류 발생:', error);
+      
+      dispatch(logout());
+      onClose();
+      navigate('/login');
+    } finally { 
+      setIsLoggingOut(false);
+    }
+  }
+    
 
   // 모달이 열릴 때 body 스크롤 막기
   useEffect(() => {
@@ -40,6 +66,10 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
           <div className="mypage-modal__title-section">
             <div className="mypage-modal__user">우감자</div>
             <h1 className="mypage-modal__title">MyPage</h1>
+              {/* 로그아웃 버튼 - 로딩 상태 포함 */}
+              <button className="mypage-modal__action-btn" onClick={handleLogout} disabled={isLoggingOut}>
+                {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
+              </button>
             <button className="mypage-modal__close-btn" onClick={onClose}>
               ×
             </button>
