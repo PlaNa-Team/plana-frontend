@@ -149,9 +149,8 @@ const Login: React.FC = () => {
                 placeholder="이메일을 입력하세요."
                 value={formData.email}
                 onChange={handleInputChange}
-                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-         
+                autoComplete="email"
               />
             </div>
             {emailError && <div className="error-message">{emailError}</div>}
@@ -173,9 +172,8 @@ const Login: React.FC = () => {
                 placeholder="비밀번호를 입력해 주세요."
                 value={formData.password}
                 onChange={handleInputChange}
-                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-                autoComplete="off"
+                autoComplete="current-password"
               />
             </div>
             {loginError && <div className="error-message">{loginError}</div>}
