@@ -17,7 +17,7 @@ const Login: React.FC = () => {
     password: ''
   });
   const [emailError, setEmailError] = useState<string>('');
-  const [loginFailed, setLoginFailed] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // 이메일 유효성 검사
@@ -49,8 +49,8 @@ const Login: React.FC = () => {
     }
 
     // 로그인 실패 메시지 초기화
-    if (loginFailed) {
-      setLoginFailed(false);
+    if (setLoginError) {
+      setLoginError('');
       dispatch(clearError());
     }
   };
@@ -64,7 +64,7 @@ const Login: React.FC = () => {
     }
 
     setIsLoading(true);
-    setLoginFailed(false);
+    setLoginError('');
     dispatch(clearError());
 
     try {
@@ -91,14 +91,20 @@ const Login: React.FC = () => {
 
     } catch (error) {
       console.error('로그인 에러:', error);
-      setLoginFailed(true);
       
-      // ✅ Redux 에러 상태도 업데이트
+      // ✅ 백엔드에서 받은 에러 메시지를 그대로 표시
+      let errorMessage = '로그인에 실패했습니다.';
+      
       if (error instanceof Error) {
+        errorMessage = error.message; // 백엔드 에러 메시지 사용
         dispatch(setError(error.message));
       } else {
-        dispatch(setError('로그인에 실패했습니다.'));
+        dispatch(setError(errorMessage));
       }
+      
+      // ✅ 로그인 에러 상태에 저장 (화면에 표시용)
+      setLoginError(errorMessage);
+      
     } finally {
       setIsLoading(false);
     }
@@ -169,11 +175,7 @@ const Login: React.FC = () => {
                 autoComplete="current-password"
               />
             </div>
-            {loginFailed && (
-              <div className="error-message">
-                이메일 또는 비밀번호가 일치하지 않습니다.
-              </div>
-            )}
+            {loginError && <div className="error-message">{loginError}</div>}
           </div>
 
           <div className="login-options">
