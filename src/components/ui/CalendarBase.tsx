@@ -61,16 +61,15 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   weekends = true,
   businessHours,
   className = ''
+  
 }) => {
   const dispatch = useAppDispatch();
   // ✅ 기존 공휴일 관련 (그대로 유지)
   const holidays = useAppSelector(selectHolidays);
-  const isLoadingHolidays = useAppSelector(selectIsLoadingHolidays);
   
   // 🆕 일정 관련 추가 (아직 사용 안 함)
   const scheduleEvents = useAppSelector(selectEvents);
   const isLoadingEvents = useAppSelector(selectIsLoadingEvents);
-  const eventsError = useAppSelector(selectEventsError);
   
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -317,6 +316,15 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     [onDatesSet, dispatch, loadHolidays, updateCalendar]
   );
 
+  // 🆕 `moreLinkContent` 커스텀 함수 추가
+  const renderMoreLinkContent = (info: any) => {
+    return (
+      <div className="custom-more-link">
+        더보기
+      </div>
+    );
+  };
+
   // 🆕 컴포넌트 마운트시에도 현재 월 데이터 로드
   useEffect(() => {
     const now = new Date();
@@ -378,6 +386,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         eventDisplay="block"
         dayMaxEventRows={3}
         moreLinkClick="popover"
+        moreLinkContent={renderMoreLinkContent}
         timeZone="Asia/Seoul"
         dayHeaderFormat={{ weekday: 'short' }}
         titleFormat={{ year: 'numeric', month: 'long' }}
