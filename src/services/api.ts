@@ -2,7 +2,7 @@
 
 // 현재 파일의 목적 :
 // 기본 구조 제공 / 타입 안정성 확보 / 개발 시작점 제공
-// ✅ 전역 토큰 관리 및 자동 헤더 추가
+// 전역 토큰 관리 및 자동 헤더 추가
 
 // 백엔드 연동 시 수정 필요한 부분 : 
 // API 엔드포인트 URL / 요청,응답 구조 / 인증 방식 / 에러 처리 방식
@@ -10,7 +10,7 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { SignUpRequest, IdCheckResponse } from '../types';
 
-// ✅ Redux store import (순환 참조 방지를 위해 동적 import 사용)
+// Redux store import (순환 참조 방지를 위해 동적 import 사용)
 let store: any = null;
 
 // store를 동적으로 가져오는 함수
@@ -62,7 +62,7 @@ const apiClient = axios.create({
   },
 });
 
-// ✅ 요청 인터셉터 - 모든 요청에 자동으로 토큰 추가
+// 요청 인터셉터 - 모든 요청에 자동으로 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
     // 1순위: Redux store에서 토큰 가져오기 (실시간 상태)
@@ -89,14 +89,23 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// ✅ 응답 인터셉터 - 토큰 만료시 자동 처리
+
+// 응답 인터셉터
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => response,
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as any;
     
+    // 현재 페이지가 로그인 페이지인지 확인
+    const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      
+      // 로그인 페이지에서는 토큰 갱신 시도하지 않음
+      if (isLoginPage) {
+        return Promise.reject(error); // 그냥 에러를 반환하여 로그인 폼에서 처리
+      }
       
       const currentStore = getStore();
       const authActions = getAuthActions();
@@ -109,44 +118,45 @@ apiClient.interceptors.response.use(
           try {
             console.log('🔄 토큰 갱신 시도...');
             
-            // ✅ 리프레시 토큰으로 새 토큰 발급
+            // 리프레시 토큰으로 새 토큰 발급
             const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
               refreshToken
             });
             
             const { accessToken, refreshToken: newRefreshToken } = response.data.data;
             
-            // ✅ Redux store 업데이트
+            // Redux store 업데이트
             currentStore.dispatch(authActions.updateTokens({
               accessToken,
               refreshToken: newRefreshToken
             }));
-            
-            // ✅ 원래 요청에 새 토큰 적용 후 재시도
+          
+            // 원래 요청에 새 토큰 적용 후 재시도
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             
-            console.log('✅ 토큰 갱신 성공, 요청 재시도');
+            console.log('토큰 갱신 성공, 요청 재시도');
             return apiClient(originalRequest);
             
           } catch (refreshError) {
-            console.error('❌ 토큰 갱신 실패, 로그아웃 처리');
+            console.error('토큰 갱신 실패, 로그아웃 처리');
             
-            // ✅ 리프레시도 실패하면 로그아웃
+            // 리프레시도 실패하면 로그아웃 (새로고침 없이)
             currentStore.dispatch(authActions.logout());
-            window.location.href = '/login';
+            // window.location.href 대신 React Router 사용할 수 있도록 에러만 던지기
+            return Promise.reject(new Error('토큰 갱신 실패 - 다시 로그인해주세요.'));
           }
         } else {
-          // 리프레시 토큰이 없으면 로그아웃
+          // 리프레시 토큰이 없으면 로그아웃 (새로고침 없이)
           console.log('🚪 리프레시 토큰 없음, 로그아웃 처리');
           currentStore.dispatch(authActions.logout());
-          window.location.href = '/login';
+          return Promise.reject(new Error('인증이 만료되었습니다. 다시 로그인해주세요.'));
         }
       } else {
-        // Redux store를 사용할 수 없는 경우 기존 방식 사용
+        // Redux store를 사용할 수 없는 경우 (새로고침 없이)
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        return Promise.reject(new Error('인증 오류가 발생했습니다. 다시 로그인해주세요.'));
       }
     }
     
@@ -216,7 +226,7 @@ export const authAPI = {
     }
   },
   
-  // ✅ 로그인 (응답 타입 확장)
+  // 로그인
   login: async (loginData: { email: string; password: string }) => {
     try {
       const response = await apiClient.post<ApiResponse<{ 
@@ -239,7 +249,7 @@ export const authAPI = {
     }
   },
   
-  // ✅ 토큰 갱신 API 추가
+  // 토큰 갱신 API 추가
   refreshToken: async () => {
     try {
       const currentStore = getStore();

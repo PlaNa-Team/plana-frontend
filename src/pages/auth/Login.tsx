@@ -43,22 +43,19 @@ const Login: React.FC = () => {
       [name]: value
     }));
 
-    // 이메일 실시간 유효성 검사
     if (name === 'email') {
       validateEmail(value);
     }
 
-    // 로그인 실패 메시지 초기화
-    if (setLoginError) {
+    if (loginError) {
       setLoginError('');
       dispatch(clearError());
     }
   };
 
-  // 로그인 핸들러
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  // ✅ 로그인 핸들러 - 완전히 새로고침 방지
+  const handleLogin = async (e?: React.FormEvent | React.MouseEvent) => {
+     e?.preventDefault();
     if (!validateEmail(formData.email) || !formData.password) {
       return;
     }
@@ -73,37 +70,37 @@ const Login: React.FC = () => {
         password: formData.password
       };
       
-      const response = await authAPI.login(loginData); 
+      const response = await authAPI.login(loginData);
       
       if (response.data && response.data.accessToken) {
-          dispatch(loginSuccess({
-            accessToken: response.data.accessToken,
-            refreshToken: response.data.refreshToken as string,
-            user: response.data.user || {
-              // 임시 사용자 정보 (백엔드에서 제공될 때까지)
-              id: 'temp-id',
-              email: formData.email,
-              name: '사용자'
-            }
+        dispatch(loginSuccess({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken as string,
+          user: {
+            id: response.data.user?.id?.toString() || 'temp-id',
+            email: response.data.user?.email || formData.email,
+            name: response.data.user?.name || '사용자',
+            nickname: response.data.user?.nickname
+          }
         }));
+        navigate('/calendar');
       }
-      navigate('/calendar');
 
-    } catch (error) {
+    } catch (error: any) { // ✅ any 타입으로 변경
       console.error('로그인 에러:', error);
       
-      // ✅ 백엔드에서 받은 에러 메시지를 그대로 표시
+      // ✅ 백엔드 에러 메시지 추출 (더 안전하게)
       let errorMessage = '로그인에 실패했습니다.';
       
-      if (error instanceof Error) {
-        errorMessage = error.message; // 백엔드 에러 메시지 사용
-        dispatch(setError(error.message));
-      } else {
-        dispatch(setError(errorMessage));
+      // axios 에러 처리
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
       }
       
-      // ✅ 로그인 에러 상태에 저장 (화면에 표시용)
       setLoginError(errorMessage);
+      dispatch(setError(errorMessage));
       
     } finally {
       setIsLoading(false);
@@ -111,10 +108,10 @@ const Login: React.FC = () => {
   };
 
   const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
-  const baseUrl = 'http://localhost:8080';
-  window.location.href = `${baseUrl}/oauth2/authorization/${provider}`;
-};
-  // 폼 유효성 검사
+    const baseUrl = 'http://localhost:8080';
+    window.location.href = `${baseUrl}/oauth2/authorization/${provider}`;
+  };
+
   const isFormValid = !emailError && formData.email && formData.password;
 
   return (
@@ -129,7 +126,7 @@ const Login: React.FC = () => {
       </div>
 
       <div className="login-box">
-        <form className="login-form" onSubmit={handleLogin}>
+        <div className="login-form">
           <h3 className="form-title">로그인</h3>
           
           <div className="form-group">
@@ -148,15 +145,16 @@ const Login: React.FC = () => {
                 placeholder="이메일을 입력하세요."
                 value={formData.email}
                 onChange={handleInputChange}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-                autoComplete="email"
+                autoComplete="off"
               />
             </div>
             {emailError && <div className="error-message">{emailError}</div>}
           </div>
 
           <div className="form-group">
-            <div className="input-wrapper">
+            <div className={`input-wrapper ${loginError ? 'error' : ''}`}>
               <span className="input-icon">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
                   <path 
@@ -171,8 +169,9 @@ const Login: React.FC = () => {
                 placeholder="비밀번호를 입력해 주세요."
                 value={formData.password}
                 onChange={handleInputChange}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-                autoComplete="current-password"
+                autoComplete="off"
               />
             </div>
             {loginError && <div className="error-message">{loginError}</div>}
@@ -185,7 +184,8 @@ const Login: React.FC = () => {
           </div>
 
           <button 
-            type="submit"
+            type="button"
+            onClick={(e) => handleLogin(e)}
             className="login-button" 
             disabled={!isFormValid || isLoading}
           >
@@ -197,8 +197,9 @@ const Login: React.FC = () => {
               계정 만들기
             </Link>
           </div>
-        </form>
-      <div className="social-login-section">
+        </div>
+        
+        <div className="social-login-section">
           <div className="divider">
             <div className='divider-line1'></div>
             <span className="divider-text">SNS 간편로그인</span>
@@ -257,8 +258,7 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
-
-      </div>
+    </div>
   );
 };
 
