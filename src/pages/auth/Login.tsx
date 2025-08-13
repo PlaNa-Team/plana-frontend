@@ -69,7 +69,7 @@ const Login: React.FC = () => {
 
     try {
       const loginData = {
-        loginId: formData.email,
+        email: formData.email,
         password: formData.password
       };
       
