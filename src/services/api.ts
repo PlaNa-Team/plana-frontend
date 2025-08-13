@@ -48,7 +48,7 @@ const apiClient = axios.create({
   },
 });
 
-// 요청 인터셉터
+// ✅ 요청 인터셉터 - 모든 요청에 자동으로 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
     const currentStore = getStore();
@@ -65,6 +65,7 @@ apiClient.interceptors.request.use(
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔑 API 요청에 토큰 자동 추가');
     }
     
     return config;
@@ -72,7 +73,7 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// 응답 인터셉터
+// ✅ 응답 인터셉터 - 토큰 만료시 자동 처리
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError<ApiError>) => {
@@ -113,6 +114,7 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
+  
   //아이디 중복체크
   checkedId: async (loginId: string): Promise<IdCheckResponse> => {
     try {
@@ -126,6 +128,7 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
+  
   // 이메일 인증 코드 발송
   sendEmailVerification: async (email: string) => {
     try {
@@ -139,6 +142,7 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
+  
   // 이메일 인증 코드 확인
   verifyEmailCode: async (email: string, code: string) => {
     try {
@@ -156,10 +160,20 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-  // 로그인
+  
+  // ✅ 로그인 (응답 타입 확장)
   login: async (loginData: { loginId: string; password: string }) => {
     try {
-      const response = await apiClient.post<ApiResponse<{ accessToken: string; refreshToken?: string }>>('/auth/login', loginData);
+      const response = await apiClient.post<ApiResponse<{ 
+        accessToken: string; 
+        refreshToken?: string;
+        user?: {
+          id: string;
+          name: string;
+          email: string;
+          nickname?: string;
+        }
+      }>>('/auth/login', loginData);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -169,5 +183,37 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
+  
+  // ✅ 토큰 갱신 API 추가
+  refreshToken: async () => {
+    try {
+      const currentStore = getStore();
+      let refreshToken = null;
+      
+      if (currentStore) {
+        const state = currentStore.getState();
+        refreshToken = state.auth?.refreshToken;
+      } else {
+        refreshToken = localStorage.getItem('refreshToken');
+      }
+      
+      if (!refreshToken) {
+        throw new Error('리프레시 토큰이 없습니다.');
+      }
+      
+      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+        refreshToken
+      });
+      
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '토큰 갱신에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  }
 }
+
 export default apiClient;
