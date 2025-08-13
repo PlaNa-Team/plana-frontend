@@ -123,7 +123,7 @@ export const authAPI = {
   // 로그인
   login: async (loginData: { loginId: string; password: string }) => {
     try {
-      const response = await apiClient.post<ApiResponse<{ accessToken: string }>>('/auth/login', loginData);
+      const response = await apiClient.post<ApiResponse<{ accessToken: string; refreshToken?: string }>>('/auth/login', loginData);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

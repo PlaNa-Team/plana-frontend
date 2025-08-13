@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authAPI } from '../../services/api';
 
 interface LoginForm {
   email: string;
@@ -62,18 +63,27 @@ const Login: React.FC = () => {
     setLoginFailed(false);
 
     try {
-      // TODO: 실제 로그인 API 호출
-      const response = await loginAPI(formData.email, formData.password);
+      const loginData = {
+        loginId: formData.email,
+        password: formData.password
+      };
       
-      if (response.success) {
-        // 로그인 성공 시 Calendar로 이동
-        navigate('/calendar');
-      } else {
-        setLoginFailed(true);
+      const response = await authAPI.login(loginData); 
+      
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem('accessToken', response.data.accessToken);
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+        }
       }
+      navigate('/calendar');
+
     } catch (error) {
       console.error('로그인 에러:', error);
       setLoginFailed(true);
+      if ( error instanceof Error) {
+        console.log('로그인 실패:', error.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -83,17 +93,6 @@ const Login: React.FC = () => {
   const baseUrl = 'http://localhost:8080';
   window.location.href = `${baseUrl}/oauth2/authorization/${provider}`;
 };
-
-  // 임시 로그인 API 함수 (실제 구현 시 대체)
-  const loginAPI = async (email: string, password: string) => {
-    // 임시 구현 - 실제로는 백엔드 API 호출
-    return new Promise<{ success: boolean }>((resolve) => {
-      setTimeout(() => {
-        resolve({ success: email === 'test@plana.com' && password === 'password' });
-      }, 1000);
-    });
-  };
-
   // 폼 유효성 검사
   const isFormValid = !emailError && formData.email && formData.password;
 
