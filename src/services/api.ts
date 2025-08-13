@@ -48,7 +48,7 @@ const apiClient = axios.create({
   },
 });
 
-// ✅ 요청 인터셉터 - 모든 요청에 자동으로 토큰 추가
+// 요청 인터셉터 - 모든 요청에 자동으로 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
     const currentStore = getStore();
@@ -73,7 +73,8 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// ✅ 응답 인터셉터 - 토큰 만료시 자동 처리
+
+// 응답 인터셉터
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError<ApiError>) => {
@@ -161,7 +162,7 @@ export const authAPI = {
     }
   },
   
-  // ✅ 로그인 (응답 타입 확장)
+  // 로그인
   login: async (loginData: { email: string; password: string }) => {
     try {
       const response = await apiClient.post<ApiResponse<{ 
@@ -184,7 +185,7 @@ export const authAPI = {
     }
   },
   
-  // ✅ 토큰 갱신 API 추가
+  // 토큰 갱신 API 추가
   refreshToken: async () => {
     try {
       const currentStore = getStore();
