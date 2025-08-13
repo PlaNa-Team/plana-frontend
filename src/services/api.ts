@@ -1,19 +1,8 @@
-// API 호출 함수들 - 전역 토큰 관리 추가
-
-// 현재 파일의 목적 :
-// 기본 구조 제공 / 타입 안정성 확보 / 개발 시작점 제공
-// 전역 토큰 관리 및 자동 헤더 추가
-
-// 백엔드 연동 시 수정 필요한 부분 : 
-// API 엔드포인트 URL / 요청,응답 구조 / 인증 방식 / 에러 처리 방식
-
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { SignUpRequest, IdCheckResponse } from '../types';
+import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
 
-// Redux store import (순환 참조 방지를 위해 동적 import 사용)
 let store: any = null;
 
-// store를 동적으로 가져오는 함수
 const getStore = () => {
   if (!store) {
     try {
@@ -25,7 +14,6 @@ const getStore = () => {
   return store;
 };
 
-// Redux 액션을 동적으로 가져오는 함수
 const getAuthActions = () => {
   try {
     return require('../store/slices/authSlice');
@@ -35,10 +23,8 @@ const getAuthActions = () => {
   }
 };
 
-// 환경변수에서 API URL 가져오기
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
-// API 응답 타입 정의
 export interface ApiResponse<T = any> {
   success: boolean;
   data: T;
@@ -46,7 +32,6 @@ export interface ApiResponse<T = any> {
   errorCode?: string;
 }
 
-// 에러 응답 타입
 export interface ApiError {
   success: false;
   message: string;
@@ -62,10 +47,9 @@ const apiClient = axios.create({
   },
 });
 
-// 요청 인터셉터 - 모든 요청에 자동으로 토큰 추가
+// 요청 인터셉터
 apiClient.interceptors.request.use(
   (config) => {
-    // 1순위: Redux store에서 토큰 가져오기 (실시간 상태)
     const currentStore = getStore();
     let token = null;
     
@@ -74,14 +58,12 @@ apiClient.interceptors.request.use(
       token = state.auth?.accessToken;
     }
     
-    // 2순위: localStorage에서 토큰 가져오기 (fallback)
     if (!token) {
       token = localStorage.getItem('accessToken');
     }
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔑 API 요청에 토큰 자동 추가');
     }
     
     return config;
@@ -89,74 +71,27 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-
 // 응답 인터셉터
 apiClient.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => response,
+  (response: AxiosResponse) => response,
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as any;
-    
-    // 현재 페이지가 로그인 페이지인지 확인
     const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
     
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
-      // 로그인 페이지에서는 토큰 갱신 시도하지 않음
       if (isLoginPage) {
-        return Promise.reject(error); // 그냥 에러를 반환하여 로그인 폼에서 처리
+        return Promise.reject(error);
       }
       
       const currentStore = getStore();
       const authActions = getAuthActions();
       
       if (currentStore && authActions) {
-        const state = currentStore.getState();
-        const refreshToken = state.auth?.refreshToken;
-        
-        if (refreshToken) {
-          try {
-            console.log('🔄 토큰 갱신 시도...');
-            
-            // 리프레시 토큰으로 새 토큰 발급
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-              refreshToken
-            });
-            
-            const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-            
-            // Redux store 업데이트
-            currentStore.dispatch(authActions.updateTokens({
-              accessToken,
-              refreshToken: newRefreshToken
-            }));
-          
-            // 원래 요청에 새 토큰 적용 후 재시도
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-            
-            console.log('토큰 갱신 성공, 요청 재시도');
-            return apiClient(originalRequest);
-            
-          } catch (refreshError) {
-            console.error('토큰 갱신 실패, 로그아웃 처리');
-            
-            // 리프레시도 실패하면 로그아웃 (새로고침 없이)
-            currentStore.dispatch(authActions.logout());
-            // window.location.href 대신 React Router 사용할 수 있도록 에러만 던지기
-            return Promise.reject(new Error('토큰 갱신 실패 - 다시 로그인해주세요.'));
-          }
-        } else {
-          // 리프레시 토큰이 없으면 로그아웃 (새로고침 없이)
-          console.log('🚪 리프레시 토큰 없음, 로그아웃 처리');
-          currentStore.dispatch(authActions.logout());
-          return Promise.reject(new Error('인증이 만료되었습니다. 다시 로그인해주세요.'));
-        }
-      } else {
-        // Redux store를 사용할 수 없는 경우 (새로고침 없이)
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        return Promise.reject(new Error('인증 오류가 발생했습니다. 다시 로그인해주세요.'));
+        // 향후 리프레시 토큰 로직 추가 예정
+        currentStore.dispatch(authActions.logout());
+        return Promise.reject(new Error('인증이 만료되었습니다. 다시 로그인해주세요.'));
       }
     }
     
@@ -164,9 +99,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-//인증 관련 API 
 export const authAPI = {
-  // 회원가입
   signUp: async (userData: SignUpRequest): Promise<SignUpRequest> => {
     try {
       const response = await apiClient.post<ApiResponse<SignUpRequest>>('/auth/signup', userData);
@@ -180,7 +113,6 @@ export const authAPI = {
     }
   },
   
-  //아이디 중복체크
   checkedId: async (loginId: string): Promise<IdCheckResponse> => {
     try {
       const response = await apiClient.get<IdCheckResponse>(`/members/check-id?loginId=${loginId}`);
@@ -194,7 +126,6 @@ export const authAPI = {
     }
   },
   
-  // 이메일 인증 코드 발송
   sendEmailVerification: async (email: string) => {
     try {
       const response = await apiClient.post('/auth/email/verification-code', { email });
@@ -208,7 +139,6 @@ export const authAPI = {
     }
   },
   
-  // 이메일 인증 코드 확인
   verifyEmailCode: async (email: string, code: string) => {
     try {
       const response = await apiClient.post('/auth/email/verify', { email, code });
@@ -216,7 +146,6 @@ export const authAPI = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response && error.response.data) {
-          console.log('백엔드 응답 (400/410):', error.response.data);
           return error.response.data; 
         }
         const errorMessage = error.response?.data?.message || '이메일 인증에 실패했습니다.';
@@ -226,54 +155,14 @@ export const authAPI = {
     }
   },
   
-  // 로그인
-  login: async (loginData: { email: string; password: string }) => {
+  // 백엔드 LoginResponseDto 구조에 맞춤
+  login: async (loginData: { email: string; password: string }): Promise<LoginResponseDto> => {
     try {
-      const response = await apiClient.post<ApiResponse<{ 
-        accessToken: string; 
-        refreshToken?: string;
-        user?: {
-          id: string;
-          name: string;
-          email: string;
-          nickname?: string;
-        }
-      }>>('/auth/login', loginData);
+      const response = await apiClient.post<LoginResponseDto>('/auth/login', loginData);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || '로그인에 실패했습니다.';
-        throw new Error(errorMessage);
-      }
-      throw new Error('네트워크 오류가 발생했습니다.');
-    }
-  },
-  
-  // 토큰 갱신 API 추가
-  refreshToken: async () => {
-    try {
-      const currentStore = getStore();
-      let refreshToken = null;
-      
-      if (currentStore) {
-        const state = currentStore.getState();
-        refreshToken = state.auth?.refreshToken;
-      } else {
-        refreshToken = localStorage.getItem('refreshToken');
-      }
-      
-      if (!refreshToken) {
-        throw new Error('리프레시 토큰이 없습니다.');
-      }
-      
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-        refreshToken
-      });
-      
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || '토큰 갱신에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');

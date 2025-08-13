@@ -29,3 +29,17 @@ export interface IdCheckResponse {
   available: boolean;
   message: string;
 }
+
+// 백엔드 LoginResponseDto에 맞는 타입
+export interface LoginResponseDto {
+  accessToken: string;
+  expiresIn: number;
+  member: {
+    id: number;
+    name: string;
+    email: string;
+    nickname?: string;
+  };
+  timestamp: number;
+  // refreshToken?: string; // 향후 소셜로그인용
+}

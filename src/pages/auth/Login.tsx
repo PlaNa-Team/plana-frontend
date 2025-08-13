@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
 import { useAppDispatch } from '../../store';
 import { loginSuccess, setError, clearError } from '../../store/slices/authSlice';
+import { User, Provider } from '../../types/user.types';
 
 interface LoginForm {
   email: string;
@@ -20,7 +21,6 @@ const Login: React.FC = () => {
   const [loginError, setLoginError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // 이메일 유효성 검사
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
@@ -35,7 +35,6 @@ const Login: React.FC = () => {
     return true;
   };
 
-  // 입력 필드 변경 핸들러
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -53,9 +52,7 @@ const Login: React.FC = () => {
     }
   };
 
-  // ✅ 로그인 핸들러 - 완전히 새로고침 방지
-  const handleLogin = async (e?: React.FormEvent | React.MouseEvent) => {
-     e?.preventDefault();
+  const handleLogin = async () => {
     if (!validateEmail(formData.email) || !formData.password) {
       return;
     }
@@ -65,34 +62,41 @@ const Login: React.FC = () => {
     dispatch(clearError());
 
     try {
-      const loginData = {
+      const response = await authAPI.login({
         email: formData.email,
         password: formData.password
-      };
+      });
       
-      const response = await authAPI.login(loginData);
-      
-      if (response.data && response.data.accessToken) {
+      // 백엔드 LoginResponseDto 구조에 맞춰 처리
+      if (response.accessToken && response.member) {
+        const fullUser: User = {
+          id: response.member.id,
+          name: response.member.name,
+          loginId: response.member.email,
+          email: response.member.email,
+          password: '',
+          nickname: response.member.nickname || response.member.name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDeleted: false,
+          provider: 'LOCAL' as Provider,
+          refreshToken: '' // 향후 소셜로그인용
+        };
+        
         dispatch(loginSuccess({
-          accessToken: response.data.accessToken,
-          refreshToken: response.data.refreshToken as string,
-          user: {
-            id: response.data.user?.id?.toString() || 'temp-id',
-            email: response.data.user?.email || formData.email,
-            name: response.data.user?.name || '사용자',
-            nickname: response.data.user?.nickname
-          }
+          accessToken: response.accessToken,
+          // refreshToken: response.refreshToken, // 향후 소셜로그인용
+          user: fullUser
         }));
+        
         navigate('/calendar');
+      } else {
+        throw new Error('서버에서 올바른 응답을 받지 못했습니다.');
       }
 
-    } catch (error: any) { // ✅ any 타입으로 변경
-      console.error('로그인 에러:', error);
-      
-      // ✅ 백엔드 에러 메시지 추출 (더 안전하게)
+    } catch (error: any) {
       let errorMessage = '로그인에 실패했습니다.';
       
-      // axios 에러 처리
       if (error?.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error?.message) {
@@ -145,9 +149,8 @@ const Login: React.FC = () => {
                 placeholder="이메일을 입력하세요."
                 value={formData.email}
                 onChange={handleInputChange}
-                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-         
+                autoComplete="email"
               />
             </div>
             {emailError && <div className="error-message">{emailError}</div>}
@@ -169,9 +172,8 @@ const Login: React.FC = () => {
                 placeholder="비밀번호를 입력해 주세요."
                 value={formData.password}
                 onChange={handleInputChange}
-                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                 className="form-input"
-                autoComplete="off"
+                autoComplete="current-password"
               />
             </div>
             {loginError && <div className="error-message">{loginError}</div>}
@@ -185,7 +187,7 @@ const Login: React.FC = () => {
 
           <button 
             type="button"
-            onClick={(e) => handleLogin(e)}
+            onClick={handleLogin}
             className="login-button" 
             disabled={!isFormValid || isLoading}
           >
