@@ -14,11 +14,6 @@ const Calendar: React.FC = () => {
   // 모달 상태 관리
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // 날짜 변경 핸들러
-  const handleDatesSet = (dateInfo: any) => {
-    dispatch(updateCurrentDate({ start: new Date(dateInfo.start).toISOString() }));
-  };
-
   // 일정 추가 모달 열기
   const handleOpenAddModal = () => {
     setIsAddModalOpen(true);
@@ -45,7 +40,6 @@ const Calendar: React.FC = () => {
         locale="ko"
         className="schedule-calendar"
         events={events}
-        onDatesSet={handleDatesSet}
       />
     </div>
   );

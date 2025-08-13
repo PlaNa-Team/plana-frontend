@@ -39,7 +39,7 @@ interface CalendarBaseProps {
 }
 
 const CalendarBase: React.FC<CalendarBaseProps> = ({
-  events = [],
+  // events = [],
   onDateSelect,
   onEventClick,
   onEventDrop,
@@ -353,7 +353,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
         height={height}
         
         // 🔄 아직은 props events 사용 (나중에 scheduleEvents로 교체)
-        events={events}
+        events={scheduleEvents}
         
         editable={editable}
         selectable={selectable}
