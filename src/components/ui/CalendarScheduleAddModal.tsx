@@ -3,7 +3,7 @@ import { TimeIcon, ColorIcon, RoundArrowIcon, TagIcon, BellIcon, LocationIcon, N
 import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 import CalendarScheduleTagModal from './CalendarScheduleTagModal';
-import { ScheduleFormData  , Tag } from  '../../types';
+import { ScheduleFormData, Tag } from '../../types/calendar.types';
 
 
 interface CalendarScheduleAddModalProps {
