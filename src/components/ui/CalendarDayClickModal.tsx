@@ -37,11 +37,16 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
 
   // 선택된 날짜의 일정만 필터링
   const dailyEvents: DayEvent[] = React.useMemo(() => {
-    if (!selectedDate || !monthlyEvents.length) return [];
-    // 선택된 날짜와 같은 일정들만 필터링
-    const filteredEvents = monthlyEvents.filter((event: any) => {
-      const eventDate = event.start.split('T')[0]; // 'YYYY-MM-DD' 부분만 추출
-      return eventDate === selectedDate;
+    if (!selectedDate || !monthlyEvents.length) {
+      return [];
+    }
+    // 선택된 날짜와 같은 일정들만 필터링 (기간 포함)
+    const filteredEvents = monthlyEvents.filter((event:any) => {
+      const eventStartDate = event.start.split('T')[0]; // 시작일
+      const eventEndDate = event.end ? event.end.split('T')[0] : eventStartDate; // 종료일
+
+      // 선택된 날짜가 일정 기간 내에 포함되는지 확인
+      return selectedDate >= eventStartDate && selectedDate <= eventEndDate;
     });
 
     // CalendarEvent를 DayEvent 형식으로 변환
@@ -157,13 +162,6 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     }
   };
 
-  const handleRetry = () => {
-    const targetDate = new Date(selectedDate);
-    const year = targetDate.getFullYear();
-    const month = targetDate.getMonth() + 1;
-    dispatch(fetchMonthlySchedules({ year, month }));
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -188,7 +186,8 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
             <div className="events-list">
               {dailyEvents.map((event) => (
                 <div key={event.id} className="event-item">
-                  <div className={`event-category-indicator ${event.category}`} />
+                  <div className={`event-category-indicator`} 
+                  style={{ backgroundColor: event.color || undefined }}/>
                   <div className="event-content">
                     <div className="event-header">
                       <h3 className="event-title">{event.title}</h3>  

@@ -202,7 +202,7 @@ export const authAPI = {
 
 // API 객체에 추가할 함수
 export const calendarAPI = {
-  // 월간 일정 조회
+  // 월간 일정 조회 + 날짜 클릭시 해당 날짜의 일정 필터링
   getMonthlySchedules: async (year: number, month: number): Promise<MonthlyScheduleResponse> => {
     try {
       const response = await apiClient.get<MonthlyScheduleResponse>(
