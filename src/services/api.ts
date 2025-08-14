@@ -134,7 +134,7 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
   const endDateTime = new Date(detail.endAt);
   
   // 알림 값 변환
-  const alarmTexts = detail.alarms.map(alarm => {
+  const alarmTexts = (detail.alarms ||[]).map(alarm => {
     if (alarm.notifyBeforeVal === 0) return '시작';
     const unit = alarm.notifyUnit === 'MIN' ? '분' : 
                  alarm.notifyUnit === 'HOUR' ? '시간' : '일';
@@ -170,11 +170,11 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
     memo: detail.memo || '',
     repeatValue: getRepeatValue(detail.isRecurring, detail.recurrenceRule),
     alarmValue: alarmTexts.join(', '),
-    tags: detail.tags.map(tag => ({
-      id: tag.id.toString(),
-      name: tag.name,
-      color: tag.color
-    }))
+    tags: (detail.tags || []).map(tag => ({
+  id: tag.id ? tag.id.toString() : Math.random().toString(),
+    name: tag.name || '',
+    color: tag.color || 'blue'
+}))
   };
 };
 

@@ -15,7 +15,7 @@ interface CalendarDayClickModalProps {
   // 외부에서 날짜 클릭 이벤트를 전달받기 위한 prop
   onDateClick?: (dateStr: string) => void;
   onOpenAddModal?: (selectedDate: string) => void; // 🔑 선택된 날짜 전달
-  onOpenEditModal?: (scheduleData: any) => void;   // 🔑 일정 데이터 전달
+  onOpenEditModal?: (scheduleData: ScheduleFormData) => void;   // 🔑 일정 데이터 전달
   // 일정 추가 모달 열기 콜백 추가
 }
 
@@ -212,9 +212,6 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
       
       closeModal();
       onOpenEditModal(fallbackData);
-      
-      // TODO: 에러 토스트 메시지
-      // toast.error('일정 상세 정보를 불러오는데 실패했습니다.');
     }
   };
 

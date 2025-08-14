@@ -70,8 +70,8 @@ const Calendar: React.FC = () => {
         scheduleData={scheduleModalState.scheduleData}
         onClose={handleCloseModal}
         // onSave와 onDelete는 각 모달에서 처리
-        onSave={() => {}} // 빈 함수로 일단 전달
-        onDelete={() => {}} // 빈 함수로 일단 전달
+        onSave={(data) => {handleCloseModal()}} // 빈 함수로 일단 전달
+        onDelete={(id) => {handleCloseModal()}} // 빈 함수로 일단 전달
       />
       
       {/* 날짜 클릭 모달 */}
