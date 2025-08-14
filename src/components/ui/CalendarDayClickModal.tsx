@@ -4,15 +4,9 @@ import {
   selectEvents,
   fetchMonthlySchedules
 } from '../../store/slices/calendarSlice';
+import { DayEvent } from '../../types/calendar.types';
 
-interface DayEvent {
-  id: string;
-  title: string;
-  time: string;
-  category: 'meeting' | 'personal' | 'work';
-  description?: string;
-  color?: string;
-}
+
 
 interface CalendarDayClickModalProps {
   // 외부에서 날짜 클릭 이벤트를 전달받기 위한 prop

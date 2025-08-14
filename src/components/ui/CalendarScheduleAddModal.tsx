@@ -1,114 +1,135 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TimeIcon, ColorIcon, RoundArrowIcon, TagIcon, BellIcon, LocationIcon, NoteIcon } from '../../assets/icons';
 import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 import CalendarScheduleTagModal from './CalendarScheduleTagModal';
+import { ScheduleFormData  , Tag } from  '../../types';
 
-interface Tag {
-  id: string;
-  name: string;
-  color: string;
-}
 
 interface CalendarScheduleAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedDate?: string;
+  mode: 'add' | 'edit';  // 🔑 추가/수정 모드 구분
+  selectedDate?: string; // + 버튼 클릭시 선택된 날짜
+  scheduleData?: ScheduleFormData; // 수정할 일정 데이터 (수정 모드일 때만)
+  onSave: (data: ScheduleFormData) => void;
+  onDelete?: (id: string) => void; // 수정 모드일 때만
 }
 
 const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   isOpen,
   onClose,
-  selectedDate
+  mode,
+  selectedDate,
+  scheduleData,
+  onSave,
+  onDelete
 }) => {
-  const [title, setTitle] = useState('');
-  const [startDate, setStartDate] = useState('2025-06-15');
-  const [startTime, setStartTime] = useState('18:00');
-  const [endDate, setEndDate] = useState('2025-06-15');
-  const [endTime, setEndTime] = useState('20:00');
-  const [isAllDay, setIsAllDay] = useState(false);
-  const [location, setLocation] = useState('');
-  const [memo, setMemo] = useState('');
-  const [selectedColor, setSelectedColor] = useState('red');
 
-  // 태그 관련 상태
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([
-    { id: '1', name: '업무', color: 'red' }
-  ]);
+  // 🔄 모드에 따른 초기값 설정
+  const getInitialFormData = (): ScheduleFormData => {
+    if (mode === 'edit' && scheduleData) {
+      // 수정 모드: 기존 데이터 사용
+      return { ...scheduleData };
+    } else {
+      // 추가 모드: 빈 폼 + 선택된 날짜
+      const defaultDate = selectedDate || new Date().toISOString().split('T')[0];
+      return {
+        title: '',
+        startDate: defaultDate,
+        startTime: '09:00',
+        endDate: defaultDate,
+        endTime: '10:00',
+        isAllDay: false,
+        color: 'red',
+        category: 'work',
+        description: '',
+        location: '',
+        memo: '',
+        repeatValue: '',
+        alarmValue: '',
+        tags: []
+      };
+    }
+  };
 
-  //모달 관련 상태 ( 일정반복, 알람, 태그 )
+  const [formData, setFormData] = useState<ScheduleFormData>(getInitialFormData);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(formData.tags || []);
+
+   // 모달 관련 상태 (일정반복, 알람, 태그)
   const [isRepeatModalOpen, setIsRepeatModalOpen] = useState(false);
-  const [repeatValue, setRepeatValue] = useState('');
-
-  const [isAlramModalOpen, setIsAlramModalOpen] = useState(false);
-  const [alramValue, setAlramValue] = useState('');
-
+  const [isAlarmModalOpen, setIsAlarmModalOpen] = useState(false);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 
-  //클릭 핸들러 ( 일정반복, 알람, 태그 )
-  const handleRepeatClick = () => {
-    setIsRepeatModalOpen(true);
+   // 🔄 모드나 데이터가 변경되면 폼 초기화
+  useEffect(() => {
+    if (isOpen) {
+      const initialData = getInitialFormData();
+      setFormData(initialData);
+      setSelectedTags(initialData.tags || []);
+    }
+  }, [isOpen, mode, scheduleData, selectedDate]);
+
+  // 폼 데이터 업데이트 헬퍼 함수
+  const updateFormData = (updates: Partial<ScheduleFormData>) => {
+    setFormData((prev:any) => ({ ...prev, ...updates }));
   };
 
-  const handleAlarmClick = () => {
-    setIsAlramModalOpen(true);
-  };
+  // 클릭 핸들러 (일정반복, 알람, 태그)
+  const handleRepeatClick = () => setIsRepeatModalOpen(true);
+  const handleAlarmClick = () => setIsAlarmModalOpen(true);
+  const handleTagClick = () => setIsTagModalOpen(true);
 
-  const handleTagClick = () => {
-    setIsTagModalOpen(true);
-  };
+  // 모달 닫기 (일정 반복, 알람, 태그)
+  const handleRepeatModalClose = () => setIsRepeatModalOpen(false);
+  const handleAlarmModalClose = () => setIsAlarmModalOpen(false);
+  const handleTagModalClose = () => setIsTagModalOpen(false);
 
-  //모달 닫기 ( 일정 반복, 알람, 태그 )
-  const handleRepeatModalClose = () => {
-    setIsRepeatModalOpen(false);
-  };
-
-  const handleAlarmModalClose = () => {
-    setIsAlramModalOpen(false);
-  };
-
-  const handleTagModalClose = () => {
-    setIsTagModalOpen(false);
-  };
-
-  //모달에서 값 선택 시 ( 일정 반복, 알람, 태그 )
+   // 모달에서 값 선택 시 (일정 반복, 알람, 태그)
   const handleRepeatSelect = (value: string) => {
-    setRepeatValue(value);
+    updateFormData({ repeatValue: value });
     setIsRepeatModalOpen(false);
   };
 
   const handleAlarmSelect = (value: string) => {
-    setAlramValue(value);
-    setIsAlramModalOpen(false);
+    updateFormData({ alarmValue: value });
+    setIsAlarmModalOpen(false);
   };
 
   const handleTagSelect = (tags: Tag[]) => {
     setSelectedTags(tags);
+    updateFormData({ tags });
     setIsTagModalOpen(false);
   };
 
   // 개별 태그 제거 핸들러
   const handleTagRemove = (tagId: string) => {
-    setSelectedTags(prev => prev.filter(tag => tag.id !== tagId));
+    const newTags = selectedTags.filter(tag => tag.id !== tagId);
+    setSelectedTags(newTags);
+    updateFormData({ tags: newTags });
   };
 
-  //오버레이 클릭 핸들러
+  // 오버레이 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  const handleConfirm = () => {
-    // 일정 저장 로직 추가 예정
-    console.log('일정 저장');
-    onClose();
+  // 🔑 저장 버튼 클릭
+  const handleSave = () => {
+    const finalData = {
+      ...formData,
+      tags: selectedTags
+    };
+    onSave(finalData);
   };
 
-  // 색상 선택 핸들러 추가
+    // 색상 선택 핸들러
   const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
+    updateFormData({ color });
   };
+
 
   if (!isOpen) return null;
 
@@ -121,7 +142,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
             <button className="close-button" onClick={onClose}>
               ✕
             </button>
-            <button className="confirm-button" onClick={handleConfirm}>
+            <button className="confirm-button" onClick={handleSave}>
               ✓
             </button>
           </div>
@@ -132,14 +153,15 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
             <div className="form-section">
               <div className="form-row">
                 <div className="icon-container">
-                  <div className={`color-picker-indicator ${selectedColor}`}></div>
+                  <div className={`color-picker-indicator  ${formData.color}`}></div>
                 </div>
-                <input type="text" className="title-input" placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)}
+                <input type="text" className="title-input" placeholder="제목" value={formData.title} onChange={(e) => updateFormData({ title: e.target.value })}
                   id="schedule-title"
                   name="title"
                 />
               </div>
             </div>
+
 
             {/* 색상 선택 */}
             <div className="form-section">
@@ -149,8 +171,14 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 </div>
                 <div className="color-picker">
                   {['black', 'pink', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray', 'white'].map((color) => (
-                    <div key={color} className={`color-option ${color} ${selectedColor === color ? 'selected' : ''}`}
-                      onClick={() => handleColorSelect(color)} role="radio" aria-checked={selectedColor === color} tabIndex={0} onKeyDown={(e) => {
+                    <div 
+                    key={color} 
+                    className={`color-option ${color} ${formData.color === color ? 'selected' : ''}`}
+                    onClick={() => handleColorSelect(color)} 
+                    role="radio" 
+                    aria-checked={formData.color === color} 
+                    tabIndex={0} 
+                    onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
                           handleColorSelect(color);
@@ -173,15 +201,15 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                     <div className="date-time-group">
                       <input
                         type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
+                         value={formData.startDate}
+                        onChange={(e) => updateFormData({ startDate: e.target.value })}
                         className="hidden-date-input"
                       />
-                      {!isAllDay && (
+                      {!formData.isAllDay && (
                         <input
                           type="time"
-                          value={startTime}
-                          onChange={(e) => setStartTime(e.target.value)}
+                          value={formData.startTime}
+                          onChange={(e) => updateFormData({ startTime: e.target.value })}
                           className="hidden-time-input"
                         />
                       )}
@@ -190,15 +218,15 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                     <div className="date-time-group">
                       <input
                         type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
+                        value={formData.endDate}
+                        onChange={(e) => updateFormData({ endDate: e.target.value })}
                         className="hidden-date-input"
                       />
-                      {!isAllDay && (
+                      {!formData.isAllDay && (
                         <input
                           type="time"
-                          value={endTime}
-                          onChange={(e) => setEndTime(e.target.value)}
+                          value={formData.endTime}
+                          onChange={(e) => updateFormData({ endTime: e.target.value })}
                           className="hidden-time-input"
                         />
                       )}
@@ -206,8 +234,8 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                   </div>
                   <div className="btn-spacebox">  
                     <button 
-                      className={`all-day-button ${isAllDay ? 'active' : ''}`}
-                      onClick={() => setIsAllDay(!isAllDay)}
+                      className={`all-day-button ${formData.isAllDay ? 'active' : ''}`}
+                      onClick={() => updateFormData({ isAllDay: !formData.isAllDay })}
                     >
                       하루종일
                     </button>
@@ -227,7 +255,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                     onClick={handleRepeatClick}
                     style={{ cursor: 'pointer' }}
                   >
-                    {repeatValue || '반복 없음'}
+                    {formData.repeatValue || '반복 없음'}
                 </span>
               </div>
             </div>
@@ -275,7 +303,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                   onClick={handleAlarmClick}
                   style={{ cursor: 'pointer' }}
                 > 
-                  {alramValue || '알림 없음'} 
+                  {formData.alarmValue  || '알림 없음'} 
                 </span>
               </div>
             </div>
@@ -290,8 +318,8 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                   type="text"
                   className="location-input"
                   placeholder="위치"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={formData.location}
+                  onChange={(e) => updateFormData({ location: e.target.value })}
                 />
               </div>
             </div>
@@ -305,8 +333,8 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 <textarea
                   className="memo-textarea"
                   placeholder="메모"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
+                  value={formData.memo}
+                  onChange={(e) => updateFormData({ memo: e.target.value })}
                   rows={3}
                 />
               </div>
@@ -320,14 +348,14 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
         isOpen={isRepeatModalOpen}
         onClose={handleRepeatModalClose}
         onSelect={handleRepeatSelect}
-        currentValue={repeatValue}
+        currentValue={formData.repeatValue || ''}
       />
       {/*알람 설정 모달*/}
       <CalendarScheduleAlramModal
-        isOpen={isAlramModalOpen}
+        isOpen={isAlarmModalOpen}
         onClose={handleAlarmModalClose}
         onSelect={handleAlarmSelect}
-        currentValue={alramValue}
+        currentValue={formData.alarmValue || ''}
       />
       {/*태그 설정 모달*/}
       <CalendarScheduleTagModal
