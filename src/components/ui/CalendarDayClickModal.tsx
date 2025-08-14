@@ -40,10 +40,18 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     if (!selectedDate || !monthlyEvents.length) {
       return [];
     }
-    // 선택된 날짜와 같은 일정들만 필터링 (기간 포함)
     const filteredEvents = monthlyEvents.filter((event:any) => {
       const eventStartDate = event.start.split('T')[0]; // 시작일
-      const eventEndDate = event.end ? event.end.split('T')[0] : eventStartDate; // 종료일
+      
+      // 종일 이벤트의 경우 원본 종료일을 사용 (FullCalendar +1일 보정 제거)
+      let eventEndDate = event.end ? event.end.split('T')[0] : eventStartDate;
+      
+      if (event.allDay && event.end) {
+        // 종일 이벤트는 FullCalendar에서 +1일 했으므로 -1일 해서 원본 복원
+        const endDate = new Date(event.end);
+        endDate.setDate(endDate.getDate() - 1);
+        eventEndDate = endDate.toISOString().split('T')[0];
+      }
 
       // 선택된 날짜가 일정 기간 내에 포함되는지 확인
       return selectedDate >= eventStartDate && selectedDate <= eventEndDate;
