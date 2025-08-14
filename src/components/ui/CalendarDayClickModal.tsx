@@ -17,12 +17,14 @@ interface DayEvent {
 interface CalendarDayClickModalProps {
   // 외부에서 날짜 클릭 이벤트를 전달받기 위한 prop
   onDateClick?: (dateStr: string) => void;
+  onOpenAddModal?: (selectedDate: string) => void; // 🔑 선택된 날짜 전달
+  onOpenEditModal?: (scheduleData: any) => void;   // 🔑 일정 데이터 전달
   // 일정 추가 모달 열기 콜백 추가
-  onOpenAddModal?: () => void;
 }
 
 const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
   onDateClick,
+  onOpenEditModal,
   onOpenAddModal
 }) => {
 
@@ -166,7 +168,29 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
   const handleAddEvent = () => {
     closeModal(); // 현재 모달 닫기
     if (onOpenAddModal) {
-      onOpenAddModal(); // 일정 추가 모달 열기
+      onOpenAddModal(selectedDate); // 선택된 날짜 전달
+    }
+  };
+
+  // 🔑 일정 클릭 핸들러 (수정 모드)
+  const handleEventClick = (event: DayEvent) => {
+    closeModal();
+    if (onOpenEditModal) {
+      // DayEvent를 ScheduleData 형식으로 변환
+      const scheduleData = {
+        id: event.id,
+        title: event.title,
+        startDate: selectedDate,
+        startTime: event.time.split(' - ')[0],
+        endDate: selectedDate,
+        endTime: event.time.split(' - ')[1],
+        isAllDay: event.time,
+        color: event.color,
+        category: event.category,
+        description: event.description || '',
+        location: ''
+      };
+      onOpenEditModal(scheduleData);
     }
   };
 
@@ -193,7 +217,7 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
           ) : (
             <div className="events-list">
               {dailyEvents.map((event) => (
-                <div key={event.id} className="event-item">
+                <div key={event.id} className="event-item" onClick={() => handleEventClick(event)}>
                   <div className={`event-category-indicator`} 
                   style={{ backgroundColor: event.color || undefined }}/>
                   <div className="event-content">
