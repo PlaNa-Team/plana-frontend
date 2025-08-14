@@ -29,7 +29,7 @@ interface CalendarBaseProps {
   headerToolbar?: any;
   height?: string | number;
   editable?: boolean;
-  selectable?: boolean;
+  selectable?: boolean; 
   eventContent?: (eventInfo: any) => React.ReactElement | null;
   dayCellContent?: (dayInfo: any) => React.ReactElement | null;
   locale?: string;
