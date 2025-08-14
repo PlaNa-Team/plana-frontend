@@ -25,7 +25,7 @@ const Calendar: React.FC = () => {
       <CalendarSearchModal showSearchButton={true} />
       
       {/* 일정 추가 모달 */}
-      <CalendarScheduleAddModal 
+      <CalendarScheduleAddModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
       />

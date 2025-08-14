@@ -119,3 +119,38 @@ export interface CalendarEvent {
     originalId?: number;
   };
 }
+
+// 태그 인터페이스
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+// 일정 추가/수정 모달에서 사용할 데이터 타입
+export interface ScheduleFormData {
+  id?: string;
+  title: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  isAllDay: boolean;
+  color: string;
+  category: string;
+  description?: string;
+  location?: string;
+  memo?: string;
+  repeatValue?: string;
+  alarmValue?: string;
+  tags?: Tag[];
+}
+
+export interface DayEvent {
+  id: string;
+  title: string;
+  time: string;
+  category: 'meeting' | 'personal' | 'work';
+  description?: string;
+  color?: string;
+}
