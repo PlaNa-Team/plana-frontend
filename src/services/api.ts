@@ -128,13 +128,26 @@ export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['d
   });
 };
 
-// 🆕 API 응답을 ScheduleFormData로 변환하는 함수
+// 🆕 API 응답을 ScheduleFormData로 변환하는 함수 (타임존 문제 해결 버전)
 export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']): ScheduleFormData => {
-  const startDateTime = new Date(detail.startAt);
-  const endDateTime = new Date(detail.endAt);
+  
+  // 🔧 타임존 문제 해결: 문자열에서 직접 날짜 추출
+  const startDate = detail.startAt.split('T')[0]; // '2025-08-05T00:00:00' → '2025-08-05'
+  const endDate = detail.endAt.split('T')[0];     // '2025-08-06T23:59:59' → '2025-08-06'
+  
+  // 시간이 필요한 경우에만 Date 객체 사용 (종일 이벤트가 아닐 때)
+  let startTime = '00:00';
+  let endTime = '23:59';
+  
+  if (!detail.isAllDay) {
+    const startDateTime = new Date(detail.startAt);
+    const endDateTime = new Date(detail.endAt);
+    startTime = startDateTime.toTimeString().slice(0, 5);
+    endTime = endDateTime.toTimeString().slice(0, 5);
+  }
   
   // 알림 값 변환
-  const alarmTexts = (detail.alarms ||[]).map(alarm => {
+  const alarmTexts = (detail.alarms || []).map(alarm => {
     if (alarm.notifyBeforeVal === 0) return '시작';
     const unit = alarm.notifyUnit === 'MIN' ? '분' : 
                  alarm.notifyUnit === 'HOUR' ? '시간' : '일';
@@ -145,7 +158,6 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
   const getRepeatValue = (isRecurring: boolean, rule?: string): string => {
     if (!isRecurring) return '';
     
-    // 실제 백엔드 규칙에 따라 수정 필요
     switch (rule) {
       case 'DAILY': return '매일';
       case 'WEEKLY': return '매주';
@@ -155,13 +167,13 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
     }
   };
 
-  return {
+  const result = {
     id: detail.id.toString(),
     title: detail.title,
-    startDate: startDateTime.toISOString().split('T')[0],
-    startTime: detail.isAllDay ? '00:00' : startDateTime.toTimeString().slice(0, 5),
-    endDate: endDateTime.toISOString().split('T')[0],
-    endTime: detail.isAllDay ? '23:59' : endDateTime.toTimeString().slice(0, 5),
+    startDate: startDate,
+    startTime: startTime,
+    endDate: endDate,
+    endTime: endTime,
     isAllDay: detail.isAllDay,
     color: detail.color,
     category: detail.categoryName,
@@ -171,11 +183,12 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
     repeatValue: getRepeatValue(detail.isRecurring, detail.recurrenceRule),
     alarmValue: alarmTexts.join(', '),
     tags: (detail.tags || []).map(tag => ({
-  id: tag.id ? tag.id.toString() : Math.random().toString(),
-    name: tag.name || '',
-    color: tag.color || 'blue'
-}))
+      id: tag.id ? tag.id.toString() : Math.random().toString(),
+      name: tag.name || '',
+      color: tag.color || 'blue'
+    }))
   };
+  return result;
 };
 
 export const authAPI = {
