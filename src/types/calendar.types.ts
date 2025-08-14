@@ -165,12 +165,12 @@ export interface ScheduleDetailResponse {
     recurrenceUntil?: string;
     categoryId: number;
     categoryName: string;
-    tags: Array<{
+    tags?: Array<{
       id: number;
       name: string;
       color: string;
     }>;
-    alarms: Array<{
+    alarms?: Array<{
       id: number;
       notifyBeforeVal: number;
       notifyUnit: 'MIN' | 'HOUR' | 'DAY';
