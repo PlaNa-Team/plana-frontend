@@ -146,6 +146,38 @@ export interface ScheduleFormData {
   tags?: Tag[];
 }
 
+// 일정 상세 조회 API 응답 타입
+export interface ScheduleDetailResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    title: string;
+    description?: string;
+    startAt: string;
+    endAt: string;
+    isAllDay: boolean;
+    color: string;
+    location?: string;
+    memo?: string;
+    isRecurring: boolean;
+    recurrenceRule?: string;
+    recurrenceUntil?: string;
+    categoryId: number;
+    categoryName: string;
+    tags: Array<{
+      id: number;
+      name: string;
+      color: string;
+    }>;
+    alarms: Array<{
+      id: number;
+      notifyBeforeVal: number;
+      notifyUnit: 'MIN' | 'HOUR' | 'DAY';
+    }>;
+  };
+}
+
 export interface DayEvent {
   id: string;
   title: string;
