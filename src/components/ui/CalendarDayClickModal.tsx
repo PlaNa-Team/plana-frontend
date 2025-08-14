@@ -5,6 +5,9 @@ import {
   fetchMonthlySchedules
 } from '../../store/slices/calendarSlice';
 import { DayEvent } from '../../types/calendar.types';
+import { calendarAPI } from '../../services/api';
+import { ScheduleFormData } from '../../types/calendar.types';
+import { transformDetailToFormData } from '../../services/api';
 
 
 
@@ -23,7 +26,7 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
 }) => {
 
   const dispatch = useAppDispatch();
-
+  
   // Redux에서 월간 일정 데이터 가져오기
   const monthlyEvents = useAppSelector(selectEvents);
 
@@ -166,25 +169,52 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     }
   };
 
-  // 🔑 일정 클릭 핸들러 (수정 모드)
-  const handleEventClick = (event: DayEvent) => {
-    closeModal();
-    if (onOpenEditModal) {
-      // DayEvent를 ScheduleData 형식으로 변환
-      const scheduleData = {
+  // 🚀 **핵심 변경사항: 상세 조회 API 호출 추가**
+  const handleEventClick = async (event: DayEvent) => {
+    if (!onOpenEditModal) return;
+    
+    try {
+      console.log('🔍 일정 상세 조회 시작 - ID:', event.id);
+      
+      // 🆕 일정 상세 조회 API 호출
+      const detailResponse = await calendarAPI.getScheduleDetail(event.id);
+      
+      // 🆕 API 응답을 ScheduleFormData로 변환
+      const scheduleFormData = transformDetailToFormData(detailResponse.data);
+      
+      console.log('✅ 상세 데이터 로드 완료:', scheduleFormData);
+      
+      // 모달 닫고 수정 모달 열기
+      closeModal();
+      onOpenEditModal(scheduleFormData);
+      
+    } catch (error) {
+      console.error('💥 일정 상세 조회 실패:', error);
+      
+      // ⚠️ 실패 시 기본 데이터라도 전달 (기존 방식)
+      const fallbackData: ScheduleFormData = {
         id: event.id,
         title: event.title,
         startDate: selectedDate,
-        startTime: event.time.split(' - ')[0],
+        startTime: event.time.includes('종일') ? '09:00' : event.time.split(' - ')[0] || '09:00',
         endDate: selectedDate,
-        endTime: event.time.split(' - ')[1],
-        isAllDay: event.time,
-        color: event.color,
+        endTime: event.time.includes('종일') ? '18:00' : event.time.split(' - ')[1] || '18:00',
+        isAllDay: event.time.includes('종일'),
+        color: event.color || 'blue',
         category: event.category,
         description: event.description || '',
-        location: ''
+        location: '',
+        memo: '',
+        repeatValue: '',
+        alarmValue: '',
+        tags: []
       };
-      onOpenEditModal(scheduleData);
+      
+      closeModal();
+      onOpenEditModal(fallbackData);
+      
+      // TODO: 에러 토스트 메시지
+      // toast.error('일정 상세 정보를 불러오는데 실패했습니다.');
     }
   };
 

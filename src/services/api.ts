@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
-import { MonthlyScheduleResponse, CalendarEvent } from '../types/calendar.types';
+import { MonthlyScheduleResponse, CalendarEvent,ScheduleDetailResponse, ScheduleFormData } from '../types/calendar.types';
 
 let store: any = null;
 
@@ -128,6 +128,56 @@ export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['d
   });
 };
 
+// 🆕 API 응답을 ScheduleFormData로 변환하는 함수
+export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']): ScheduleFormData => {
+  const startDateTime = new Date(detail.startAt);
+  const endDateTime = new Date(detail.endAt);
+  
+  // 알림 값 변환
+  const alarmTexts = detail.alarms.map(alarm => {
+    if (alarm.notifyBeforeVal === 0) return '시작';
+    const unit = alarm.notifyUnit === 'MIN' ? '분' : 
+                 alarm.notifyUnit === 'HOUR' ? '시간' : '일';
+    return `${alarm.notifyBeforeVal}${unit} 전`;
+  });
+
+  // 반복 설정 변환
+  const getRepeatValue = (isRecurring: boolean, rule?: string): string => {
+    if (!isRecurring) return '';
+    
+    // 실제 백엔드 규칙에 따라 수정 필요
+    switch (rule) {
+      case 'DAILY': return '매일';
+      case 'WEEKLY': return '매주';
+      case 'MONTHLY': return '매달';
+      case 'YEARLY': return '매년';
+      default: return rule || '매일';
+    }
+  };
+
+  return {
+    id: detail.id.toString(),
+    title: detail.title,
+    startDate: startDateTime.toISOString().split('T')[0],
+    startTime: detail.isAllDay ? '00:00' : startDateTime.toTimeString().slice(0, 5),
+    endDate: endDateTime.toISOString().split('T')[0],
+    endTime: detail.isAllDay ? '23:59' : endDateTime.toTimeString().slice(0, 5),
+    isAllDay: detail.isAllDay,
+    color: detail.color,
+    category: detail.categoryName,
+    description: detail.description || '',
+    location: detail.location || '',
+    memo: detail.memo || '',
+    repeatValue: getRepeatValue(detail.isRecurring, detail.recurrenceRule),
+    alarmValue: alarmTexts.join(', '),
+    tags: detail.tags.map(tag => ({
+      id: tag.id.toString(),
+      name: tag.name,
+      color: tag.color
+    }))
+  };
+};
+
 export const authAPI = {
   signUp: async (userData: SignUpRequest): Promise<SignUpRequest> => {
     try {
@@ -212,6 +262,21 @@ export const calendarAPI = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || '일정 조회에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+  // 일정 상세 조회
+  getScheduleDetail: async (scheduleId: string): Promise<ScheduleDetailResponse> => {
+    try {
+      const response = await apiClient.get<ScheduleDetailResponse>(
+        `/calendars/${scheduleId}`
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '일정 상세 조회에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');
