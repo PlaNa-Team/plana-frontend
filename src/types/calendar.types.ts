@@ -213,3 +213,30 @@ export interface CreateScheduleResponse {
     }>;
   };
 }
+
+// 수정 API 응답 타입만 추가
+export interface UpdateScheduleResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    title: string;
+    color: string;
+    description?: string;
+    startAt: string;
+    endAt: string;
+    isAllDay: boolean;
+    isRecurring: boolean;
+    recurrenceRule?: string;
+    recurrenceUntil?: string;
+    category: {
+      id: number;
+      name: string;
+      color: string;
+    };
+    alarms: Array<{
+      notifyBeforeVal: number;
+      notifyUnit: 'MIN' | 'HOUR' | 'DAY';
+    }>;
+  };
+}

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
-import { MonthlyScheduleResponse, CalendarEvent,ScheduleDetailResponse, ScheduleFormData, CreateScheduleResponse } from '../types/calendar.types';
+import { MonthlyScheduleResponse, CalendarEvent,ScheduleDetailResponse, ScheduleFormData, CreateScheduleResponse, UpdateScheduleResponse } from '../types/calendar.types';
 
 let store: any = null;
 
@@ -401,6 +401,28 @@ export const calendarAPI = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || '일정 생성에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+  // 일정 수정
+  updateSchedule: async (scheduleId: string, formData: ScheduleFormData): Promise<UpdateScheduleResponse> => {
+    try {
+      // 가상 ID인 경우 원본 ID 추출
+      const originalId = extractOriginalId(scheduleId);
+      
+      // 기존 transformFormDataToRequest 함수 사용하되 memberId만 제거
+      const baseRequestData = transformFormDataToRequest(formData);
+      const { memberId, ...updateRequestData } = baseRequestData; // memberId 제거
+      
+      const response = await apiClient.patch<UpdateScheduleResponse>(
+        `/calendars/${originalId}`, updateRequestData
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '일정 수정에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');
