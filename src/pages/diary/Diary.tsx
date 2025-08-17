@@ -3,7 +3,7 @@ import DiaryCalendar from './DiaryCalendar';
 
 const Diary: React.FC = () => {
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="diary-page">
       <DiaryCalendar />
     </div>
   );
