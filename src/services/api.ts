@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
-import { MonthlyScheduleResponse, CalendarEvent,ScheduleDetailResponse, ScheduleFormData } from '../types/calendar.types';
+import { MonthlyScheduleResponse, CalendarEvent,ScheduleDetailResponse, ScheduleFormData, CreateScheduleResponse } from '../types/calendar.types';
 
 let store: any = null;
 
@@ -128,7 +128,7 @@ export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['d
   });
 };
 
-// 🆕 API 응답을 ScheduleFormData로 변환하는 함수 (타임존 문제 해결 버전)
+//API 응답을 ScheduleFormData로 변환하는 함수 (타임존 문제 해결 버전)
 export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']): ScheduleFormData => {
   
   // 🔧 타임존 문제 해결: 문자열에서 직접 날짜 추출
@@ -190,6 +190,88 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
   };
   return result;
 };
+
+export const transformFormDataToRequest = (formData: ScheduleFormData) => {
+ // 1. 날짜와 시간을 ISO 형식으로 변환
+ const startAt = formData.isAllDay 
+   ? `${formData.startDate}T00:00:00`
+   : `${formData.startDate}T${formData.startTime}:00`;
+   
+ const endAt = formData.isAllDay 
+   ? `${formData.endDate}T23:59:59`
+   : `${formData.endDate}T${formData.endTime}:00`;
+
+ // 2. 알람 데이터 변환 ("30분 전, 10분 전" → 배열)
+ const alarms: Array<{notifyBeforeVal: number; notifyUnit: 'MIN' | 'HOUR' | 'DAY'}> = [];
+ if (formData.alarmValue) {
+   const alarmTexts = formData.alarmValue.split(', ');
+   alarmTexts.forEach(alarm => {
+     if (alarm === '시작') {
+       alarms.push({ notifyBeforeVal: 0, notifyUnit: 'MIN' });
+     } else if (alarm.includes('분 전')) {
+       const value = parseInt(alarm.replace('분 전', ''));
+       alarms.push({ notifyBeforeVal: value, notifyUnit: 'MIN' });
+     } else if (alarm.includes('시간 전')) {
+       const value = parseInt(alarm.replace('시간 전', ''));
+       alarms.push({ notifyBeforeVal: value, notifyUnit: 'HOUR' });
+     } else if (alarm.includes('일 전')) {
+       const value = parseInt(alarm.replace('일 전', ''));
+       alarms.push({ notifyBeforeVal: value, notifyUnit: 'DAY' });
+     }
+   });
+ }
+
+ // 3. 반복 규칙 변환 ("매일" → "FREQ=DAILY")
+ let recurrenceRule: string | undefined;
+ let isRecurring = false;
+ if (formData.repeatValue) {
+   isRecurring = true;
+   switch (formData.repeatValue) {
+     case '매일':
+       recurrenceRule = 'FREQ=DAILY';
+       break;
+     case '매주':
+       recurrenceRule = 'FREQ=WEEKLY';
+       break;
+     case '매달':
+       recurrenceRule = 'FREQ=MONTHLY';
+       break;
+     case '매년':
+       recurrenceRule = 'FREQ=YEARLY';
+       break;
+     default:
+       // "3일 간격으로 반복" 같은 경우 처리
+       if (formData.repeatValue.includes('일 간격')) {
+         const interval = parseInt(formData.repeatValue);
+         recurrenceRule = `FREQ=DAILY;INTERVAL=${interval}`;
+       } else if (formData.repeatValue.includes('주 간격')) {
+         const interval = parseInt(formData.repeatValue);
+         recurrenceRule = `FREQ=WEEKLY;INTERVAL=${interval}`;
+       } else if (formData.repeatValue.includes('달 간격')) {
+         const interval = parseInt(formData.repeatValue);
+         recurrenceRule = `FREQ=MONTHLY;INTERVAL=${interval}`;
+       }
+       break;
+   }
+ }
+
+ // 4. API 요청 형식으로 변환된 데이터 반환
+ return {
+   memberId: 1, // 임시로 1 설정 (실제로는 현재 로그인한 사용자 ID)
+   categoryId: 1, // 임시로 1 설정 (실제로는 선택된 카테고리 ID)
+   title: formData.title,
+   color: formData.color,
+   description: formData.description || '',
+   startAt,
+   endAt,
+   isAllDay: formData.isAllDay,
+   isRecurring,
+   recurrenceRule,
+   recurrenceUntil: isRecurring ? '2025-12-31T23:59:59' : undefined, // 임시로 올해 말까지 설정
+   alarms
+ };
+};
+
 
 export const authAPI = {
   signUp: async (userData: SignUpRequest): Promise<SignUpRequest> => {
@@ -294,8 +376,24 @@ export const calendarAPI = {
       }
       throw new Error('네트워크 오류가 발생했습니다.');
     }
+  },
+// 일정 생성
+  createSchedule: async (formData: ScheduleFormData): Promise<CreateScheduleResponse> => {
+    try {
+      const requestData = transformFormDataToRequest(formData);
+      const response = await apiClient.post<CreateScheduleResponse>(
+        '/calendars', requestData
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '일정 생성에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
   }
-};
+}
 
 
 export default apiClient;

@@ -4,6 +4,7 @@ import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 import CalendarScheduleTagModal from './CalendarScheduleTagModal';
 import { ScheduleFormData, Tag } from '../../types/calendar.types';
+import { calendarAPI } from '../../services/api';
 
 
 interface CalendarScheduleAddModalProps {
@@ -116,13 +117,30 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     }
   };
 
-  // 🔑 저장 버튼 클릭
-  const handleSave = () => {
-    const finalData = {
-      ...formData,
-      tags: selectedTags
-    };
-    onSave(finalData);
+ // 🔑 저장 버튼 클릭 - API 호출 추가
+  const handleSave = async () => {
+    try {
+      const finalData = {
+        ...formData,
+        tags: selectedTags
+      };
+
+      if (mode === 'add') {
+        // 새 일정 생성
+        await calendarAPI.createSchedule(finalData);
+        console.log('일정이 성공적으로 생성되었습니다.');
+      } else {
+        // 기존 일정 수정 (향후 구현 예정)
+        console.log('일정 수정 기능은 향후 구현 예정입니다.');
+      }
+
+      // 성공 시 콜백 호출 및 모달 닫기
+      onSave(finalData);
+      onClose();
+    } catch (error) {
+      console.error('일정 저장 실패:', error);
+      alert(error instanceof Error ? error.message : '일정 저장에 실패했습니다.');
+    }
   };
 
     // 색상 선택 핸들러
