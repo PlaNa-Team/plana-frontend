@@ -179,7 +179,7 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
     category: detail.categoryName,
     description: detail.description || '',
     location: detail.location || '',
-    memo: detail.memo || '',
+    memo: detail.description  || '',
     repeatValue: getRepeatValue(detail.isRecurring, detail.recurrenceRule),
     alarmValue: alarmTexts.join(', '),
     tags: (detail.tags || []).map(tag => ({
@@ -261,7 +261,7 @@ export const transformFormDataToRequest = (formData: ScheduleFormData) => {
    categoryId: 1, // 임시로 1 설정 (실제로는 선택된 카테고리 ID)
    title: formData.title,
    color: formData.color,
-   description: formData.description || '',
+   description: formData.memo || '',
    startAt,
    endAt,
    isAllDay: formData.isAllDay,
