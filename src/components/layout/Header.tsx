@@ -47,12 +47,6 @@ function Header() {
                     height="18"
                 />
             </div>
-            
-            <PersonIcon 
-                fill="var(--color-xl)"
-                width="18"
-                height="18"
-            />
             <div className="header__theme-switch">
                 <ThemeSwitch 
                     isDarkMode={ isDarkMode }
