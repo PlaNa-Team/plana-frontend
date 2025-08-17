@@ -186,3 +186,30 @@ export interface DayEvent {
   description?: string;
   color?: string;
 }
+
+// 일정 생성 응답 인터페이스만 정의 (요청은 변환 함수에서 처리)
+export interface CreateScheduleResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    title: string;
+    color: string;
+    description?: string;
+    startAt: string;
+    endAt: string;
+    isAllDay: boolean;
+    isRecurring: boolean;
+    recurrenceRule?: string;
+    recurrenceUntil?: string;
+    category: {
+      id: number;
+      name: string;
+      color: string;
+    };
+    alarms: Array<{
+      notifyBeforeVal: number;
+      notifyUnit: 'MIN' | 'HOUR' | 'DAY';
+    }>;
+  };
+}
