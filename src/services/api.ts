@@ -272,6 +272,16 @@ export const transformFormDataToRequest = (formData: ScheduleFormData) => {
  };
 };
 
+// 가상 ID에서 원본 ID 추출하는 함수
+export const extractOriginalId = (eventId: string): string => {
+  // "recurring-11-1755680400" → "11"
+  if (eventId.startsWith('recurring-')) {
+    const parts = eventId.split('-');
+    return parts[1]; // 원본 ID 반환
+  }
+  // 일반 일정인 경우 그대로 반환
+  return eventId;
+};
 
 export const authAPI = {
   signUp: async (userData: SignUpRequest): Promise<SignUpRequest> => {
@@ -365,8 +375,11 @@ export const calendarAPI = {
   // 일정 상세 조회
   getScheduleDetail: async (scheduleId: string): Promise<ScheduleDetailResponse> => {
     try {
+      // 가상 ID인 경우 원본 ID 추출
+      const originalId = extractOriginalId(scheduleId);
+
       const response = await apiClient.get<ScheduleDetailResponse>(
-        `/calendars/${scheduleId}`
+        `/calendars/${originalId}`
       );
       return response.data;
     } catch (error) {
