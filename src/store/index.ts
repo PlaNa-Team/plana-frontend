@@ -15,6 +15,7 @@ import calendarSlice from './slices/calendarSlice';
 import diarySlice from './slices/diarySlice';
 import projectSlice from './slices/projectSlice';
 import themeSlice from './slices/themeSlice';
+import notificationReducer from './slices/notiSlice';
 
 // 전체 앱의 상태 저장소 설정
 export const store = configureStore({
@@ -24,6 +25,7 @@ export const store = configureStore({
     diary: diarySlice,
     project: projectSlice,
     theme: themeSlice,
+    notifications: notificationReducer,
   },
 });
 
