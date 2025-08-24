@@ -10,21 +10,21 @@ import {
 import { MonthlyDiaryItem } from '../../types/diary.types';
 import CustomDiaryCalendar from './CustomDiaryCalendar';
 import DiaryModalBase from '../../components/diary/DiaryModalBase';
-import { title } from 'process';
 
 const DiaryCalendar: React.FC = () => {
     const dispatch = useAppDispatch();
     const {
         monthlyDiaries,
-        currentDiaryDetail,
+        selectedDate,
         isLoading,
         error
     } = useAppSelector(state => state.diary);
 
     // 지역 상태 관리
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDiaryData, setSelectedDiaryData] = useState<any>(null);
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
+
+    const isModalOpen = selectedDate !== null;
 
     // 현재 보고있는 연월 기준 다이어리 데이터 가져오기
     useEffect(() => {
@@ -59,6 +59,7 @@ const DiaryCalendar: React.FC = () => {
                 // 모달에 전달할 데이터 구성
                 setSelectedDiaryData({
                     id: diaryData.id,
+                    diaryType: diaryData.diaryType,
                     diaryDate: diaryData.diaryDate,
                     imageUrl: diaryData.imageUrl,
                     title: diaryData.title,
@@ -72,22 +73,25 @@ const DiaryCalendar: React.FC = () => {
             dispatch(clearCurrentData());
             setSelectedDiaryData(null);
         }
-
-        setIsModalOpen(true);
     }, [diaryMap, dispatch]);
 
     // 모달 닫기 핸들러
     const handleCloseModal = useCallback(() => {
-        setIsModalOpen(false);
         setSelectedDate(null);
         dispatch(clearCurrentData());
-        dispatch(setSelectedDate(null));
+        dispatch(setSelectedDate(null)); // 이걸로 모달이 닫힘
     }, [dispatch]);
 
     // 달력 월 변경 핸들러
     const handleMonthChange = useCallback((newDate: Date) => {
         setCurrentViewDate(newDate);
-    }, []);
+
+        // 월 변경 시 모달이 열려있다면 닫기
+        if (selectedDate) {
+            dispatch(setSelectedDate(null));
+            setSelectedDiaryData(null);
+        }
+    }, [selectedDate, dispatch]);
 
     // 에러 처리
     if (error) {
@@ -119,12 +123,14 @@ const DiaryCalendar: React.FC = () => {
                 currentDate={currentViewDate}
             />
             
-            <DiaryModalBase
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                selectedDate={currentViewDate.toISOString().split('T')[0]} // YYYY-MM-DD 형식
-                diaryData={selectedDiaryData}
-            />
+            {isModalOpen && (
+                <DiaryModalBase
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    selectedDate={selectedDate}
+                    diaryData={selectedDiaryData}
+                />
+            )}
         </div>
     );
 };
