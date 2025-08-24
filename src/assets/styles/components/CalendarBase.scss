@@ -1,5 +1,139 @@
 .calendar-base {
-  
+  .fc-button {
+    background-color: none !important;
+  }
+
+   .fc-event {
+    
+    // 🎨 각 색상별로 이벤트 전체와 내부 요소들까지 모두 스타일링
+    &[style*="yellow"] {
+      background-color: $tag-yellow !important;
+      border-color: $tag-yellow !important;
+      
+      // 📝 내부 텍스트 요소들도 모두 색상 변경
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-yellow, 50%) !important;
+      }
+    }
+    
+    &[style*="red"] {
+      background-color: $tag-red !important;
+      border-color: $tag-red !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-red, 50%) !important;
+      }
+    }
+    
+    &[style*="blue"] {
+      background-color: $tag-blue !important;
+      border-color: $tag-blue !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-blue, 50%) !important;
+      }
+    }
+    
+    &[style*="green"] {
+      background-color: $tag-green !important;
+      border-color: $tag-green !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-green, 50%) !important;
+      }
+    }
+    
+    &[style*="orange"] {
+      background-color: $tag-orange !important;
+      border-color: $tag-orange !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-orange, 50%) !important;
+      }
+    }
+    
+    &[style*="pink"] {
+      background-color: $tag-pink !important;
+      border-color: $tag-pink !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-pink, 50%) !important;
+      }
+    }
+    
+    &[style*="purple"] {
+      background-color: $tag-purple !important;
+      border-color: $tag-purple !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-purple, 50%) !important;
+      }
+    }
+    
+    &[style*="gray"], &[style*="grey"] {
+      background-color: $tag-gray !important;
+      border-color: $tag-gray !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: darken($tag-gray, 50%) !important;
+      }
+    }
+    
+    &[style*="white"] {
+      background-color: $tag-white !important;
+      border-color: #d1d5db !important;
+      
+      &, 
+      .fc-event-main,
+      .fc-event-main-frame,
+      .fc-event-title-container,
+      .fc-event-title,
+      .fc-event-time {
+        color: #374151 !important;
+      }
+    }
+  }
+}
   // === 8컬럼 그리드 스타일 ===
   
   // 모든 컬럼 너비 통일
@@ -202,7 +336,7 @@
     }
   }
 
-}
+
 
 // === 반응형 설정 ===
 @media (max-width: 768px) {
