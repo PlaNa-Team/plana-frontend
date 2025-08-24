@@ -76,9 +76,11 @@ export interface MonthlyDiaryItem {
 export interface MonthlyDiaryResponse {
   status: number;
   message: string;
-  data: {
-    diaryList: MonthlyDiaryItem[];
-  };
+  body: {
+    data: {
+      diaryList: MonthlyDiaryItem[];
+    };
+  }
 }
 
 // 다이어리 상세 조회 응답 (공통)

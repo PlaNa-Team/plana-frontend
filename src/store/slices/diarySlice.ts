@@ -1,7 +1,7 @@
 // 다이어리 모드 관련 상태 관리
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { diaryApi } from '../../services/diaryApi';
+import { diaryAPI } from '../../services/api';
 import {
   MonthlyDiaryItem,
   DiaryDetail,
@@ -98,8 +98,12 @@ const initialState: DiaryState = {
 export const fetchMonthlyDiaries = createAsyncThunk(
   'diary/fetchMonthlyDiaries',
   async ({ year, month }: { year: number; month: number }) => {
-    const response = await diaryApi.getMonthlyDiaries(year, month);
-    return response.data.diaryList;
+    const response = await diaryAPI.getMonthlyDiaries(year, month);
+
+    console.log('=== 실제 응답 구조 ===');
+    console.log('전체 response:', response);
+
+    return response.body?.data?.diaryList || [];
   }
 );
 
@@ -107,7 +111,7 @@ export const fetchMonthlyDiaries = createAsyncThunk(
 export const fetchDiaryDetail = createAsyncThunk(
   'diary/fetchDiaryDetail',
   async (id: number) => {
-    const response = await diaryApi.getDiaryDetail(id);
+    const response = await diaryAPI.getDiaryDetail(id);
     return response.data;
   }
 );
@@ -116,7 +120,7 @@ export const fetchDiaryDetail = createAsyncThunk(
 export const uploadTempImage = createAsyncThunk(
   'diary/uploadTempImage',
   async (file: File) => {
-    const response = await diaryApi.uploadTempImage(file);
+    const response = await diaryAPI.uploadTempImage(file);
     return response.data.tempUrl;
   }
 );
@@ -125,7 +129,7 @@ export const uploadTempImage = createAsyncThunk(
 export const createDiary = createAsyncThunk(
   'diary/createDiary',
   async (data: CreateDiaryRequest) => {
-    const response = await diaryApi.createDiary(data);
+    const response = await diaryAPI.createDiary(data);
     return response.body.data;
   }
 );
@@ -134,7 +138,7 @@ export const createDiary = createAsyncThunk(
 export const updateDiary = createAsyncThunk(
   'diary/updateDiary',
   async ({ id, data }: { id: number; data: UpdateDiaryRequest }) => {
-    const response = await diaryApi.updateDiary(id, data);
+    const response = await diaryAPI.updateDiary(id, data);
     return response.body.data;
   }
 );
@@ -143,7 +147,7 @@ export const updateDiary = createAsyncThunk(
 export const deleteDiary = createAsyncThunk(
   'diary/deleteDiary',
   async (id: number) => {
-    await diaryApi.deleteDiary(id);
+    await diaryAPI.deleteDiary(id);
     return id;
   }
 );
