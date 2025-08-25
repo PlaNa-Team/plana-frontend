@@ -1,8 +1,8 @@
 .calendar-base {
-  .fc-button {
-    background-color: none !important;
+  .fc .fc-button-primary {
+    background-color: $tag-white !important;
   }
-
+  
    .fc-event {
     
     // 🎨 각 색상별로 이벤트 전체와 내부 요소들까지 모두 스타일링
