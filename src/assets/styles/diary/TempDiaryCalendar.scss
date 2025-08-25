@@ -1,0 +1,97 @@
+.diary-calendar-container {
+  width: 100%;
+  height: 100vh;
+  position: absolute;
+  top: 5%;
+}
+
+.diary-calendar {
+  width: 100%;
+  height: 100%;
+
+// 날짜 셀 기본 스타일
+  .fc-daygrid-day {
+    border: 1px solid var(--color-sm) !important;
+    padding: 0 !important;
+    height: 113px !important;
+    max-height: 113px !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+}
+
+// 다이어리 날짜 셀 커스텀 스타일
+.diary-day-cell {
+  width: 100%;
+  height: 113px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  // 다이어리가 있는 경우
+  &:not(.empty) {
+    .diary-image-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diary-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .diary-date-overlay {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--color-xs);
+      color: var(--color-lg);
+      padding: 4px 8px;
+      border-radius: $border-radius-full;
+      line-height: 1;
+
+      &.sunday-holiday {
+        color: #dc2626 !important;
+      }
+
+      &.saturday {
+        color: #2563eb !important;
+      }
+
+      &.weekday {
+        color: var(--color-lg);
+      }
+    }
+  }
+
+  &.empty {
+    .diary-empty-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: $spacing-2;
+    }
+
+    &.sunday-holiday {
+      color: #dc2626 !important;
+    }
+
+    &.saturday {
+      color: #2563eb !important;
+    }
+
+    &.weekday {
+      color: var(--color-lg);
+    }
+  }
+
+  background: var(--color-xs);
+}

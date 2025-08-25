@@ -1,97 +1,251 @@
-.diary-calendar-container {
+.diary-calendar-wrapper {
   width: 100%;
   height: 100vh;
   position: absolute;
   top: 5%;
-}
-
-.diary-calendar {
-  width: 100%;
-  height: 100%;
-
-// 날짜 셀 기본 스타일
-  .fc-daygrid-day {
-    border: 1px solid var(--color-sm) !important;
-    padding: 0 !important;
-    height: 113px !important;
-    max-height: 113px !important;
-    position: relative !important;
-    overflow: hidden !important;
+  font-family: $font-family-base;
+  background: transparent;
+  
+  .calendar-header {
+    @include flex-between;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    padding: $spacing-md $spacing-lg;
+    
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      color: var(--color-xl);
+      font-size: $font-size-lg;
+      font-weight: $font-weight-medium;
+      @include flex-center;
+    }
+    
+    .calendar-title {
+      margin: 0;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      color: var(--color-xl);
+      text-align: center;
+    }
   }
-}
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 1px;
+    background: var(--color-sm);
+    border: 1px solid var(--color-sm);
+    border-radius: $border-radius-lg;
 
-// 다이어리 날짜 셀 커스텀 스타일
-.diary-day-cell {
-  width: 100%;
-  height: 113px;
-  position: relative;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  // 다이어리가 있는 경우
-  &:not(.empty) {
-    .diary-image-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .diary-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-    }
-
-    .diary-date-overlay {
-      position: absolute;
-      top: 8px;
-      left: 8px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 97%;
+    
+    .weekday-header {
       background: var(--color-xs);
+      padding: $spacing-3 $spacing-2;
+      text-align: center;
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-sm;
       color: var(--color-lg);
-      padding: 4px 8px;
-      border-radius: $border-radius-full;
-      line-height: 1;
-
-      &.sunday-holiday {
-        color: #dc2626 !important;
+      
+      &.sunday {
+        color: #dc2626;
       }
-
       &.saturday {
-        color: #2563eb !important;
-      }
-
-      &.weekday {
-        color: var(--color-lg);
+        color: #2563eb;
       }
     }
-  }
-
-  &.empty {
-    .diary-empty-content {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
+    
+    .date-cell {
+      background: var(--color-xs);
+      min-height: 120px;
       padding: $spacing-2;
+      position: relative;
+      @include flex-column;
+      
+      &.other-month {
+        .date-number {
+          color: var(--color-md);
+          opacity: 0.4;
+        }
+      }
+      
+      &.today {
+        background: var(--color-sm);
+        .date-number {
+          font-weight: $font-weight-bold;
+        }
+      }
+      
+      &.has-diary {
+        .date-number {
+          font-weight: $font-weight-semibold;
+        }
+      }
+      
+      .date-number {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: var(--color-xl);
+        margin-bottom: $spacing-1;
+
+        @include flex-center;
+          background-color: var(--color-xs);
+          width: 25px;
+          height: 25px; 
+          border-radius: $border-radius-full;
+        
+        &.sunday {
+          color: #dc2626;
+        }
+        
+        &.saturday {
+          color: #2563eb;
+        }
+      }
+      
+      .diary-img {
+        flex: 1;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        
+        .diary-thumbnail {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+        
+        // 다이어리 타입별 오버레이 표시
+        &::after {
+          content: '';
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 8px;
+          height: 8px;
+          border-radius: $border-radius-full;
+          background: var(--color-xl);
+        }
+      }
+    }
+    
+    // 요일별 날짜 숫자 색상
+    .date-cell:nth-child(8n+1) .date-number {
+      color: #dc2626; // 일요일
+    }
+    
+    .date-cell:nth-child(8n-1) .date-number {
+      color: #2563eb; // 토요일
     }
 
-    &.sunday-holiday {
-      color: #dc2626 !important;
-    }
-
-    &.saturday {
-      color: #2563eb !important;
-    }
-
-    &.weekday {
+    .memo-header {
+      background: var(--color-xs);
+      padding: $spacing-3 $spacing-2;
+      text-align: center;
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-sm;
       color: var(--color-lg);
     }
-  }
 
-  background: var(--color-xs);
+    .memo-cell {
+      background: var(--color-xs);
+      min-height: 120px;
+      padding: $spacing-2;
+      
+      .memo-textarea {
+        width: 100%;
+        height: 90%;
+        border: none;
+        background: transparent;
+        color: var(--color-xl);
+        font-size: $font-size-xs;
+        resize: none;
+        outline: none;
+        font-family: $font-family-base;
+        
+        &::placeholder {
+          color: var(--color-md);
+        }
+      }
+    }
+  }
+}
+
+// 반응형 설정
+@media (max-width: 768px) {
+  .diary-calendar-wrapper {
+    top: 3%;
+    
+    .calendar-header {
+      padding: $spacing-sm $spacing-md;
+      
+      .nav-btn {
+        width: 35px;
+        height: 35px;
+        font-size: $font-size-base;
+      }
+      
+      .calendar-title {
+        font-size: $font-size-lg;
+      }
+    }
+    
+    .calendar-grid {
+      .date-cell {
+        min-height: 100px;
+        padding: $spacing-1;
+        
+        .date-number {
+          font-size: $font-size-xs;
+        }
+        
+        .diary-img {
+          .diary-thumbnail {
+            min-height: 60px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .diary-calendar-wrapper {
+    .calendar-header {
+      .nav-btn {
+        width: 30px;
+        height: 30px;
+        font-size: $font-size-sm;
+      }
+      
+      .calendar-title {
+        font-size: $font-size-base;
+      }
+    }
+    
+    .calendar-grid {
+      .weekday-header {
+        padding: $spacing-2 $spacing-1;
+        font-size: $font-size-xs;
+      }
+      
+      .date-cell {
+        min-height: 80px;
+        
+        .diary-img {
+          .diary-thumbnail {
+            min-height: 45px;
+          }
+        }
+      }
+    }
+  }
 }
