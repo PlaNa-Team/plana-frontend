@@ -27,11 +27,11 @@ const DiaryCalendar: React.FC = () => {
     const isModalOpen = selectedDate !== null;
 
     // 현재 보고있는 연월 기준 다이어리 데이터 가져오기
-    useEffect(() => {
-        const year = currentViewDate.getFullYear();
-        const month = currentViewDate.getMonth() + 1;
-        dispatch(fetchMonthlyDiaries({ year, month }));
-    }, [dispatch, currentViewDate]);
+    // useEffect(() => {
+    //     const year = currentViewDate.getFullYear();
+    //     const month = currentViewDate.getMonth() + 1;
+    //     dispatch(fetchMonthlyDiaries({ year, month }));
+    // }, [dispatch, currentViewDate]);
 
     // 날짜별 다이어리 매핑
     const diaryMap = useMemo(() => {
@@ -40,7 +40,8 @@ const DiaryCalendar: React.FC = () => {
             map.set(diary.diaryDate, diary);
         });
         return map;
-    }, [monthlyDiaries]);
+    // }, [monthlyDiaries]);
+    }, []);
 
     // 날짜 클릭 핸들러
     const handleDateClick = useCallback(async (dateStr: string) => {
@@ -51,10 +52,10 @@ const DiaryCalendar: React.FC = () => {
 
         if (diaryData) {
             // 다이어리 데이터가 있으면 상세 정보 가져오기
-            try {
-                await dispatch(fetchDiaryDetail(diaryData.id)).unwrap();
-                // 가져온 데이터를 편집용으로 로드
-                dispatch(loadDiaryToEdit());
+            // try {
+            //     await dispatch(fetchDiaryDetail(diaryData.id)).unwrap();
+            //     // 가져온 데이터를 편집용으로 로드
+            //     dispatch(loadDiaryToEdit());
 
                 // 모달에 전달할 데이터 구성
                 setSelectedDiaryData({
@@ -64,10 +65,10 @@ const DiaryCalendar: React.FC = () => {
                     imageUrl: diaryData.imageUrl,
                     title: diaryData.title,
                 });
-            } catch (error) {
-                console.error('다이어리 상세 조회 실패:', error);
-                setSelectedDiaryData(null);
-            }
+            // } catch (error) {
+            //     console.error('다이어리 상세 조회 실패:', error);
+            //     setSelectedDiaryData(null);
+            // }
         } else {
             // 다이어리 데이터가 없으면 새 다이어리 생성 모드
             dispatch(clearCurrentData());
@@ -94,27 +95,27 @@ const DiaryCalendar: React.FC = () => {
     }, [selectedDate, dispatch]);
 
     // 에러 처리
-    if (error) {
-        return (
-            <div className="diary-calendar-container">
-                <div className="error-message">
-                    <p>데이터를 불러오는 중 오류가 발생했습니다: {error}</p>
-                    <button onClick={() => window.location.reload()}>
-                        다시 시도
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    // if (error) {
+    //     return (
+    //         <div className="diary-calendar-container">
+    //             <div className="error-message">
+    //                 <p>데이터를 불러오는 중 오류가 발생했습니다: {error}</p>
+    //                 <button onClick={() => window.location.reload()}>
+    //                     다시 시도
+    //                 </button>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="diary-calendar-container">
             {/* 로딩 상태 표시 */}
-            { isLoading && (
+            {/* { isLoading && ( */}
                 <div className='loading-overlay'>
                     <div className='loading-spinner'></div>
                 </div>
-            )}
+            {/* )} */}
 
             <CustomDiaryCalendar 
                 diaryMap={diaryMap}
