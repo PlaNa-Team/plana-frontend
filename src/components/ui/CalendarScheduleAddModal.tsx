@@ -4,6 +4,7 @@ import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 import CalendarScheduleTagModal from './CalendarScheduleTagModal';
 import { ScheduleFormData, Tag } from '../../types/calendar.types';
+import { calendarAPI } from '../../services/api';
 
 
 interface CalendarScheduleAddModalProps {
@@ -26,7 +27,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   onDelete
 }) => {
 
-  // 🔄 모드에 따른 초기값 설정
+  // 모드에 따른 초기값 설정
   const getInitialFormData = (): ScheduleFormData => {
     if (mode === 'edit' && scheduleData) {
       // 수정 모드: 기존 데이터 사용
@@ -116,13 +117,34 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     }
   };
 
-  // 🔑 저장 버튼 클릭
-  const handleSave = () => {
-    const finalData = {
-      ...formData,
-      tags: selectedTags
-    };
-    onSave(finalData);
+ // 저장, 수정 api 핸들러
+  const handleSave = async () => {
+    try {
+      const finalData = {
+        ...formData,
+        tags: selectedTags
+      };
+
+      if (mode === 'add') {
+        // 새 일정 생성
+        await calendarAPI.createSchedule(finalData);
+        console.log('일정이 성공적으로 생성되었습니다.');
+      } else if (mode === 'edit') {
+        // 🆕 기존 일정 수정
+        if (!scheduleData?.id) {
+          throw new Error('수정할 일정의 ID를 찾을 수 없습니다.');
+        }
+        await calendarAPI.updateSchedule(scheduleData.id, finalData);
+        console.log('일정이 성공적으로 수정되었습니다.');
+      }
+
+      // 성공 시 콜백 호출 및 모달 닫기
+      onSave(finalData);
+      onClose();
+    } catch (error) {
+      console.error('일정 저장 실패:', error);
+      alert(error instanceof Error ? error.message : '일정 저장에 실패했습니다.');
+    }
   };
 
     // 색상 선택 핸들러

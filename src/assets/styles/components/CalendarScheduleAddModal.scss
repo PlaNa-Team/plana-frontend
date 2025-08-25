@@ -87,6 +87,10 @@
   &:last-child {
     margin-bottom: 0;
   }
+  &:last-child{
+    display: flex;
+    justify-content: start !important;
+  }
 }
 
 /* 폼 행 */
