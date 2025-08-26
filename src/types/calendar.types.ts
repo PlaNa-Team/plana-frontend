@@ -191,7 +191,8 @@ export interface ScheduleFormData {
   endTime: string;
   isAllDay: boolean;
   color: string;
-  category: string;
+  categoryId?: number; // 🔧 숫자로 통일
+  category?: string; // 🔧 기존 호환성 유지 (deprecated)
   description?: string;
   location?: string;
   memo?: string;

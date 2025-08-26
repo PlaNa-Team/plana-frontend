@@ -42,7 +42,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
         endTime: '10:00',
         isAllDay: false,
         color: 'red',
-        category: 'work',
+        categoryId: undefined, // 카테고리 ID로 변경,
         description: '',
         location: '',
         memo: '',
@@ -298,7 +298,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
               </div>
             </div>
 
-            {/* 🆕 태그 - 전체 태그 목록 표시 */}
+            {/* 태그 - 모드별 분기 처리 */}
             <div className="form-section">
               <div className="form-row">
                 <div className="icon-container">
@@ -306,20 +306,24 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 </div>
                 <div className="tags-container">
                   <div className="tags-subcontainer">
-                    {isLoadingTags ? (
-                      <span>로딩 중...</span>
-                    ) : (
-                      selectedTags.map((tag) => (
-                        <span 
-                          key={tag.id} 
-                          className={`tag ${tag.color}`}
-                          onClick={() => handleTagRemove(tag.id)}
-                          style={{ cursor: 'pointer' }}
-                          title="클릭하여 삭제"
-                        >
+                    {mode === 'edit' ? (
+                      // 수정 모드: DB에서 가져온 선택된 태그들만 표시
+                      formData.tags?.map((tag) => (
+                        <span key={tag.id} className={`tag ${tag.color}`}>
                           {tag.name}
                         </span>
                       ))
+                    ) : (
+                      // 추가 모드: 전체 태그 목록 표시
+                      isLoadingTags ? (
+                        <span>로딩 중...</span>
+                      ) : (
+                        allTags.map((tag) => (
+                          <span key={tag.id} className={`tag ${tag.color}`}>
+                            {tag.name}
+                          </span>
+                        ))
+                      )
                     )}
                   </div>
                   <div>
