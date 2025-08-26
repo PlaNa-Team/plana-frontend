@@ -314,7 +314,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                         </span>
                       ))
                     ) : (
-                      // 추가 모드: 전체 태그 목록 표시
+                      // 추가 모드: 전체 태그 목록 표시 // 태그 선택을 단일로 하고 색상 부분 이슈로 일단 여기서 마무리 하고 기획 적인 부분 나오면 리팩토링 필요
                       isLoadingTags ? (
                         <span>로딩 중...</span>
                       ) : (
