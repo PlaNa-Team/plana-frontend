@@ -4,17 +4,16 @@ import CalendarScheduleRepeatModal from './CalendarScheduleRepeatModal';
 import CalendarScheduleAlramModal from './CalendarScheduleAlramModal';
 import CalendarScheduleTagModal from './CalendarScheduleTagModal';
 import { ScheduleFormData, Tag } from '../../types/calendar.types';
-import { calendarAPI } from '../../services/api';
-
+import { calendarAPI, tagAPI, transformServerTagsToFrontendTags } from '../../services/api'; // 🆕 tagAPI 추가
 
 interface CalendarScheduleAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'add' | 'edit';  // 🔑 추가/수정 모드 구분
-  selectedDate?: string; // + 버튼 클릭시 선택된 날짜
-  scheduleData?: ScheduleFormData; // 수정할 일정 데이터 (수정 모드일 때만)
+  mode: 'add' | 'edit';
+  selectedDate?: string;
+  scheduleData?: ScheduleFormData;
   onSave: (data: ScheduleFormData) => void;
-  onDelete?: (id: string) => void; // 수정 모드일 때만
+  onDelete?: (id: string) => void;
 }
 
 const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
@@ -56,18 +55,35 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
 
   const [formData, setFormData] = useState<ScheduleFormData>(getInitialFormData);
   const [selectedTags, setSelectedTags] = useState<Tag[]>(formData.tags || []);
+  const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
+  const [isLoadingTags, setIsLoadingTags] = useState(false); // 🆕 태그 로딩 상태
 
    // 모달 관련 상태 (일정반복, 알람, 태그)
   const [isRepeatModalOpen, setIsRepeatModalOpen] = useState(false);
   const [isAlarmModalOpen, setIsAlarmModalOpen] = useState(false);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 
-   // 🔄 모드나 데이터가 변경되면 폼 초기화
+  // 🆕 전체 태그 목록 조회
+  const loadAllTags = async () => {
+    try {
+      setIsLoadingTags(true);
+      const response = await tagAPI.getTags();
+      const frontendTags = transformServerTagsToFrontendTags(response.data);
+      setAllTags(frontendTags);
+    } catch (error) {
+      console.error('태그 조회 실패:', error);
+    } finally {
+      setIsLoadingTags(false);
+    }
+  };
+
+   // 📄 모드나 데이터가 변경되면 폼 초기화
   useEffect(() => {
     if (isOpen) {
       const initialData = getInitialFormData();
       setFormData(initialData);
       setSelectedTags(initialData.tags || []);
+      loadAllTags(); // 🆕 모달 열릴 때 태그 목록 조회
     }
   }, [isOpen, mode, scheduleData, selectedDate]);
 
@@ -101,6 +117,8 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     setSelectedTags(tags);
     updateFormData({ tags });
     setIsTagModalOpen(false);
+    // 🆕 태그 모달에서 변경된 내용 반영을 위해 다시 로드
+    loadAllTags();
   };
 
   // 개별 태그 제거 핸들러
@@ -152,7 +170,6 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     updateFormData({ color });
   };
 
-
   if (!isOpen) return null;
 
   return (
@@ -183,7 +200,6 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 />
               </div>
             </div>
-
 
             {/* 색상 선택 */}
             <div className="form-section">
@@ -282,7 +298,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
               </div>
             </div>
 
-            {/* 태그 */}
+            {/* 🆕 태그 - 전체 태그 목록 표시 */}
             <div className="form-section">
               <div className="form-row">
                 <div className="icon-container">
@@ -290,17 +306,21 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 </div>
                 <div className="tags-container">
                   <div className="tags-subcontainer">
-                    {selectedTags.map((tag) => (
-                      <span 
-                        key={tag.id} 
-                        className={`tag ${tag.color}`}
-                        onClick={() => handleTagRemove(tag.id)}
-                        style={{ cursor: 'pointer' }}
-                        title="클릭하여 삭제"
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
+                    {isLoadingTags ? (
+                      <span>로딩 중...</span>
+                    ) : (
+                      selectedTags.map((tag) => (
+                        <span 
+                          key={tag.id} 
+                          className={`tag ${tag.color}`}
+                          onClick={() => handleTagRemove(tag.id)}
+                          style={{ cursor: 'pointer' }}
+                          title="클릭하여 삭제"
+                        >
+                          {tag.name}
+                        </span>
+                      ))
+                    )}
                   </div>
                   <div>
                     <button 

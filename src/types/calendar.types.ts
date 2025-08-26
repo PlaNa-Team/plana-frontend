@@ -120,11 +120,65 @@ export interface CalendarEvent {
   };
 }
 
-// 태그 인터페이스
+// 태그 인터페이스 (기존 유지 - 프론트엔드용)
 export interface Tag {
   id: string;
   name: string;
   color: string;
+}
+
+// 🆕 서버 태그 응답 인터페이스 (API 응답용)
+export interface ServerTag {
+  id: number;
+  name: string;
+  color: string;
+}
+
+// 🆕 태그 목록 조회 API 응답 타입
+export interface TagListResponse {
+  status: number;
+  message: string;
+  data: ServerTag[];
+}
+
+// 🆕 태그 생성 API 요청 타입
+export interface CreateTagRequest {
+  name: string;
+  color: string;
+}
+
+// 🆕 태그 생성 API 응답 타입
+export interface CreateTagResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    color: string;
+  };
+}
+
+// 🆕 태그 수정 API 요청 타입
+export interface UpdateTagRequest {
+  name: string;
+  color: string;
+}
+
+// 🆕 태그 수정 API 응답 타입
+export interface UpdateTagResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    color: string;
+  };
+}
+
+// 🆕 태그 삭제 API 응답 타입
+export interface DeleteTagResponse {
+  status: number;
+  message: string;
 }
 
 // 일정 추가/수정 모달에서 사용할 데이터 타입
