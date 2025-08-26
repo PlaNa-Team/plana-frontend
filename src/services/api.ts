@@ -9,8 +9,24 @@ import {
   DiaryCreateResponse,
   DiaryDeleteResponse
 } from '../types/diary.types';
-import { MonthlyScheduleResponse, CalendarEvent,ScheduleDetailResponse, ScheduleFormData, CreateScheduleResponse, UpdateScheduleResponse } from '../types/calendar.types';
-
+import { 
+  MonthlyScheduleResponse, 
+  CalendarEvent,
+  ScheduleDetailResponse, 
+  ScheduleFormData, 
+  CreateScheduleResponse, 
+  UpdateScheduleResponse,
+  // 🆕 태그 관련 타입 추가
+  TagListResponse,
+  CreateTagRequest,
+  CreateTagResponse,
+  UpdateTagRequest,
+  UpdateTagResponse,
+  DeleteTagResponse,
+  ServerTag,
+  Tag
+} from '../types/calendar.types';
+import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
 
 let store: any = null;
 
@@ -110,6 +126,28 @@ apiClient.interceptors.response.use(
   }
 );
 
+// 서버 태그 데이터를 프론트엔드 태그 형식으로 변환하는 함수
+export const transformServerTagToFrontendTag = (serverTag: ServerTag): Tag => {
+  return {
+    id: serverTag.id.toString(),
+    name: serverTag.name,
+    color: getColorNameFromHex(serverTag.color) || serverTag.color // HEX → 색상명 변환
+  };
+};
+
+// 프론트엔드 태그를 서버 요청 형식으로 변환하는 함수
+export const transformFrontendTagToRequest = (tag: Tag): CreateTagRequest | UpdateTagRequest => {
+  return {
+    name: tag.name,
+    color: getHexFromColorName(tag.color) // 색상명 → HEX 변환
+  };
+};
+
+// 서버 태그 목록을 프론트엔드 태그 목록으로 변환하는 함수
+export const transformServerTagsToFrontendTags = (serverTags: ServerTag[]): Tag[] => {
+  return serverTags.map(transformServerTagToFrontendTag);
+};
+
 // API 응답을 FullCalendar 형식으로 변환하는 함수
 export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['data']['schedules']): CalendarEvent[] => {
   return schedules.map(schedule => {
@@ -125,7 +163,7 @@ export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['d
       id: schedule.virtualId || schedule.id.toString(),
       title: schedule.title,
       start: schedule.startAt,
-      end: adjustedEnd, // 🔄 수정된 adjustedEnd 사용
+      end: adjustedEnd, // 📄 수정된 adjustedEnd 사용
       allDay: schedule.isAllDay,
       backgroundColor: schedule.color,
       borderColor: schedule.color,
@@ -433,6 +471,91 @@ export const calendarAPI = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || '일정 수정에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  }
+}
+
+// 🆕 태그 API - authAPI, calendarAPI와 동일한 패턴으로 구현
+export const tagAPI = {
+  /**
+   * 태그 목록 조회
+   * GET /api/tags
+   * @returns Promise<TagListResponse> 사용자의 모든 태그 목록
+   */
+  getTags: async (): Promise<TagListResponse> => {
+    try {
+      const response = await apiClient.get<TagListResponse>('/tags');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '태그 조회에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+
+  /**
+   * 태그 생성
+   * POST /api/tags
+   * @param tagData Tag 객체 (프론트엔드 형식)
+   * @returns Promise<CreateTagResponse> 생성된 태그 정보
+   */
+  createTag: async (tagData: Tag): Promise<CreateTagResponse> => {
+    try {
+      // 프론트엔드 태그 형식을 서버 요청 형식으로 변환
+      const requestData = transformFrontendTagToRequest(tagData);
+      
+      const response = await apiClient.post<CreateTagResponse>('/tags', requestData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '태그 등록에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+
+  /**
+   * 태그 수정
+   * PUT /api/tags/{id}
+   * @param tagId 수정할 태그의 ID (string)
+   * @param tagData 수정할 태그 정보 (Tag 객체)
+   * @returns Promise<UpdateTagResponse> 수정된 태그 정보
+   */
+  updateTag: async (tagId: string, tagData: Tag): Promise<UpdateTagResponse> => {
+    try {
+      // 프론트엔드 태그 형식을 서버 요청 형식으로 변환
+      const requestData = transformFrontendTagToRequest(tagData);
+      
+      const response = await apiClient.put<UpdateTagResponse>(`/tags/${tagId}`, requestData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '태그 수정에 실패했습니다.';
+        throw new Error(errorMessage);
+      }
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
+  },
+
+  /**
+   * 태그 삭제
+   * DELETE /api/tags/{id}
+   * @param tagId 삭제할 태그의 ID (string)
+   * @returns Promise<DeleteTagResponse> 삭제 결과
+   */
+  deleteTag: async (tagId: string): Promise<DeleteTagResponse> => {
+    try {
+      const response = await apiClient.delete<DeleteTagResponse>(`/tags/${tagId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || '태그 삭제에 실패했습니다.';
         throw new Error(errorMessage);
       }
       throw new Error('네트워크 오류가 발생했습니다.');
