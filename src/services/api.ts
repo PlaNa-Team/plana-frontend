@@ -399,7 +399,30 @@ export const authAPI = {
       }
       throw new Error('네트워크 오류가 발생했습니다.');
     }
-  }
+  },
+    refresh: async (): Promise<LoginResponseDto> => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        throw new Error('리프레시 토큰이 없습니다.');
+      }
+      
+      // Axios 인스턴스를 새로 생성하여 리프레시 토큰을 헤더에 담아 보냅니다.
+      const refreshClient = axios.create({
+        baseURL: API_BASE_URL,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}` // <-- 리프레시 토큰을 헤더에 추가
+        }
+      });
+
+      // /auth/refresh 엔드포인트에 POST 요청을 보냅니다.
+      const response = await refreshClient.post<LoginResponseDto>('/auth/refresh');
+      return response.data;
+    } catch (error) {
+      throw new Error('토큰 갱신에 실패했습니다.');
+    }
+  },
 }
 
 
