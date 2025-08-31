@@ -72,7 +72,7 @@ const Login: React.FC = () => {
         // 🔑 로그인 성공 시 콘솔 로그 추가
         console.log('✅ 로그인 성공!');
         console.log('Access Token:', response.accessToken);
-        console.log('Refresh Token:', response.refreshToken);
+//         console.log('Refresh Token:', response.refreshToken);
         console.log('토큰 만료 시간(Expires In):', response.expiresIn, '밀리초');
         console.log('사용자 정보:', response.member);
 
@@ -88,16 +88,16 @@ const Login: React.FC = () => {
           updatedAt: new Date().toISOString(),
           isDeleted: false,
           provider: 'LOCAL' as Provider,
-          refreshToken: response.refreshToken
+//        refreshToken: response.refreshToken <-- 쿠키로 담기 떄문에 필요 없음
         };
         
         dispatch(loginSuccess({
           accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
+//        refreshToken: response.refreshToken, <-- 쿠키로 담기 떄문에 필요 없음
           user: fullUser
         }));
         
-        localStorage.setItem('refreshToken', response.refreshToken);
+//         localStorage.setItem('refreshToken', response.refreshToken); <-- 쿠키로 담기 떄문에 필요 없음
 
         navigate('/calendar');
       } else {

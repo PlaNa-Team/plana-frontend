@@ -5,7 +5,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   accessToken: string | null;
-  refreshToken: string | null; // <-- 이 줄의 주석 해제
+  // refreshToken: string | null; // <-- 쿠키로 담기 떄문에 필요 없음제
   error: string | null;
 }
 
@@ -39,7 +39,7 @@ const initialState: AuthState = {
   user: initialUser,
   isAuthenticated: !!initialTokens.accessToken,
   accessToken: initialTokens.accessToken,
-  refreshToken: initialTokens.refreshToken, // <-- 이 줄의 주석 해제
+  // refreshToken: initialTokens.refreshToken, // <-- 쿠키로 담기 떄문에 필요 없음
   error: null,
 };
 
@@ -50,20 +50,20 @@ const authSlice = createSlice({
     // 3. loginSuccess 페이로드에 refreshToken 추가
     loginSuccess: (state, action: PayloadAction<{
       accessToken: string;
-      refreshToken: string; // <-- 이 줄의 주석 해제
+      // refreshToken: string; // <-- 이 줄의 주석 해제
       user: User;
     }>) => {
       state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken; // <-- 이 줄의 주석 해제
+      // state.refreshToken = action.payload.refreshToken; // <-- 쿠키로 담기 떄문에 필요 없음
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.error = null;
       
       localStorage.setItem('accessToken', action.payload.accessToken);
       // 4. refreshToken이 있을 때 로컬 스토리지에 저장하는 if문 주석 해제
-      if (action.payload.refreshToken) {
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
-      }
+      // if (action.payload.refreshToken) {
+      //   localStorage.setItem('refreshToken', action.payload.refreshToken);
+      // }
       localStorage.setItem('user', JSON.stringify(action.payload.user));
     },
     
@@ -72,11 +72,11 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.accessToken = null;
-      state.refreshToken = null; // <-- 이 줄의 주석 해제
+      // state.refreshToken = null; // <-- 쿠키로 담기 떄문에 필요 없음
       state.error = null;
       
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken'); // <-- 이 줄의 주석 해제
+      // localStorage.removeItem('refreshToken'); //<-- 쿠키로 담기 떄문에 필요 없음
       localStorage.removeItem('user');
     },
     

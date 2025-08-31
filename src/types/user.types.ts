@@ -12,7 +12,7 @@ export interface User {
   updatedAt: string;
   isDeleted: boolean;
   provider: Provider;
-  refreshToken: string;
+  // refreshToken: string;
 }
 
 export interface SignUpRequest {
@@ -41,5 +41,5 @@ export interface LoginResponseDto {
     nickname?: string;
   };
   timestamp: number;
-  refreshToken: string;
+  // refreshToken: string; // 쿠키에 저장 한다고 함. 다시 주석
 }
