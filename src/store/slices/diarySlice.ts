@@ -183,38 +183,42 @@ const diarySlice = createSlice({
       if (!state.currentDiaryDetail) return;
       
       const diary = state.currentDiaryDetail;
+      const content = diary.content;
       
       switch (diary.diaryType) {
         case 'DAILY':
+          const dailyContent = content as DailyContent;
           state.currentMomentData = {
-            title: diary.title,
-            location: (diary as any).location || '',
-            memo: (diary as any).memo || ''
+            title: dailyContent.title,
+            location: dailyContent.location || '',
+            memo: dailyContent.memo || ''
           };
           break;
         case 'MOVIE':
+          const movieContent = content as MovieContent;
           state.currentMovieData = {
-            title: diary.title,
-            director: (diary as any).director || '',
-            genre: (diary as any).genre || '',
-            actors: (diary as any).actors || '',
-            releaseDate: '', // API에서 releaseDate가 없으므로 빈 값
-            rewatch: (diary as any).rewatch || false,
-            rating: (diary as any).rating || 0,
-            comment: (diary as any).comment || ''
+            title: movieContent.title,
+            director: movieContent.director || '',
+            genre: movieContent.genre || '',
+            actors: movieContent.actors || '',
+            releaseDate: '', // API에서 지원하지 않음
+            rewatch: movieContent.rewatch || false,
+            rating: movieContent.rating || 0,
+            comment: movieContent.comment || ''
           };
           break;
         case 'BOOK':
+          const bookContent = content as BookContent;
           state.currentBookData = {
-            title: diary.title,
-            author: (diary as any).author || '',
-            genre: (diary as any).genre || '',
-            publisher: (diary as any).publisher || '',
-            startDate: (diary as any).startDate || '',
-            endDate: (diary as any).endDate || '',
-            reread: false, // API에서 reread가 없으므로 기본값
-            rating: (diary as any).rating || 0,
-            comment: (diary as any).comment || ''
+            title: bookContent.title,
+            author: bookContent.author || '',
+            genre: bookContent.genre || '',
+            publisher: bookContent.publisher || '',
+            startDate: bookContent.startDate || '',
+            endDate: bookContent.endDate || '',
+            reread: false, // API에서 지원하지 않음
+            rating: bookContent.rating || 0,
+            comment: bookContent.comment || ''
           };
           break;
       }
@@ -277,7 +281,7 @@ const diarySlice = createSlice({
           diaryDate: action.payload.diaryDate,
           diaryType: action.payload.diaryType,
           imageUrl: action.payload.imageUrl,
-          title: action.payload.title
+          title: action.payload.content.title
         };
         state.monthlyDiaries.push(newDiary);
       })
@@ -302,7 +306,7 @@ const diarySlice = createSlice({
             diaryDate: updatedDiary.diaryDate,
             diaryType: updatedDiary.diaryType,
             imageUrl: updatedDiary.imageUrl,
-            title: updatedDiary.title
+            title: updatedDiary.content.title
           };
         }
         state.currentDiaryDetail = updatedDiary;

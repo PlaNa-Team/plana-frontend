@@ -89,9 +89,9 @@ export interface DiaryDetailBase {
   diaryDate: string;
   diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
   imageUrl?: string;
-  title: string;
   createdAt: string;
   updatedAt: string;
+  content: DailyContent | BookContent | MovieContent;
   diaryTags: FriendTag[];
 }
 
