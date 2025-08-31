@@ -80,8 +80,11 @@ const CustomDiaryCalendar: React.FC<CustomDiaryCalendarProps> = ({
         const days = [];
         const start = new Date(calendarStart);
 
-        // 42개의 날짜 생성
-        for (let i = 0; i < 42; i++) {
+        // 현재 달의 마지막 날짜가 포함된 주까지만 계산
+        const monthEndWeek = Math.ceil((monthEnd.getDate() + monthStart.getDay()) / 7);
+        const totalDays = monthEndWeek * 7;
+
+        for (let i = 0; i < totalDays; i++) {
             const date = new Date(start);
             date.setDate(start.getDate() + i);
             days.push(date);
@@ -90,6 +93,23 @@ const CustomDiaryCalendar: React.FC<CustomDiaryCalendarProps> = ({
     };
 
     const calendarDays = generateCalendarDays();
+
+    // 해당 주차가 1년 기준 몇 번째 주인지 계산
+    const getWeekOfYear = (date: Date): number => {
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        const daysSinceFirstDay = Math.floor((date.getTime() - firstDayOfYear.getTime()) / (1000 * 60 * 60 * 24));
+        return Math.ceil((daysSinceFirstDay + firstDayOfYear.getDay() + 1) / 7);
+    };
+
+    // 메모 상태관리
+    const [ memoData, setMemoData ] = useState<Map<number, string>>(new Map());
+    const handleMemoChange = (weekOfYear: number, content: string) => {
+        setMemoData(prev => {
+            const newMap = new Map(prev);
+            newMap.set(weekOfYear, content);
+            return newMap;
+        });
+    }
 
     // 이벤트 핸들러들
     // 이전 달로 이동
@@ -210,6 +230,8 @@ const CustomDiaryCalendar: React.FC<CustomDiaryCalendarProps> = ({
                                 <textarea 
                                     className="memo-textarea"
                                     placeholder="메모를 입력하세요"
+                                    value={memoData.get(getWeekOfYear(date)) || ''}
+                                    onChange={(e) => handleMemoChange(getWeekOfYear(date), e.target.value)}
                                 />
                             </div>
                         )

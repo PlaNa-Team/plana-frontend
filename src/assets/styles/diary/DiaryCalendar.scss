@@ -1,11 +1,10 @@
 .diary-calendar-wrapper {
   width: 100%;
-  height: 100vh;
   position: absolute;
   top: 5%;
   font-family: $font-family-base;
   background: transparent;
-  
+
   .calendar-header {
     @include flex-between;
     position: relative;
@@ -36,18 +35,15 @@
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 1px;
-    background: var(--color-sm);
-    border: 1px solid var(--color-sm);
     border-radius: $border-radius-lg;
 
     position: relative;
     left: 50%;
     transform: translateX(-50%);
     width: 97%;
+    margin-bottom: 100px;
     
     .weekday-header {
-      background: var(--color-xs);
       padding: $spacing-3 $spacing-2;
       text-align: center;
       font-weight: $font-weight-semibold;
@@ -56,15 +52,30 @@
       
       &.sunday {
         color: #dc2626;
+        border-radius: $border-radius-lg 0 0 0;
       }
       &.saturday {
         color: #2563eb;
       }
     }
+
+    .date-cell, .weekday-header,
+    .memo-cell, .memo-header {
+      border: 1px solid var(--color-sm);
+
+      &:not(:nth-child(8n)) {
+        border-right: none;
+      }
+      
+      &:not(:nth-child(-n+8)) {
+        border-top: none;
+      }
+    }
+    .date-cell, .memo-cell {
+      aspect-ratio: 4 / 3;
+    }
     
     .date-cell {
-      background: var(--color-xs);
-      min-height: 120px;
       padding: $spacing-2;
       position: relative;
       @include flex-column;
@@ -148,6 +159,7 @@
 
     .memo-header {
       background: var(--color-xs);
+      border-radius: 0 $border-radius-lg 0 0;
       padding: $spacing-3 $spacing-2;
       text-align: center;
       font-weight: $font-weight-semibold;
@@ -156,8 +168,8 @@
     }
 
     .memo-cell {
+      display: grid;
       background: var(--color-xs);
-      min-height: 120px;
       padding: $spacing-2;
       
       .memo-textarea {
@@ -200,17 +212,10 @@
     
     .calendar-grid {
       .date-cell {
-        min-height: 100px;
         padding: $spacing-1;
         
         .date-number {
           font-size: $font-size-xs;
-        }
-        
-        .diary-img {
-          .diary-thumbnail {
-            min-height: 60px;
-          }
         }
       }
     }
@@ -235,16 +240,6 @@
       .weekday-header {
         padding: $spacing-2 $spacing-1;
         font-size: $font-size-xs;
-      }
-      
-      .date-cell {
-        min-height: 80px;
-        
-        .diary-img {
-          .diary-thumbnail {
-            min-height: 45px;
-          }
-        }
       }
     }
   }
