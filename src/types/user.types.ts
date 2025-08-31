@@ -41,5 +41,5 @@ export interface LoginResponseDto {
     nickname?: string;
   };
   timestamp: number;
-  // refreshToken?: string; // 향후 소셜로그인용
+  refreshToken: string;
 }

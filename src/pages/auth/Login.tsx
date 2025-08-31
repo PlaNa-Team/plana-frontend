@@ -80,15 +80,17 @@ const Login: React.FC = () => {
           updatedAt: new Date().toISOString(),
           isDeleted: false,
           provider: 'LOCAL' as Provider,
-          refreshToken: '' // 향후 소셜로그인용
+          refreshToken: response.refreshToken //<-- 리프레쉬 토큰 저장.
         };
         
         dispatch(loginSuccess({
           accessToken: response.accessToken,
-          // refreshToken: response.refreshToken, // 향후 소셜로그인용
+          refreshToken: response.refreshToken, //Redux 스토어에 저장
           user: fullUser
         }));
         
+        localStorage.setItem('refreshToken', response.refreshToken); // <-- 로컬 스토리지에 저장
+
         navigate('/calendar');
       } else {
         throw new Error('서버에서 올바른 응답을 받지 못했습니다.');

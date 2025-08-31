@@ -5,18 +5,17 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   accessToken: string | null;
-  // refreshToken: string | null; // 향후 소셜로그인용
+  refreshToken: string | null; // <-- 이 줄의 주석 해제
   error: string | null;
 }
 
 const getInitialTokens = () => {
   if (typeof window !== 'undefined') {
-    return {
-      accessToken: localStorage.getItem('accessToken'),
-      // refreshToken: localStorage.getItem('refreshToken'), // 향후 추가
-    };
+    const accessToken = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+    return { accessToken, refreshToken };
   }
-  return { accessToken: null };
+  return { accessToken: null, refreshToken: null };
 };
 
 const getInitialUser = (): User | null => {
@@ -40,7 +39,7 @@ const initialState: AuthState = {
   user: initialUser,
   isAuthenticated: !!initialTokens.accessToken,
   accessToken: initialTokens.accessToken,
-  // refreshToken: initialTokens.refreshToken, // 향후 추가
+  refreshToken: initialTokens.refreshToken, // <-- 이 줄의 주석 해제
   error: null,
 };
 
@@ -48,33 +47,36 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    // 3. loginSuccess 페이로드에 refreshToken 추가
     loginSuccess: (state, action: PayloadAction<{
       accessToken: string;
-      // refreshToken?: string; // 향후 소셜로그인용
+      refreshToken: string; // <-- 이 줄의 주석 해제
       user: User;
     }>) => {
       state.accessToken = action.payload.accessToken;
-      // state.refreshToken = action.payload.refreshToken || null; // 향후 추가
+      state.refreshToken = action.payload.refreshToken; // <-- 이 줄의 주석 해제
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.error = null;
       
       localStorage.setItem('accessToken', action.payload.accessToken);
-      // if (action.payload.refreshToken) { // 향후 추가
-      //   localStorage.setItem('refreshToken', action.payload.refreshToken);
-      // }
+      // 4. refreshToken이 있을 때 로컬 스토리지에 저장하는 if문 주석 해제
+      if (action.payload.refreshToken) {
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+      }
       localStorage.setItem('user', JSON.stringify(action.payload.user));
     },
     
+    // 5. logout 로직에 refreshToken 추가
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.accessToken = null;
-      // state.refreshToken = null; // 향후 추가
+      state.refreshToken = null; // <-- 이 줄의 주석 해제
       state.error = null;
       
       localStorage.removeItem('accessToken');
-      // localStorage.removeItem('refreshToken'); // 향후 추가
+      localStorage.removeItem('refreshToken'); // <-- 이 줄의 주석 해제
       localStorage.removeItem('user');
     },
     
