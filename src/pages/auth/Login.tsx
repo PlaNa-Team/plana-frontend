@@ -53,65 +53,75 @@ const Login: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    if (!validateEmail(formData.email) || !formData.password) {
-      return;
-    }
+    if (!validateEmail(formData.email) || !formData.password) {
+      return;
+    }
 
-    setIsLoading(true);
-    setLoginError('');
-    dispatch(clearError());
+    setIsLoading(true);
+    setLoginError('');
+    dispatch(clearError());
 
-    try {
-      const response = await authAPI.login({
-        email: formData.email,
-        password: formData.password
-      });
-      
-      // 백엔드 LoginResponseDto 구조에 맞춰 처리
-      if (response.accessToken && response.member) {
-        const fullUser: User = {
-          id: response.member.id,
-          name: response.member.name,
-          loginId: response.member.email,
-          email: response.member.email,
-          password: '',
-          nickname: response.member.nickname || response.member.name,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isDeleted: false,
-          provider: 'LOCAL' as Provider,
-          refreshToken: response.refreshToken //<-- 리프레쉬 토큰 저장.
-        };
-        
-        dispatch(loginSuccess({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken, //Redux 스토어에 저장
-          user: fullUser
-        }));
-        
-        localStorage.setItem('refreshToken', response.refreshToken); // <-- 로컬 스토리지에 저장
+    try {
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // 백엔드 LoginResponseDto 구조에 맞춰 처리
+      if (response.accessToken && response.member) {
+        // 🔑 로그인 성공 시 콘솔 로그 추가
+        console.log('✅ 로그인 성공!');
+        console.log('Access Token:', response.accessToken);
+        console.log('Refresh Token:', response.refreshToken);
+        console.log('토큰 만료 시간(Expires In):', response.expiresIn, '밀리초');
+        console.log('사용자 정보:', response.member);
 
-        navigate('/calendar');
-      } else {
-        throw new Error('서버에서 올바른 응답을 받지 못했습니다.');
-      }
 
-    } catch (error: any) {
+        const fullUser: User = {
+          id: response.member.id,
+          name: response.member.name,
+          loginId: response.member.email,
+          email: response.member.email,
+          password: '',
+          nickname: response.member.nickname || response.member.name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDeleted: false,
+          provider: 'LOCAL' as Provider,
+          refreshToken: response.refreshToken
+        };
+        
+        dispatch(loginSuccess({
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          user: fullUser
+        }));
+        
+        localStorage.setItem('refreshToken', response.refreshToken);
+
+        navigate('/calendar');
+      } else {
+        throw new Error('서버에서 올바른 응답을 받지 못했습니다.');
+      }
+
+    } catch (error: any) {
+      // ❌ 로그인 실패 시 콘솔 로그
+      console.error('❌ 로그인 실패:', error);
       let errorMessage = '로그인에 실패했습니다.';
-      
-      if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-      
-      setLoginError(errorMessage);
-      dispatch(setError(errorMessage));
-      
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      setLoginError(errorMessage);
+      dispatch(setError(errorMessage));
+      
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
     const baseUrl = 'http://localhost:8080';
