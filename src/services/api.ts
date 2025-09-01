@@ -104,22 +104,36 @@ apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as any;
-    const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
     
+    // 💡 401 Unauthorized 에러와 재시도 여부 확인
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
-      if (isLoginPage) {
-        return Promise.reject(error);
-      }
-      
-      const currentStore = getStore();
-      const authActions = getAuthActions();
-      
-      if (currentStore && authActions) {
-        // 향후 리프레시 토큰 로직 추가 예정
-        currentStore.dispatch(authActions.logout());
-        return Promise.reject(new Error('인증이 만료되었습니다. 다시 로그인해주세요.'));
+      try {
+        const refreshResponse = await authAPI.refresh(); // 갱신 시도
+        const newAccessToken = refreshResponse.accessToken;
+        const authActions = getAuthActions();
+        const currentStore = getStore();
+
+        // 새 토큰으로 Redux 스토어 갱신
+        if (currentStore && authActions) {
+          currentStore.dispatch(authActions.setAccessToken(newAccessToken));
+        }
+
+        // 원래 요청의 헤더를 새 토큰으로 갱신
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        // 실패했던 원래 요청 재시도
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // 💡 갱신 실패 시 로그아웃 및 로그인 페이지로 이동
+        const currentStore = getStore();
+        const authActions = getAuthActions();
+        if (currentStore && authActions) {
+          currentStore.dispatch(authActions.logout());
+        }
+        window.location.href = '/login';
+        return Promise.reject(new Error('세션이 만료되었습니다. 다시 로그인해주세요.'));
       }
     }
     
@@ -401,27 +415,15 @@ export const authAPI = {
       throw new Error('네트워크 오류가 발생했습니다.');
     }
   },
-    refresh: async (): Promise<LoginResponseDto> => {
+  refresh: async (): Promise<LoginResponseDto> => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        throw new Error('리프레시 토큰이 없습니다.');
-      }
-      
-      // Axios 인스턴스를 새로 생성하여 리프레시 토큰을 헤더에 담아 보냅니다.
-      const refreshClient = axios.create({
-        baseURL: API_BASE_URL,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${refreshToken}` // <-- 리프레시 토큰을 헤더에 추가
-        }
-      });
-
-      // /auth/refresh 엔드포인트에 POST 요청을 보냅니다.
-      const response = await refreshClient.post<LoginResponseDto>('/auth/refresh');
+      // 💡 별도의 헤더 없이 apiClient를 사용하여 요청
+      // 이 요청에 브라우저가 HttpOnly 쿠키에 담긴 리프레시 토큰을 자동으로 첨부합니다.
+      const response = await apiClient.post<LoginResponseDto>('/auth/refresh');
       return response.data;
     } catch (error) {
-      throw new Error('토큰 갱신에 실패했습니다.');
+      // 토큰 갱신 실패 시 에러를 던져 인터셉터에서 잡도록 함
+      throw new Error('리프레시 토큰으로 갱신에 실패했습니다.');
     }
   },
 }
