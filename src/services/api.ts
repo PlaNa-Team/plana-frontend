@@ -101,45 +101,52 @@ apiClient.interceptors.request.use(
 
 // 응답 인터셉터
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response) => response,
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as any;
-    
-    // 💡 401 Unauthorized 에러와 재시도 여부 확인
-    if (error.response?.status === 401 && !originalRequest._retry) {
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !(originalRequest?.url || '').includes('/auth/refresh')
+    ) {
       originalRequest._retry = true;
-      
+
       try {
-        const refreshResponse = await authAPI.refresh(); // 갱신 시도
+        // Refresh 요청
+        const refreshResponse = await authAPI.refresh();
         const newAccessToken = refreshResponse.accessToken;
+
         const authActions = getAuthActions();
         const currentStore = getStore();
 
-        // 새 토큰으로 Redux 스토어 갱신
-        if (currentStore && authActions) {
+        if (currentStore && authActions?.setAccessToken) {
           currentStore.dispatch(authActions.setAccessToken(newAccessToken));
         }
 
-        // 원래 요청의 헤더를 새 토큰으로 갱신
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        // 실패했던 원래 요청 재시도
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // 💡 갱신 실패 시 로그아웃 및 로그인 페이지로 이동
-        const currentStore = getStore();
+        // 🔴 Refresh Token도 만료된 경우 → 로그아웃 + 로그인 페이지 이동
         const authActions = getAuthActions();
-        if (currentStore && authActions) {
+        const currentStore = getStore();
+
+        if (currentStore && authActions?.logout) {
           currentStore.dispatch(authActions.logout());
         }
+
+        // 로그인 페이지로 이동
         window.location.href = '/login';
-        return Promise.reject(new Error('세션이 만료되었습니다. 다시 로그인해주세요.'));
+
+        return Promise.reject(refreshError);
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
+
 
 // 서버 태그 데이터를 프론트엔드 태그 형식으로 변환하는 함수
 export const transformServerTagToFrontendTag = (serverTag: ServerTag): Tag => {

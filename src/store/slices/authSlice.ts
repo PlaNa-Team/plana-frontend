@@ -87,6 +87,12 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+
+    setAccessToken: (state, action: PayloadAction<string>) => {
+      state.accessToken = action.payload;
+      state.isAuthenticated = true; // 토큰 갱신 후에도 로그인 상태 유지
+      localStorage.setItem('accessToken', action.payload);
+    },
   },
 });
 
@@ -94,7 +100,8 @@ export const {
   loginSuccess,
   logout, 
   setError, 
-  clearError 
+  clearError,
+  setAccessToken,
 } = authSlice.actions;
 
 export default authSlice.reducer;
