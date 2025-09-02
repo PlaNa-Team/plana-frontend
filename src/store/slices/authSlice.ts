@@ -5,7 +5,6 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   accessToken: string | null;
-  // refreshToken: string | null; // <-- 쿠키로 담기 떄문에 필요 없음제
   error: string | null;
 }
 
@@ -39,7 +38,6 @@ const initialState: AuthState = {
   user: initialUser,
   isAuthenticated: !!initialTokens.accessToken,
   accessToken: initialTokens.accessToken,
-  // refreshToken: initialTokens.refreshToken, // <-- 쿠키로 담기 떄문에 필요 없음
   error: null,
 };
 
@@ -47,44 +45,31 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // 3. loginSuccess 페이로드에 refreshToken 추가
     loginSuccess: (state, action: PayloadAction<{
       accessToken: string;
-      // refreshToken: string; // <-- 이 줄의 주석 해제
       user: User;
     }>) => {
       state.accessToken = action.payload.accessToken;
-      // state.refreshToken = action.payload.refreshToken; // <-- 쿠키로 담기 떄문에 필요 없음
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.error = null;
       
       localStorage.setItem('accessToken', action.payload.accessToken);
-      // 4. refreshToken이 있을 때 로컬 스토리지에 저장하는 if문 주석 해제
-      // if (action.payload.refreshToken) {
-      //   localStorage.setItem('refreshToken', action.payload.refreshToken);
-      // }
       localStorage.setItem('user', JSON.stringify(action.payload.user));
-      console.log('✅ 로그인 성공! 엑세스 토큰이 저장되었습니다.');
+      
     },
-    
-    // 5. logout 로직에 refreshToken 추가
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.accessToken = null;
-      // state.refreshToken = null; // <-- 쿠키로 담기 떄문에 필요 없음
       state.error = null;
       
       localStorage.removeItem('accessToken');
-      // localStorage.removeItem('refreshToken'); //<-- 쿠키로 담기 떄문에 필요 없음
       localStorage.removeItem('user');
-      console.log('➡️ 로그아웃! 모든 인증 정보가 제거되었습니다.');
     },
     
     setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
-      console.log('❗️ 인증 오류 발생:', action.payload);
     },
     
     clearError: (state) => {
@@ -95,7 +80,6 @@ const authSlice = createSlice({
       state.accessToken = action.payload;
       state.isAuthenticated = true; // 토큰 갱신 후에도 로그인 상태 유지
       localStorage.setItem('accessToken', action.payload);
-      console.log('✨ Redux 상태 업데이트: 새로운 엑세스 토큰이 저장되었습니다.');
     },
   },
 });
