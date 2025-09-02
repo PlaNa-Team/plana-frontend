@@ -65,6 +65,7 @@ const authSlice = createSlice({
       //   localStorage.setItem('refreshToken', action.payload.refreshToken);
       // }
       localStorage.setItem('user', JSON.stringify(action.payload.user));
+      console.log('✅ 로그인 성공! 엑세스 토큰이 저장되었습니다.');
     },
     
     // 5. logout 로직에 refreshToken 추가
@@ -78,10 +79,12 @@ const authSlice = createSlice({
       localStorage.removeItem('accessToken');
       // localStorage.removeItem('refreshToken'); //<-- 쿠키로 담기 떄문에 필요 없음
       localStorage.removeItem('user');
+      console.log('➡️ 로그아웃! 모든 인증 정보가 제거되었습니다.');
     },
     
     setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
+      console.log('❗️ 인증 오류 발생:', action.payload);
     },
     
     clearError: (state) => {
@@ -92,6 +95,7 @@ const authSlice = createSlice({
       state.accessToken = action.payload;
       state.isAuthenticated = true; // 토큰 갱신 후에도 로그인 상태 유지
       localStorage.setItem('accessToken', action.payload);
+      console.log('✨ Redux 상태 업데이트: 새로운 엑세스 토큰이 저장되었습니다.');
     },
   },
 });

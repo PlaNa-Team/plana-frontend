@@ -101,44 +101,42 @@ apiClient.interceptors.request.use(
 
 // 응답 인터셉터
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError<ApiError>) => {
-    const originalRequest = error.config as any;
+  (response) => {
+    // 💡 모든 API 호출이 성공적으로 완료될 때
+    console.log('✅ API 요청 성공:', response.config.url);
+    return response;
+  },
+  async (error) => {
+    // 💡 모든 API 요청이 실패할 때 (에러 응답)
+    console.error('❌ API 요청 실패:', error.config.url, '상태 코드:', error.response?.status);
+    const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest?._retry &&
-      !(originalRequest?.url || '').includes('/auth/refresh')
-    ) {
-      originalRequest._retry = true;
-
+    // 엑세스 토큰 만료 (401 에러)를 감지
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; // 무한 루프 방지
+      console.log('🔄 엑세스 토큰 만료! 새로운 토큰을 요청합니다...');
+      
       try {
-        // Refresh 요청
-        const refreshResponse = await authAPI.refresh();
-        const newAccessToken = refreshResponse.accessToken;
+        // 백엔드의 토큰 갱신 API 호출
+        // 이 요청에는 HttpOnly 쿠키에 담긴 리프레시 토큰이 자동으로 포함됩니다.
+        const response = await authAPI.refresh();
+        const newAccessToken = response.accessToken;
+        
+        // Redux와 localStorage에 새 엑세스 토큰 저장
+        getAuthActions().setAccessToken(newAccessToken);
+        
+        // 원래 요청 헤더를 새로운 토큰으로 업데이트
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
 
-        const authActions = getAuthActions();
-        const currentStore = getStore();
-
-        if (currentStore && authActions?.setAccessToken) {
-          currentStore.dispatch(authActions.setAccessToken(newAccessToken));
-        }
-
-        originalRequest.headers = originalRequest.headers || {};
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return apiClient(originalRequest);
+        console.log('🎉 토큰 갱신 성공! 새로운 엑세스 토큰으로 원래 요청을 재시도합니다.');
+        return apiClient(originalRequest); // 원래 요청 재시도
       } catch (refreshError) {
-        // 🔴 Refresh Token도 만료된 경우 → 로그아웃 + 로그인 페이지 이동
-        const authActions = getAuthActions();
-        const currentStore = getStore();
-
-        if (currentStore && authActions?.logout) {
-          currentStore.dispatch(authActions.logout());
-        }
-
+        console.error('⛔️ 리프레시 토큰 만료 또는 갱신 실패! 로그아웃 처리합니다.');
+        // 토큰 갱신마저 실패하면 로그아웃 처리
+        getAuthActions().logout();
         // 로그인 페이지로 이동
         window.location.href = '/login';
-
         return Promise.reject(refreshError);
       }
     }
@@ -146,6 +144,7 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 
 // 서버 태그 데이터를 프론트엔드 태그 형식으로 변환하는 함수
