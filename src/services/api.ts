@@ -69,6 +69,7 @@ export interface ApiError {
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true, 
   headers: {
     'Content-Type': 'application/json',
   },
@@ -100,31 +101,54 @@ apiClient.interceptors.request.use(
 
 // 응답 인터셉터
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response) => response,
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as any;
-    const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !(originalRequest?.url || '').includes('/auth/refresh')
+    ) {
       originalRequest._retry = true;
-      
-      if (isLoginPage) {
-        return Promise.reject(error);
-      }
-      
-      const currentStore = getStore();
-      const authActions = getAuthActions();
-      
-      if (currentStore && authActions) {
-        // 향후 리프레시 토큰 로직 추가 예정
-        currentStore.dispatch(authActions.logout());
-        return Promise.reject(new Error('인증이 만료되었습니다. 다시 로그인해주세요.'));
+
+      try {
+        // Refresh 요청
+        const refreshResponse = await authAPI.refresh();
+        const newAccessToken = refreshResponse.accessToken;
+
+        const authActions = getAuthActions();
+        const currentStore = getStore();
+
+        if (currentStore && authActions?.setAccessToken) {
+          currentStore.dispatch(authActions.setAccessToken(newAccessToken));
+        }
+
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        console.log("엑세스 토큰 만료로 새로운 토큰을 갱신합니다.")
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // 🔴 Refresh Token도 만료된 경우 → 로그아웃 + 로그인 페이지 이동
+        const authActions = getAuthActions();
+        const currentStore = getStore();
+
+        if (currentStore && authActions?.logout) {
+          currentStore.dispatch(authActions.logout());
+        }
+        
+        alert("리프레쉬 토큰 만료입니다. 로그인 페이지로 이동합니다");
+        // 로그인 페이지로 이동
+        window.location.href = '/login';
+   
+        return Promise.reject(refreshError);
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
+
 
 // 서버 태그 데이터를 프론트엔드 태그 형식으로 변환하는 함수
 export const transformServerTagToFrontendTag = (serverTag: ServerTag): Tag => {
@@ -399,7 +423,18 @@ export const authAPI = {
       }
       throw new Error('네트워크 오류가 발생했습니다.');
     }
-  }
+  },
+  refresh: async (): Promise<LoginResponseDto> => {
+    try {
+      // 💡 별도의 헤더 없이 apiClient를 사용하여 요청
+      // 이 요청에 브라우저가 HttpOnly 쿠키에 담긴 리프레시 토큰을 자동으로 첨부합니다.
+      const response = await apiClient.post<LoginResponseDto>('/auth/refresh');
+      return response.data;
+    } catch (error) {
+      // 토큰 갱신 실패 시 에러를 던져 인터셉터에서 잡도록 함
+      throw new Error('리프레시 토큰으로 갱신에 실패했습니다.');
+    }
+  },
 }
 
 
