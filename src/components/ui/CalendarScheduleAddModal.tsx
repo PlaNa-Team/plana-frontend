@@ -135,6 +135,8 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     }
   };
 
+  
+
  // 저장, 수정 api 핸들러
   const handleSave = async () => {
     try {
@@ -164,6 +166,46 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
       alert(error instanceof Error ? error.message : '일정 저장에 실패했습니다.');
     }
   };
+
+    // 🚀 이 변환 함수를 추가합니다.
+  const parseRRuleToText = (rruleString?: string): string => {
+    if (!rruleString) return '반복 없음';
+
+    // "FREQ=WEEKLY;INTERVAL=3" 와 같은 문자열을 파싱합니다.
+    const parts = rruleString.split(';').reduce((acc, part) => {
+      const [key, value] = part.split('=');
+      if (key && value) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+
+    const freq = parts.FREQ;
+    const interval = parts.INTERVAL ? parseInt(parts.INTERVAL) : 1;
+
+    let text = '';
+    switch (freq) {
+      case 'DAILY':
+        text = interval > 1 ? `${interval}일 간격으로 반복` : '매일 반복';
+        break;
+      case 'WEEKLY':
+        text = interval > 1 ? `${interval}주 간격으로 반복` : '매주 반복';
+        break;
+      case 'MONTHLY':
+        text = interval > 1 ? `${interval}달 간격으로 반복` : '매달 반복';
+        break;
+      case 'YEARLY':
+        text = interval > 1 ? `${interval}년 간격으로 반복` : '매년 반복';
+        break;
+      default:
+        text = '반복 없음';
+        break;
+    }
+
+    return text;
+  };
+
+
 
     // 색상 선택 핸들러
   const handleColorSelect = (color: string) => {
@@ -293,7 +335,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                     onClick={handleRepeatClick}
                     style={{ cursor: 'pointer' }}
                   >
-                    {formData.repeatValue || '반복 없음'}
+                    {parseRRuleToText(formData.repeatValue) || '반복 없음'}
                 </span>
               </div>
             </div>
