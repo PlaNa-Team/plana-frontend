@@ -15,6 +15,9 @@ function Header() {
     // Redux store에서 현재 테마 상태 가져오기
     const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
 
+    const user = useSelector((state: RootState) => state.auth.user);
+    const userNicename = user?.nickname; // user 객체에서 name 속성을 가져옵니다.
+
     // 알림 관련 상태 가져오기
     const unreadCount = useSelector((state: RootState) => state.notifications.unreadCount);
 
@@ -35,7 +38,7 @@ function Header() {
     <>
     <div className="header">
         <div className="header__title">
-            <div className="header__user">우감자의</div>
+            <div className="header__user">{userNicename ? `${userNicename}의` : '사용자'}</div>
             <div className="header__mode">{ getCurrentMode() }</div>
         </div>
         <div className="header__icons">
