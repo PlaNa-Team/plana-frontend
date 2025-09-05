@@ -1,8 +1,10 @@
+// diary.types.ts
+
 // TypeScript 타입 정의 - 다이어리 관련 타입
 export interface Diary {
   id: number;
-  diaryDate: string;   // yyyy-MM-dd
-  diaryType: string;   // DAILY, BOOK, MOVIE
+  diaryDate: string; // yyyy-MM-dd
+  diaryType: string; // DAILY, BOOK, MOVIE
   imageUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +29,7 @@ export interface Book {
   publisher?: string;
   genre?: string;
   startDate?: string; // yyyy-MM-dd
-  endDate?: string;   // yyyy-MM-dd
+  endDate?: string; // yyyy-MM-dd
   rating?: number;
   comment?: string;
 }
@@ -61,96 +63,8 @@ export interface FriendTag {
   loginId?: string;
   memberNickname?: string;
   tagText?: string;
-  tagStatus: 'PENDING' | '수락' | '거절' | '삭제' | '작성자';
+  tagStatus: string;
 }
-
-// 월간 다이어리 조회 응답
-export interface MonthlyDiaryItem {
-  id: number;
-  diaryDate: string;
-  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
-  imageUrl?: string;
-  title: string;
-}
-
-export interface MonthlyDiaryResponse {
-  status: number;
-  message: string;
-  body: {
-    data: {
-      diaryList: MonthlyDiaryItem[];
-    };
-  }
-}
-
-// 다이어리 상세 조회 응답 (공통)
-export interface DiaryDetailBase {
-  id: number;
-  diaryDate: string;
-  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
-  imageUrl?: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  diaryTags: FriendTag[];
-}
-
-// DAILY 타입 상세
-export interface DailyDiaryDetail extends DiaryDetailBase {
-  diaryType: 'DAILY';
-  location?: string;
-  memo?: string;
-}
-
-// BOOK 타입 상세
-export interface BookDiaryDetail extends DiaryDetailBase {
-  diaryType: 'BOOK';
-  author?: string;
-  publisher?: string;
-  genre?: string;
-  startDate?: string;
-  endDate?: string;
-  rating?: number;
-  comment?: string;
-}
-
-// MOVIE 타입 상세
-export interface MovieDiaryDetail extends DiaryDetailBase {
-  diaryType: 'MOVIE';
-  director?: string;
-  actors?: string;
-  genre?: string;
-  rewatch?: boolean;
-  rating?: number;
-  comment?: string;
-}
-
-export type DiaryDetail = DailyDiaryDetail | BookDiaryDetail | MovieDiaryDetail;
-
-export interface DiaryDetailResponse {
-  status: number;
-  message?: string;
-  data: DiaryDetail;
-}
-
-// 이미지 임시 업로드 응답
-export interface TempImageResponse {
-  status: number;
-  data: {
-    tempUrl: string;
-  };
-}
-
-// 다이어리 등록/수정 요청
-export interface CreateDiaryRequest {
-  diaryDate: string;
-  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
-  imageUrl?: string;
-  content: DailyContent | BookContent | MovieContent;
-  diaryTags?: DiaryTagRequest[];
-}
-
-export interface UpdateDiaryRequest extends CreateDiaryRequest {}
 
 export interface DiaryTagRequest {
   memberId?: number;
@@ -185,11 +99,75 @@ export interface MovieContent {
   comment?: string;
 }
 
+// 월간 다이어리 목록 응답
+export interface MonthlyDiaryResponse {
+  status: number;
+  message?: string;
+  body: {
+    data: {
+      diaryList: MonthlyDiaryItem[];
+    };
+  };
+}
+
+// 월간 다이어리 아이템
+export interface MonthlyDiaryItem {
+  id: number;
+  diaryDate: string;
+  type: 'DAILY' | 'BOOK' | 'MOVIE';
+  imageUrl?: string;
+  title: string;
+}
+
+// 다이어리 등록/수정 요청
+export interface CreateDiaryRequest {
+  diaryDate: string;
+  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
+  imageUrl?: string;
+  content: DailyContent | BookContent | MovieContent;
+  diaryTags?: DiaryTagRequest[];
+}
+
+export interface UpdateDiaryRequest extends CreateDiaryRequest {}
+
 // 다이어리 등록/수정 응답
 export interface DiaryCreateResponse {
   status: number;
+  message?: string;
   body: {
     data: DiaryDetail;
+  };
+}
+
+// 다이어리 상세 조회 응답
+export interface DiaryDetailResponse {
+  id: number;
+  diaryDate: string;
+  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  content: DailyContent | BookContent | MovieContent;
+  diaryTags?: FriendTag[];
+}
+
+// 다이어리 상세 정보 타입 (백엔드 응답과 동일하게 camelCase 유지)
+export interface DiaryDetail {
+  id: number;
+  diaryDate: string;
+  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  content: DailyContent | BookContent | MovieContent;
+  diaryTags?: FriendTag[];
+}
+
+// 이미지 임시 업로드 응답
+export interface TempImageResponse {
+  status: number;
+  data: {
+    tempUrl: string;
   };
 }
 
@@ -197,20 +175,6 @@ export interface DiaryCreateResponse {
 export interface DiaryDeleteResponse {
   status: number;
   body: {
-    message: string;
-  };
-}
-
-// 에러 응답
-export interface DiaryErrorResponse {
-  status: number;
-  body: {
-    success: false;
-    error: string;
-    message: string;
-    details?: Array<{
-      field: string;
-      message: string;
-    }>;
+    data: null;
   };
 }

@@ -1,11 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { 
-    fetchMonthlyDiaries,
-    fetchDiaryDetail,
     setSelectedDate,
     clearCurrentData,
-    loadDiaryToEdit
 } from '../../store/slices/diarySlice';
 import { MonthlyDiaryItem } from '../../types/diary.types';
 import CustomDiaryCalendar from './CustomDiaryCalendar';
@@ -26,13 +23,6 @@ const DiaryCalendar: React.FC = () => {
 
     const isModalOpen = selectedDate !== null;
 
-    // 현재 보고있는 연월 기준 다이어리 데이터 가져오기
-    // useEffect(() => {
-    //     const year = currentViewDate.getFullYear();
-    //     const month = currentViewDate.getMonth() + 1;
-    //     dispatch(fetchMonthlyDiaries({ year, month }));
-    // }, [dispatch, currentViewDate]);
-
     // 날짜별 다이어리 매핑
     const diaryMap = useMemo(() => {
         const map = new Map<string, MonthlyDiaryItem>();
@@ -52,23 +42,7 @@ const DiaryCalendar: React.FC = () => {
 
         if (diaryData) {
             // 다이어리 데이터가 있으면 상세 정보 가져오기
-            // try {
-            //     await dispatch(fetchDiaryDetail(diaryData.id)).unwrap();
-            //     // 가져온 데이터를 편집용으로 로드
-            //     dispatch(loadDiaryToEdit());
-
-                // 모달에 전달할 데이터 구성
-                setSelectedDiaryData({
-                    id: diaryData.id,
-                    diaryType: diaryData.diaryType,
-                    diaryDate: diaryData.diaryDate,
-                    imageUrl: diaryData.imageUrl,
-                    title: diaryData.title,
-                });
-            // } catch (error) {
-            //     console.error('다이어리 상세 조회 실패:', error);
-            //     setSelectedDiaryData(null);
-            // }
+            
         } else {
             // 다이어리 데이터가 없으면 새 다이어리 생성 모드
             dispatch(clearCurrentData());
