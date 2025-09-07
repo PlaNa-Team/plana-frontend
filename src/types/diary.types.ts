@@ -1,5 +1,3 @@
-// diary.types.ts
-
 // TypeScript 타입 정의 - 다이어리 관련 타입
 export interface Diary {
   id: number;
@@ -76,6 +74,7 @@ export interface DailyContent {
   title: string;
   location?: string;
   memo?: string;
+  imageUrl?: string | null;
 }
 
 export interface BookContent {
@@ -85,8 +84,10 @@ export interface BookContent {
   genre?: string;
   startDate?: string;
   endDate?: string;
+  reread?: boolean;
   rating?: number;
   comment?: string;
+  imageUrl?: string | null;
 }
 
 export interface MovieContent {
@@ -94,9 +95,11 @@ export interface MovieContent {
   director?: string;
   actors?: string;
   genre?: string;
+  releaseDate?: string;
   rewatch?: boolean;
   rating?: number;
   comment?: string;
+  imageUrl?: string | null;
 }
 
 // 월간 다이어리 목록 응답
@@ -166,9 +169,11 @@ export interface DiaryDetail {
 // 이미지 임시 업로드 응답
 export interface TempImageResponse {
   status: number;
-  data: {
-    tempUrl: string;
-  };
+  message?: string;
+
+    data: {
+      tempUrl: string;
+    };
 }
 
 // 다이어리 삭제 응답

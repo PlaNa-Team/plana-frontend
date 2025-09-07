@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CheckIcon, XIcon, TrashBinIcon } from '../../assets/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
 import {
@@ -46,14 +46,74 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         currentMomentData,
         currentMovieData,
         currentBookData,
-        tempImageUrl,
         currentDiaryDetail,
         isLoading,
         isUploading,
         error
     } = useAppSelector(state => state.diary);
 
+    const modalContentRef = useRef<HTMLDivElement>(null);
+
     const [activeTab, setActiveTab] = useState<DiaryType>(diaryData?.diaryType || 'DAILY');
+    const [isSaving, setIsSaving] = useState(false);
+    const [isToastOpen, setIsToastOpen] = useState(false);
+
+    useEffect(() => {
+        if (diaryData && diaryData.diaryType) {
+            setActiveTab(diaryData.diaryType);
+            dispatch(clearCurrentData());
+
+            // 상세 조회 api 로직
+        }
+    }, [diaryData, dispatch]);
+
+    const handleToastClose = (open: boolean) => {
+        if (!open) {
+            dispatch(clearError());
+            setIsToastOpen(false);
+        }
+    };
+
+    const handleSaveDiary = () => {
+        if (!selectedDate) {
+            toast.error('날짜를 선택해 주세요.');
+            return;
+        }
+
+        let content: DailyContent | MovieContentType | BookContentType;
+        switch (activeTab) {
+            case 'DAILY':
+                content = currentMomentData;
+                break;
+            case 'MOVIE':
+                content = currentMovieData;
+                break;
+            case 'BOOK':
+                content = currentBookData;
+                break;
+            default:
+                return;
+        }
+    }
+
+    // 모달 외부 클릭을 감지
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            // modalContentRef가 설정되어 있고, 클릭한 대상이 모달 외부인 경우
+            if (modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+
+        // 모달이 열려 있을 때만 이벤트 리스너 추가
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, onClose]);
 
     // 다이어리 상세 데이터가 로드되면 Redux 상태 업데이트
     useEffect(() => {
@@ -70,66 +130,78 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         }
     }, [currentDiaryDetail, dispatch]);
 
-    const handleTabChange = (type: DiaryType) => {
-        setActiveTab(type);
+    const handleCloseModal = () => {
         dispatch(clearCurrentData());
+        dispatch(clearError());
+        onClose();
     }
 
-    const handleToastClose = () => {
-        dispatch(clearError());
-    };
+    const handleTabChange = (tab: DiaryType) => {
+        setActiveTab(tab);
+    }
 
     if (!isOpen) return null;
 
     return (
-        <div className={`diary-modal-overlay ${isOpen ? 'open' : ''}`}>
-            <div className='diary-modal-base'>
+        <div className="diary-modal-backdrop" onClick={handleCloseModal}>
+            <div className='diary-modal' ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
                 <div className='diary-modal-header'>
-                    <span className='date-label'>
-                        {currentDiaryDetail?.diaryDate || selectedDate}
-                    </span>
-                    <div className='modal-actions'>
-                        <button disabled={isLoading || isUploading}>
-                            <CheckIcon width='24' height='24' fill='var(--color-primary)' />
-                        </button>
-                        <button onClick={onClose} disabled={isLoading}>
-                            <XIcon width='24' height='24' fill='var(--color-primary)' />
-                        </button>
-                    </div>
+                    <button 
+                        className='diary-modal-close'
+                        onClick={handleCloseModal} 
+                        disabled={isLoading}
+                    >
+                        <XIcon width='24' height='24' fill='var(--color-xl)' />
+                    </button>
+                    <button 
+                        className='diary-modal-save'
+                        disabled={isLoading || isUploading}
+                    >
+                        <CheckIcon width='24' height='24' fill='var(--color-xl)' />
+                    </button>
                 </div>
 
-                <div className='diary-modal-content'>
-                    <div className='diary-type-tabs'>
-                        {['DAILY', 'BOOK', 'MOVIE'].map(type => (
-                            <button
-                                key={type}
-                                className={`tab-button ${activeTab === type ? 'active' : ''}`}
-                                onClick={() => setActiveTab(type as DiaryType)}
-                            >
-                                {type}
-                            </button>
-                        ))}
+                <div className='diary-modal-main'>
+                    <div className='diary-modal-sidebar'>
+                        <button
+                            className={`diary-tab ${activeTab === 'DAILY' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('DAILY')}
+                        >
+                            <span className='diary-tab-text'>
+                                D<br/>A<br/>I<br/>L<br/>Y
+                            </span>
+                        </button>
+                        <button
+                            className={`diary-tab ${activeTab === 'MOVIE' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('MOVIE')}
+                        >
+                            <span className='diary-tab-text'>
+                                M<br/>O<br/>V<br/>I<br/>E
+                            </span>
+                        </button>
+                        <button
+                            className={`diary-tab ${activeTab === 'BOOK' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('BOOK')}
+                        >
+                            <span className='diary-tab-text'>
+                                B<br/>O<br/>O<br/>K
+                            </span>
+                        </button>
                     </div>
 
                     <div className='tab-content'>
                         {activeTab === 'DAILY' && (
-                            <MomentContent
-                                imagePreview={currentDiaryDetail?.imageUrl || tempImageUrl || ''}
-                            />
+                            <MomentContent/>
                         )}
                         {activeTab === 'MOVIE' && (
-                            <MovieContent
-                                imagePreview={currentDiaryDetail?.imageUrl || tempImageUrl || ''}
-                            />
+                            <MovieContent/>
                         )}
                         {activeTab === 'BOOK' && (
-                            <BookContent
-                                imagePreview={currentDiaryDetail?.imageUrl || tempImageUrl || ''}
-                            />
+                            <BookContent/>
                         )}
                     </div>
                 </div>
-                
+            
                 {diaryData?.id && (
                     <button
                         className="diary-modal-delete"
@@ -149,19 +221,11 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
 
                 <CustomToast
                     title={error ? '오류 발생' : '알림'}
-                    description={error || (isUploading ? '이미지 업로드 성공' : '저장 성공')}
-                    isOpen={!!error || (isUploading && tempImageUrl !== null)}
+                    description={error || '저장 성공'}
+                    isOpen={!!error}
                     onOpenChange={handleToastClose}
                 />
             </div>
-
-            {(isLoading || isUploading) && (
-                <div className='loading-overlay'>
-                    <div className='loading-spinner'>
-                        {isUploading ? '이미지 업로드 중...' : '로딩 중...'}    
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

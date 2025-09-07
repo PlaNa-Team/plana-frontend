@@ -18,10 +18,9 @@ const DiaryCalendar: React.FC = () => {
     } = useAppSelector(state => state.diary);
 
     // 지역 상태 관리
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDiaryData, setSelectedDiaryData] = useState<any>(null);
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
-
-    const isModalOpen = selectedDate !== null;
 
     // 날짜별 다이어리 매핑
     const diaryMap = useMemo(() => {
@@ -30,8 +29,7 @@ const DiaryCalendar: React.FC = () => {
             map.set(diary.diaryDate, diary);
         });
         return map;
-    // }, [monthlyDiaries]);
-    }, []);
+    }, [monthlyDiaries]);
 
     // 날짜 클릭 핸들러
     const handleDateClick = useCallback(async (dateStr: string) => {
@@ -39,48 +37,22 @@ const DiaryCalendar: React.FC = () => {
 
         // Redux에 선택된 날짜 저장
         dispatch(setSelectedDate(dateStr));
+        setSelectedDiaryData(diaryData);
 
-        if (diaryData) {
-            // 다이어리 데이터가 있으면 상세 정보 가져오기
-            
-        } else {
-            // 다이어리 데이터가 없으면 새 다이어리 생성 모드
-            dispatch(clearCurrentData());
-            setSelectedDiaryData(null);
-        }
+        setIsModalOpen(true);
     }, [diaryMap, dispatch]);
 
     // 모달 닫기 핸들러
     const handleCloseModal = useCallback(() => {
-        setSelectedDate(null);
+        setIsModalOpen(false);
+        dispatch(setSelectedDate(null));
         dispatch(clearCurrentData());
-        dispatch(setSelectedDate(null)); // 이걸로 모달이 닫힘
+        setSelectedDiaryData(null);
     }, [dispatch]);
 
-    // 달력 월 변경 핸들러
     const handleMonthChange = useCallback((newDate: Date) => {
         setCurrentViewDate(newDate);
-
-        // 월 변경 시 모달이 열려있다면 닫기
-        if (selectedDate) {
-            dispatch(setSelectedDate(null));
-            setSelectedDiaryData(null);
-        }
-    }, [selectedDate, dispatch]);
-
-    // 에러 처리
-    // if (error) {
-    //     return (
-    //         <div className="diary-calendar-container">
-    //             <div className="error-message">
-    //                 <p>데이터를 불러오는 중 오류가 발생했습니다: {error}</p>
-    //                 <button onClick={() => window.location.reload()}>
-    //                     다시 시도
-    //                 </button>
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    }, []);
 
     return (
         <div className="diary-calendar-container">

@@ -1,18 +1,22 @@
 import React, { useRef, useEffect } from 'react';
 import { LocationIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { updateMomentData } from '../../store/slices/diarySlice';
+import { updateMomentData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
 interface MomentContentProps {
-    imagePreview: string;
 }
 
-const MomentContent: React.FC<MomentContentProps> = ({
-    imagePreview,
-}) => {
+const MomentContent: React.FC<MomentContentProps> = () => {
     const dispatch = useAppDispatch();
     const momentData = useAppSelector(state => state.diary.currentMomentData);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY'}));
+        }
+    };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(updateMomentData({ title: e.target.value }));
@@ -37,19 +41,31 @@ const MomentContent: React.FC<MomentContentProps> = ({
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload-area'>
-                    <input
-                        type='file'
-                        id='fileInput-moment'
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                    />
-                    <div
-                        className='image-box'
-                        onClick={handleImageClick}
-                        style={{ backgroundImage: imagePreview ? `url(${imagePreview})` : 'none' }}
-                    >
-                        {!imagePreview && <div className='placeholder-text'>사진 업로드</div>}
-                    </div>
+                    {momentData.imageUrl ? (
+                        <img
+                            src={momentData.imageUrl}
+                            alt="Uploaded Preview"
+                            className="uploaded-image-preview"
+                        />
+                    ) : (
+                        <>
+                            <input
+                                type='file'
+                                accept='image/*'
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                                className='file-input'
+                                style={{ display: 'none'}}
+                            />
+                            <label
+                                role='button'
+                                onClick={handleImageClick}
+                                className='image-upload-button'
+                            >
+                                이미지 업로드
+                            </label>
+                        </>
+                    )}
                 </div>
 
                 <div className='input-section'>

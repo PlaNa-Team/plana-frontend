@@ -51,12 +51,12 @@ const CustomToast: React.FC<ToastProps> = ({
                 <Toast.Description className="ToastDescription">
                     { description }
                 </Toast.Description>
-                <Toast.Action
-                    className="ToastAction"
-                    altText={ actionText }
-                    onClick={ handleAction }
-                >
-                    <button className="Button">
+                <Toast.Action asChild altText={ actionText }>
+                    <button 
+                        className="Button"
+                        type="button"
+                        onClick={ handleAction }
+                    >
                         { actionText }
                     </button>
                 </Toast.Action>
