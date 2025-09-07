@@ -28,33 +28,37 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
 
   // 모드에 따른 초기값 설정
   const getInitialFormData = (): ScheduleFormData => {
-    if (mode === 'edit' && scheduleData) {
-      // 수정 모드: 기존 데이터 사용
-      return { ...scheduleData };
-    } else {
-      // 추가 모드: 빈 폼 + 선택된 날짜
-      const defaultDate = selectedDate || new Date().toISOString().split('T')[0];
-      return {
-        title: '',
-        startDate: defaultDate,
-        startTime: '09:00',
-        endDate: defaultDate,
-        endTime: '10:00',
-        isAllDay: false,
-        color: 'red',
-        categoryId: undefined, // 카테고리 ID로 변경,
-        description: '',
-        location: '',
-        memo: '',
-        repeatValue: '',
-        alarmValue: '',
-        tags: []
-      };
-    }
-  };
+  if (mode === 'edit' && scheduleData) {
+    // 수정 모드: 기존 데이터를 변환하여 사용
+  return { ...scheduleData };
+
+  } else {
+    // 추가 모드: 빈 폼 + 선택된 날짜
+    const defaultDate = selectedDate || new Date().toISOString().split('T')[0];
+    return {
+      title: '',
+      startDate: defaultDate,
+      startTime: '09:00',
+      endDate: defaultDate,
+      endTime: '10:00',
+      isAllDay: false,
+      color: 'red',
+      categoryId: undefined,
+      description: '',
+      location: '',
+      memo: '',
+      repeatValue: '',
+      alarmValue: '',
+      tags: []
+    };
+  }
+};
+
+  
 
   const [formData, setFormData] = useState<ScheduleFormData>(getInitialFormData);
-  const [selectedTag, setSelectedTag] = useState<Tag | null>(formData.tags?.[0] || null);  const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(formData.tags?.[0] || null);  
+  const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
   const [isLoadingTags, setIsLoadingTags] = useState(false); // 🆕 태그 로딩 상태
 
    // 모달 관련 상태 (일정반복, 알람, 태그)
@@ -81,11 +85,20 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     if (isOpen) {
         const initialData = getInitialFormData();
         setFormData(initialData);
-        // Correctly set the single selected tag.
-        setSelectedTag(initialData.tags?.[0] || null);
+
+        // 💡 모든 태그를 먼저 로드합니다.
         loadAllTags();
     }
-}, [isOpen, mode, scheduleData, selectedDate]);
+  }, [isOpen, mode, scheduleData, selectedDate]);
+
+  useEffect(() => {
+    if (formData.categoryId && allTags.length > 0) {
+        const foundTag = allTags.find(tag => Number(tag.id) === formData.categoryId);
+        if (foundTag) {
+            setSelectedTag(foundTag);
+        }
+    }
+}, [allTags, formData.categoryId]);
 
   // 폼 데이터 업데이트 헬퍼 함수
   const updateFormData = (updates: Partial<ScheduleFormData>) => {

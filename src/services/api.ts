@@ -175,31 +175,37 @@ export const transformServerTagsToFrontendTags = (serverTags: ServerTag[]): Tag[
 
 // API 응답을 FullCalendar 형식으로 변환하는 함수
 export const transformSchedulesToEvents = (schedules: MonthlyScheduleResponse['data']['schedules']): CalendarEvent[] => {
-  return schedules.map(schedule => {
-    // 💡 allDay 이벤트일 경우에만 end 날짜에 하루를 더하는 로직 추가
-    let adjustedEnd = schedule.endAt;
-    if (schedule.isAllDay) {
-      const endDate = new Date(schedule.endAt);
-      endDate.setDate(endDate.getDate() + 1);
-      adjustedEnd = endDate.toISOString();
-    }
-    
-    return {
-      id: schedule.virtualId || schedule.id.toString(),
-      title: schedule.title,
-      start: schedule.startAt,
-      end: adjustedEnd, // 📄 수정된 adjustedEnd 사용
-      allDay: schedule.isAllDay,
-      backgroundColor: schedule.color,
-      borderColor: schedule.color,
-      extendedProps: {
-        categoryName: schedule.categoryName,
-        isRecurring: schedule.isRecurring,
-        originalId: schedule.id
+  return schedules
+    .filter(schedule => !schedule.isDeleted)
+    .map(schedule => {
+      // ✅ endAt이 존재할 때만 new Date()를 사용하도록 수정
+      let adjustedEnd: string | undefined;
+      if (schedule.isAllDay && schedule.endAt) {
+        const endDate = new Date(schedule.endAt);
+        endDate.setDate(endDate.getDate() + 1);
+        adjustedEnd = endDate.toISOString();
+      } else {
+        adjustedEnd = schedule.endAt; // endAt이 없으면 undefined로 유지
       }
-    };
-  });
+      
+      return {
+        id: schedule.virtualId || schedule.id.toString(),
+        title: schedule.title,
+        start: schedule.startAt,
+        end: adjustedEnd,
+        allDay: schedule.isAllDay,
+        backgroundColor: schedule.color,
+        borderColor: schedule.color,
+        extendedProps: {
+          categoryId: schedule.categoryId,
+          categoryName: schedule.categoryName,
+          isRecurring: schedule.isRecurring,
+          originalId: schedule.id
+        }
+      };
+    });
 };
+
 
 //API 응답을 ScheduleFormData로 변환하는 함수 (타임존 문제 해결 버전)
 export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']): ScheduleFormData => {
@@ -249,7 +255,10 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
     endTime: endTime,
     isAllDay: detail.isAllDay,
     color: detail.color,
-    category: detail.categoryName,
+    // ✅ API 응답에 있는 category 객체에서 id를 가져와 categoryId에 할당합니다.
+    categoryId: detail.category?.id,
+    // ✅ API 응답에 있는 category 객체에서 name을 가져와 category에 할당합니다.
+    category: detail.category?.name,
     description: detail.description || '',
     location: detail.location || '',
     memo: detail.description  || '',
@@ -265,6 +274,9 @@ export const transformDetailToFormData = (detail: ScheduleDetailResponse['data']
 };
 
 export const transformFormDataToRequest = (formData: ScheduleFormData) => {
+
+
+
  // 1. 날짜와 시간을 ISO 형식으로 변환
  const startAt = formData.isAllDay 
    ? `${formData.startDate}T00:00:00`
@@ -328,10 +340,18 @@ export const transformFormDataToRequest = (formData: ScheduleFormData) => {
    }
  }
 
+ const store = getStore();
+ const memberId = store?.getState()?.auth?.memberId || 1;
+ // 💡 categoryId를 안전하게 가져오고, Number()로 변환합니다.
+    const categoryId = formData.tags && formData.tags.length > 0
+        ? Number(formData.tags[0].id)
+        : undefined;
+
+
  // 4. API 요청 형식으로 변환된 데이터 반환
  return {
-   memberId: 1, // 임시로 1 설정 (실제로는 현재 로그인한 사용자 ID)
-   categoryId: 1, // 임시로 1 설정 (실제로는 선택된 카테고리 ID)
+   memberId: memberId, // 임시로 1 설정 (실제로는 현재 로그인한 사용자 ID)
+  categoryId: formData.categoryId,
    title: formData.title,
    color: formData.color,
    description: formData.memo || '',
