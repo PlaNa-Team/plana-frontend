@@ -18,7 +18,7 @@ const CalendarScheduleTagModal: React.FC<CalendarScheduleTagModalProps> = ({
   const [tags, setTags] = useState<Tag[]>(currentTags || []);
   const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
   const [inputText, setInputText] = useState('');
-  const [selectedColor, setSelectedColor] = useState('purple');
+  const [selectedColor, setSelectedColor] = useState('gray');
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); // 🆕 로딩 상태
 
