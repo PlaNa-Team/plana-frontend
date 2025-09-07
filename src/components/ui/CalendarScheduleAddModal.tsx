@@ -136,15 +136,12 @@ useEffect(() => {
   };
 
 const handleTagSelect = (tags: Tag[]) => {
-      // tags 배열의 첫 번째 요소를 selectedTag로 설정
-      const selectedTag = tags.length > 0 ? tags[0] : null;
-      
-      setSelectedTag(selectedTag);
-      updateFormData({ tags: selectedTag ? [selectedTag] : [] });
-      setIsTagModalOpen(false);
-      // loadAllTags(); // 이 줄을 제거했습니다.
+ // tags 배열의 첫 번째 요소를 selectedTag로 설정
+  const selectedTag = tags.length > 0 ? tags[0] : null;
+    setSelectedTag(selectedTag);
+    updateFormData({ tags: selectedTag ? [selectedTag] : [] });
+    setIsTagModalOpen(false);
 };
-
 
   // 오버레이 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -153,23 +150,24 @@ const handleTagSelect = (tags: Tag[]) => {
     }
   };
 
-  
-
- // 저장, 수정 api 핸들러
+// 저장, 수정 API 핸들러
   const handleSave = async () => {
     try {
-      const finalData = {
+      // selectedTag 상태를 기반으로 최종 데이터를 구성
+      const finalData: ScheduleFormData = {
         ...formData,
-        // Ensure the tags property is always an array
+        // categoryId를 Number()로 변환하여 할당합니다.
+        categoryId: selectedTag ? Number(selectedTag.id) : undefined,
+        // tags 배열에는 선택된 태그만 포함
         tags: selectedTag ? [selectedTag] : []
-       };
+      };
 
       if (mode === 'add') {
         // 새 일정 생성
         await calendarAPI.createSchedule(finalData);
         console.log('일정이 성공적으로 생성되었습니다.');
       } else if (mode === 'edit') {
-        // 🆕 기존 일정 수정
+        // 기존 일정 수정
         if (!scheduleData?.id) {
           throw new Error('수정할 일정의 ID를 찾을 수 없습니다.');
         }
@@ -224,9 +222,7 @@ const handleTagSelect = (tags: Tag[]) => {
     return text;
   };
 
-
-
-    // 색상 선택 핸들러
+  // 색상 선택 핸들러
   const handleColorSelect = (color: string) => {
     updateFormData({ color });
   };
