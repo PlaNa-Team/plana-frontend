@@ -158,7 +158,7 @@ const SignUpPage: React.FC = () => {
     setIsEmailSent(true);
 
     try {
-      const response = await authAPI.sendEmailVerification(formData.email);
+      const response = await authAPI.sendEmailVerification(formData.email, 'SIGN_UP');
       console.log('이메일 인증 발송:', response.message);
       setIsModalOpen(true);
 
