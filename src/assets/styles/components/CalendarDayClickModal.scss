@@ -141,19 +141,15 @@
   border-radius: 0.125rem;
   margin-right: 1rem;
   flex-shrink: 0;
-
-  &.meeting {
-    background-color: $tag-red;
-  }
-
-  &.personal {
-    background-color: $tag-green;
-  }
-
-  &.work {
-    background-color: $tag-blue;
-  }
 }
+.event-color-pink { background-color: #FFBCD1; }
+.event-color-red { background-color: #FF8888; }
+.event-color-orange { background-color: #FFAF73; }
+.event-color-yellow { background-color: #FFF06A; }
+.event-color-green { background-color: #C2FF9E; }
+.event-color-blue { background-color: #B8FFFD; }
+.event-color-purple { background-color: #D7AAFF; }
+.event-color-gray { background-color: #E2E3E5; }
 
 /* 일정 내용 */
 .event-content {

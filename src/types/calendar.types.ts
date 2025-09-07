@@ -94,11 +94,14 @@ export interface MonthlyScheduleResponse {
       id: number;
       title: string;
       startAt: string;
-      endAt: string;
+      endAt?: string;
       isAllDay: boolean;
       color: string;
       isRecurring: boolean;
+      // ✅ 누락된 속성들을 여기에 추가
+      categoryId: number;
       categoryName: string;
+      isDeleted: boolean;
       virtualId?: string;
     }>;
   };
@@ -218,8 +221,11 @@ export interface ScheduleDetailResponse {
     isRecurring: boolean;
     recurrenceRule?: string;
     recurrenceUntil?: string;
-    categoryId: number;
-    categoryName: string;
+     category?: {
+        id: number;
+        name: string;
+        color: string;
+    };
     tags?: Array<{
       id: number;
       name: string;
