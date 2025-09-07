@@ -383,9 +383,9 @@ export const authAPI = {
     }
   },
   
-  sendEmailVerification: async (email: string) => {
+  sendEmailVerification: async (email: string, purpose: string) => {
     try {
-      const response = await apiClient.post('/auth/email/verification-code', { email });
+      const response = await apiClient.post('/auth/email/verification-code', { email, purpose });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
