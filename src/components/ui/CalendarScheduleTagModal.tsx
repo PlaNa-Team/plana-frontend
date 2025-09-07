@@ -22,7 +22,7 @@ const CalendarScheduleTagModal: React.FC<CalendarScheduleTagModalProps> = ({
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); // 🆕 로딩 상태
 
-  const colors = ['pink', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray', 'white'];
+  // const colors = ['pink', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'gray', 'white'];
 
   // 🆕 전체 태그 목록 조회
   const loadAllTags = async () => {
@@ -166,7 +166,7 @@ const CalendarScheduleTagModal: React.FC<CalendarScheduleTagModalProps> = ({
             </button>
           </div>
 
-          {/* 색상 선택 */}
+          {/* 색상 선택
           <div className="color-selection">
             {colors.map((color) => (
               <div
@@ -175,7 +175,7 @@ const CalendarScheduleTagModal: React.FC<CalendarScheduleTagModalProps> = ({
                 onClick={() => setSelectedColor(color)}
               />
             ))}
-          </div>
+          </div> */}
 
           {/* 🆕 전체 태그 목록 표시 */}
           <div className="current-tags-section">
