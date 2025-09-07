@@ -1,18 +1,22 @@
 import React, { useRef, useEffect } from 'react';
 import { StarEmptyIcon, StarFullIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { updateMovieData } from '../../store/slices/diarySlice';
+import { updateMovieData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
 interface MovieContentProps {
-    imagePreview: string;
 }
 
-const MovieContent: React.FC<MovieContentProps> = ({
-    imagePreview,
-}) => {
+const MovieContent: React.FC<MovieContentProps> = () => {
     const dispatch = useAppDispatch();
     const movieData = useAppSelector(state => state.diary.currentMovieData);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            dispatch(uploadTempImageAsync({ file, diaryType: 'MOVIE'}));
+        }
+    };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(updateMovieData({ title: e.target.value }));
@@ -53,23 +57,37 @@ const MovieContent: React.FC<MovieContentProps> = ({
         }
     };
 
+    const currentRating = movieData.rating ?? 0;
+
     return (
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload-area'>
-                    <input
-                        type='file'
-                        id='fileInput-movie'
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                    />
-                    <div
-                        className='image-box'
-                        onClick={handleImageClick}
-                        style={{ backgroundImage: imagePreview ? `url(${imagePreview})` : 'none' }}
-                    >
-                        {!imagePreview && <div className='placeholder-text'>사진 업로드</div>}
-                    </div>
+                    {movieData.imageUrl ? (
+                        <img
+                            src={movieData.imageUrl}
+                            alt="Uploaded Preview"
+                            className="uploaded-image-preview"
+                        />
+                    ) : (
+                        <>
+                            <input
+                                type='file'
+                                accept='image/*'
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                                className='file-input'
+                                style={{ display: 'none'}}
+                            />
+                            <label
+                                role='button'
+                                onClick={handleImageClick}
+                                className='image-upload-button'
+                            >
+                                이미지 업로드
+                            </label>
+                        </>
+                    )}
                 </div>
 
                 <div className='input-section'>
@@ -118,10 +136,10 @@ const MovieContent: React.FC<MovieContentProps> = ({
                             <button
                                 key={star}
                                 type="button"
-                                className={`star ${star <= movieData.rating ? 'filled' : 'empty'}`}
+                                className={`star ${star <= currentRating ? 'filled' : 'empty'}`}
                                 onClick={() => handleStarClick(star)}
                             >
-                                {star <= movieData.rating ? (
+                                {star <= currentRating ? (
                                     <StarFullIcon className="star-icon filled" fill="var(--color-xl)" width="20" />
                                 ) : (
                                     <StarEmptyIcon className="star-icon empty" fill="var(--color-xl)" width="20" />

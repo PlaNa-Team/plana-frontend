@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { diaryAPI } from '../../services/api';
+import { diaryAPI, API_BASE_URL } from '../../services/api'
 import {
     MonthlyDiaryItem,
     DiaryDetail,
@@ -15,53 +15,24 @@ import {
 } from '../../types/diary.types';
 import axios from 'axios';
 
-interface MomentData {
-    title: string;
-    location: string;
-    memo: string;
-}
-
-interface MovieData {
-    title: string;
-    director: string;
-    genre: string;
-    actors: string;
-    releaseDate: string;
-    rewatch: boolean;
-    rating: number;
-    comment: string;
-}
-
-interface BookData {
-    title: string;
-    author: string;
-    genre: string;
-    publisher: string;
-    startDate: string;
-    endDate: string;
-    reread: boolean;
-    rating: number;
-    comment: string;
-}
-
 interface DiaryState {
-    currentMomentData: MomentData;
-    currentMovieData: MovieData;
-    currentBookData: BookData;
+    currentMomentData: DailyContent;
+    currentMovieData: MovieContent;
+    currentBookData: BookContent;
     selectedDate: string | null;
     monthlyDiaries: MonthlyDiaryItem[];
     currentDiaryDetail: DiaryDetail | null;
     isLoading: boolean;
     isUploading: boolean;
     error: string | null;
-    tempImageUrl: string | null;
 }
 
 const initialState: DiaryState = {
     currentMomentData: {
         title: '',
         location: '',
-        memo: ''
+        memo: '',
+        imageUrl: ''
     },
     currentMovieData: {
         title: '',
@@ -71,7 +42,8 @@ const initialState: DiaryState = {
         releaseDate: '',
         rewatch: false,
         rating: 0,
-        comment: ''
+        comment: '',
+        imageUrl: ''
     },
     currentBookData: {
         title: '',
@@ -82,7 +54,8 @@ const initialState: DiaryState = {
         endDate: '',
         reread: false,
         rating: 0,
-        comment: ''
+        comment: '',
+        imageUrl: ''
     },
     selectedDate: null,
     monthlyDiaries: [],
@@ -90,9 +63,22 @@ const initialState: DiaryState = {
     isLoading: false,
     isUploading: false,
     error: null,
-    tempImageUrl: null
 };
 
+// 이미지 임시 업로드 Thunk
+export const uploadTempImageAsync = createAsyncThunk<
+    TempImageResponse, 
+    { file: File; diaryType: 'DAILY' | 'MOVIE' | 'BOOK'}, 
+    { rejectValue: string }
+>('diary/uploadTempImage', async ({ file, diaryType }, { rejectWithValue }) => {
+        try {
+            const response = await diaryAPI.uploadTempImage(file);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 
 const diarySlice = createSlice({
     name: 'diary',
@@ -102,27 +88,55 @@ const diarySlice = createSlice({
             state.selectedDate = action.payload;
         },
         clearCurrentData: (state) => {
-            state.currentMomentData = { title: '', location: '', memo: '' };
-            state.currentMovieData = { title: '', director: '', actors: '', genre: '', releaseDate: '', rewatch: false, rating: 0, comment: '' };
-            state.currentBookData = { title: '', author: '', genre: '', publisher: '', startDate: '', endDate: '', reread: false, rating: 0, comment: '' };
+            state.currentMomentData = { title: '', location: '', memo: '', imageUrl: '' };
+            state.currentMovieData = { title: '', director: '', actors: '', genre: '', releaseDate: '', rewatch: false, rating: 0, comment: '', imageUrl: '' };
+            state.currentBookData = { title: '', author: '', genre: '', publisher: '', startDate: '', endDate: '', reread: false, rating: 0, comment: '', imageUrl: '' };
             state.currentDiaryDetail = null;
         },
-        updateMomentData: (state, action: PayloadAction<Partial<MomentData>>) => {
+        updateMomentData: (state, action: PayloadAction<Partial<DailyContent>>) => {
             state.currentMomentData = { ...state.currentMomentData, ...action.payload };
         },
-        updateMovieData: (state, action: PayloadAction<Partial<MovieData>>) => {
+        updateMovieData: (state, action: PayloadAction<Partial<MovieContent>>) => {
             state.currentMovieData = { ...state.currentMovieData, ...action.payload };
         },
-        updateBookData: (state, action: PayloadAction<Partial<BookData>>) => {
+        updateBookData: (state, action: PayloadAction<Partial<BookContent>>) => {
             state.currentBookData = { ...state.currentBookData, ...action.payload };
         },
         clearError: (state) => {
             state.error = null;
-        }
-  },
+        },
+    },
     extraReducers: (builder) => {
+        builder
+            .addCase(uploadTempImageAsync.pending, (state) => {
+                state.isUploading = true;
+                state.error = null;
+            })
+            .addCase(uploadTempImageAsync.fulfilled, (state, action) => {
+                state.isUploading = false;
+                const tempUrl = action.payload.data.tempUrl;
+                const baseDomain = API_BASE_URL.replace('/api', '');
+                const fullUrl = `${baseDomain}${tempUrl}`;
 
-  },
+                const { diaryType } = action.meta.arg;
+
+                switch (diaryType) {
+                    case 'DAILY':
+                        state.currentMomentData.imageUrl = fullUrl;
+                        break;
+                    case 'MOVIE':
+                        state.currentMovieData.imageUrl = fullUrl;
+                        break;
+                    case 'BOOK':
+                        state.currentBookData.imageUrl = fullUrl;
+                        break;
+                }
+            })
+            .addCase(uploadTempImageAsync.rejected, (state, action) => {
+                state.isUploading = false;
+                state.error = action.payload as string;
+            });
+    },
 });
 
 export const {
@@ -131,7 +145,7 @@ export const {
     updateMomentData,
     updateMovieData,
     updateBookData,
-    clearError
+    clearError,
 } = diarySlice.actions;
 
 export default diarySlice.reducer;

@@ -1,18 +1,22 @@
 import React, { useRef, useEffect } from 'react';
 import { StarEmptyIcon, StarFullIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { updateBookData } from '../../store/slices/diarySlice';
+import { updateBookData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
 interface BookContentProps {
-    imagePreview: string;
 }
 
-const BookContent: React.FC<BookContentProps> = ({
-    imagePreview,
-}) => {
+const BookContent: React.FC<BookContentProps> = () => {
     const dispatch = useAppDispatch();
     const bookData = useAppSelector(state => state.diary.currentBookData);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            dispatch(uploadTempImageAsync({ file, diaryType: 'BOOK'}));
+        }
+    };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(updateBookData({ title: e.target.value }));
@@ -57,23 +61,37 @@ const BookContent: React.FC<BookContentProps> = ({
         }
     };
 
+    const currentRating = bookData.rating ?? 0;
+
     return (
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload-area'>
-                    <input
-                        type='file'
-                        id='fileInput-book'
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                    />
-                    <div
-                        className='image-box'
-                        onClick={handleImageClick}
-                        style={{ backgroundImage: imagePreview ? `url(${imagePreview})` : 'none' }}
-                    >
-                        {!imagePreview && <div className='placeholder-text'>사진 업로드</div>}
-                    </div>
+                    {bookData.imageUrl ? (
+                        <img
+                            src={bookData.imageUrl}
+                            alt="Uploaded Preview"
+                            className="uploaded-image-preview"
+                        />
+                    ) : (
+                        <>
+                            <input
+                                type='file'
+                                accept='image/*'
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                                className='file-input'
+                                style={{ display: 'none'}}
+                            />
+                            <label
+                                role='button'
+                                onClick={handleImageClick}
+                                className='image-upload-button'
+                            >
+                                이미지 업로드
+                            </label>
+                        </>
+                    )}
                 </div>
                 <div className='input-section'>
                     <input
@@ -121,10 +139,10 @@ const BookContent: React.FC<BookContentProps> = ({
                             <button
                                 key={star}
                                 type="button"
-                                className={`star ${star <= bookData.rating ? 'filled' : 'empty'}`}
+                                className={`star ${star <= currentRating ? 'filled' : 'empty'}`}
                                 onClick={() => handleStarClick(star)}
                             >
-                                {star <= bookData.rating ? (
+                                {star <= currentRating ? (
                                     <StarFullIcon className="star-icon filled" fill="var(--color-xl)" width="20" />
                                 ) : (
                                     <StarEmptyIcon className="star-icon empty" fill="var(--color-xl)" width="20" />
