@@ -360,7 +360,7 @@ export const transformFormDataToRequest = (formData: ScheduleFormData) => {
        alarms
      };
   };
-};
+
 
 // 가상 ID에서 원본 ID 추출하는 함수
 export const extractOriginalId = (eventId: string): string => {
