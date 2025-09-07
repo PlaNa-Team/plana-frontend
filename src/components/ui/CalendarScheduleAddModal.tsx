@@ -135,15 +135,16 @@ useEffect(() => {
     setIsAlarmModalOpen(false);
   };
 
-  const handleTagSelect = (tags: Tag[]) => {
-      // tags 배열의 첫 번째 요소를 selectedTag로 설정
-      const selectedTag = tags.length > 0 ? tags[0] : null;
-      
-      setSelectedTag(selectedTag);
-      updateFormData({ tags: selectedTag ? [selectedTag] : [] });
-      setIsTagModalOpen(false);
-      loadAllTags();
-  };
+const handleTagSelect = (tags: Tag[]) => {
+      // tags 배열의 첫 번째 요소를 selectedTag로 설정
+      const selectedTag = tags.length > 0 ? tags[0] : null;
+      
+      setSelectedTag(selectedTag);
+      updateFormData({ tags: selectedTag ? [selectedTag] : [] });
+      setIsTagModalOpen(false);
+      // loadAllTags(); // 이 줄을 제거했습니다.
+};
+
 
   // 오버레이 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -370,16 +371,16 @@ useEffect(() => {
                       (allTags.map((tag) => {
                         const isSelected = selectedTag?.id === tag.id;
                           const colorClass = isSelected ? formData.color : tag.color;
-                            return (
+                          return (
                             <span key={tag.id}
                               className={`tag ${colorClass} ${isSelected ? 'selected' : ''}`}
                               onClick={() => handleTagSelect(isSelected ? [] : [tag])}>
                               {tag.name}
                             </span>
-                        );
-                    }))
+                          );
+                      }))
                     }
-                    </div>
+                  </div>
                   <div>
                     <button 
                       className="add-tag-button"
