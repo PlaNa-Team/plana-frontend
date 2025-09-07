@@ -81,15 +81,24 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   };
 
    // 📄 모드나 데이터가 변경되면 폼 초기화
-  useEffect(() => {
-    if (isOpen) {
-        const initialData = getInitialFormData();
-        setFormData(initialData);
+  // 📄 모드나 데이터가 변경되면 폼 초기화
+useEffect(() => {
+  if (isOpen) {
+    const initialData = getInitialFormData();
+    setFormData(initialData);
 
-        // 💡 모든 태그를 먼저 로드합니다.
-        loadAllTags();
+    // 🆕 수정 모드일 때 scheduleData의 tags로 selectedTag 초기화
+    if (mode === 'edit' && scheduleData) {
+      setSelectedTag(scheduleData.tags?.[0] || null);
+    } else {
+      // 🆕 추가 모드일 때 selectedTag를 null로 초기화
+      setSelectedTag(null);
     }
-  }, [isOpen, mode, scheduleData, selectedDate]);
+    
+    // 💡 모든 태그를 먼저 로드합니다.
+    loadAllTags();
+  }
+}, [isOpen, mode, scheduleData, selectedDate]);
 
   useEffect(() => {
     if (formData.categoryId && allTags.length > 0) {
@@ -357,23 +366,20 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 </div>
                 <div className="tags-container">
                   <div className="tags-subcontainer">
-                    {isLoadingTags ? (
-                      <span>로딩 중...</span>
-                    ) : (
-                      allTags.map((tag) => {
-                        const isSelected = selectedTag?.id === tag.id;  
-                        const colorClass = isSelected ? formData.color : tag.color;
-                        return (
-                          <span
-                            key={tag.id}
-                            className={`tag ${colorClass} ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleTagSelect(isSelected ? [] : [tag])}
-                          >
-                            {tag.name}
-                          </span>
-                        );
-                      }))}
-                  </div>
+                    { 
+                      (allTags.map((tag) => {
+                        const isSelected = selectedTag?.id === tag.id;
+                          const colorClass = isSelected ? formData.color : tag.color;
+                            return (
+                            <span key={tag.id}
+                              className={`tag ${colorClass} ${isSelected ? 'selected' : ''}`}
+                              onClick={() => handleTagSelect(isSelected ? [] : [tag])}>
+                              {tag.name}
+                            </span>
+                        );
+                    }))
+                    }
+                    </div>
                   <div>
                     <button 
                       className="add-tag-button"
