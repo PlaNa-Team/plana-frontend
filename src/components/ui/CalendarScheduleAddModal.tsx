@@ -53,9 +53,6 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     };
   }
 };
-
-  
-
   const [formData, setFormData] = useState<ScheduleFormData>(getInitialFormData);
   const [selectedTag, setSelectedTag] = useState<Tag | null>(formData.tags?.[0] || null);  
   const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
