@@ -54,8 +54,7 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   };
 
   const [formData, setFormData] = useState<ScheduleFormData>(getInitialFormData);
-  const [selectedTags, setSelectedTags] = useState<Tag[]>(formData.tags || []);
-  const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(formData.tags?.[0] || null);  const [allTags, setAllTags] = useState<Tag[]>([]); // 🆕 전체 태그 목록
   const [isLoadingTags, setIsLoadingTags] = useState(false); // 🆕 태그 로딩 상태
 
    // 모달 관련 상태 (일정반복, 알람, 태그)
@@ -80,12 +79,13 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
    // 📄 모드나 데이터가 변경되면 폼 초기화
   useEffect(() => {
     if (isOpen) {
-      const initialData = getInitialFormData();
-      setFormData(initialData);
-      setSelectedTags(initialData.tags || []);
-      loadAllTags(); // 🆕 모달 열릴 때 태그 목록 조회
+        const initialData = getInitialFormData();
+        setFormData(initialData);
+        // Correctly set the single selected tag.
+        setSelectedTag(initialData.tags?.[0] || null);
+        loadAllTags();
     }
-  }, [isOpen, mode, scheduleData, selectedDate]);
+}, [isOpen, mode, scheduleData, selectedDate]);
 
   // 폼 데이터 업데이트 헬퍼 함수
   const updateFormData = (updates: Partial<ScheduleFormData>) => {
@@ -114,18 +114,13 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
   };
 
   const handleTagSelect = (tags: Tag[]) => {
-    setSelectedTags(tags);
-    updateFormData({ tags });
-    setIsTagModalOpen(false);
-    // 🆕 태그 모달에서 변경된 내용 반영을 위해 다시 로드
-    loadAllTags();
-  };
-
-  // 개별 태그 제거 핸들러
-  const handleTagRemove = (tagId: string) => {
-    const newTags = selectedTags.filter(tag => tag.id !== tagId);
-    setSelectedTags(newTags);
-    updateFormData({ tags: newTags });
+      // tags 배열의 첫 번째 요소를 selectedTag로 설정
+      const selectedTag = tags.length > 0 ? tags[0] : null;
+      
+      setSelectedTag(selectedTag);
+      updateFormData({ tags: selectedTag ? [selectedTag] : [] });
+      setIsTagModalOpen(false);
+      loadAllTags();
   };
 
   // 오버레이 클릭 핸들러
@@ -142,8 +137,9 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
     try {
       const finalData = {
         ...formData,
-        tags: selectedTags
-      };
+        // Ensure the tags property is always an array
+        tags: selectedTag ? [selectedTag] : []
+       };
 
       if (mode === 'add') {
         // 새 일정 생성
@@ -348,26 +344,23 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
                 </div>
                 <div className="tags-container">
                   <div className="tags-subcontainer">
-                    {mode === 'edit' ? (
-                      // 수정 모드: DB에서 가져온 선택된 태그들만 표시
-                      formData.tags?.map((tag) => (
-                        <span key={tag.id} className={`tag ${tag.color}`}>
-                          {tag.name}
-                        </span>
-                      ))
-                    ) : (
-                      // 추가 모드: 전체 태그 목록 표시 // 태그 선택을 단일로 하고 색상 부분 이슈로 일단 여기서 마무리 하고 기획 적인 부분 나오면 리팩토링 필요
-                      isLoadingTags ? (
-                        <span>로딩 중...</span>
-                      ) : (
-                        allTags.map((tag) => (
-                          <span key={tag.id} className={`tag ${tag.color}`}>
-                            {tag.name}
-                          </span>
-                        ))
-                      )
-                    )}
-                  </div>
+                    {isLoadingTags ? (
+                      <span>로딩 중...</span>
+                    ) : (
+                      allTags.map((tag) => {
+                        const isSelected = selectedTag?.id === tag.id;  
+                        const colorClass = isSelected ? formData.color : tag.color;
+                        return (
+                          <span
+                            key={tag.id}
+                            className={`tag ${colorClass} ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleTagSelect(isSelected ? [] : [tag])}
+                          >
+                            {tag.name}
+                          </span>
+                        );
+                      }))}
+                  </div>
                   <div>
                     <button 
                       className="add-tag-button"
@@ -446,11 +439,11 @@ const CalendarScheduleAddModal: React.FC<CalendarScheduleAddModalProps> = ({
         currentValue={formData.alarmValue || ''}
       />
       {/*태그 설정 모달*/}
-      <CalendarScheduleTagModal
-        isOpen={isTagModalOpen}
-        onClose={handleTagModalClose}
-        onSelect={handleTagSelect}
-        currentTags={selectedTags}
+            <CalendarScheduleTagModal
+          isOpen={isTagModalOpen}
+          onClose={handleTagModalClose}
+          onSelect={handleTagSelect}
+          currentTags={selectedTag ? [selectedTag] : []}
       />
     </>
   );
