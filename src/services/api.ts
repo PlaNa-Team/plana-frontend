@@ -25,7 +25,11 @@ import {
   UpdateTagResponse,
   DeleteTagResponse,
   ServerTag,
-  Tag
+  Tag,
+  MemoItem,
+  MemoPayload,
+  UpdateMemoPayload
+
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
 
@@ -528,8 +532,84 @@ export const calendarAPI = {
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
+    },
+        // 🆕 캘린더 메모 관련 API
+    /**
+     * 캘린더 메모 목록을 조회합니다.
+     * GET /api/memos?year={year}&week={week}
+     * @param year 조회할 연도
+     * @param week 조회할 주차
+     * @returns Promise<MemoItem[]> 메모 목록
+     */
+    getMemos: async (year: number, week: number): Promise<MemoItem[]> => {
+        try {
+            const response = await apiClient.get<{ data: MemoItem[] }>(`/memos?year=${year}&week=${week}`);
+            return response.data.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '메모 조회에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * 새로운 캘린더 메모를 생성합니다.
+     * POST /api/memos
+     * @param payload 메모 생성 요청 페이로드
+     * @returns Promise<MemoItem> 생성된 메모 정보
+     */
+    createMemo: async (payload: MemoPayload): Promise<MemoItem> => {
+        try {
+            const response = await apiClient.post<{ data: MemoItem }>('/memos', payload);
+            return response.data.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '메모 생성에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * 기존 캘린더 메모를 수정합니다.
+     * PUT /api/memos/{id}
+     * @param payload 메모 수정 요청 페이로드 (id 포함)
+     * @returns Promise<MemoItem> 수정된 메모 정보
+     */
+    updateMemo: async (payload: UpdateMemoPayload): Promise<MemoItem> => {
+        try {
+            const response = await apiClient.put<{ data: MemoItem }>(`/memos/${payload.id}`, payload);
+            return response.data.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '메모 수정에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * 캘린더 메모를 삭제합니다.
+     * DELETE /api/memos/{id}
+     * @param id 삭제할 메모 ID
+     * @returns Promise<void>
+     */
+    deleteMemo: async (id: number): Promise<void> => {
+        try {
+            await apiClient.delete(`/memos/${id}`);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '메모 삭제에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
     }
-}
+};
 
     // 🆕 태그 API - authAPI, calendarAPI와 동일한 패턴으로 구현
     export const tagAPI = {
