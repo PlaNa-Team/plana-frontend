@@ -1,3 +1,6 @@
+import { MemoType } from './diary.types'; // ✅ 다이어리 타입 파일에서 MemoType을 가져옴
+
+
 // TypeScript 타입 정의 - 캘린더 관련 타입
 export interface Schedule {
   id: number;
@@ -300,4 +303,30 @@ export interface UpdateScheduleResponse {
       notifyUnit: 'MIN' | 'HOUR' | 'DAY';
     }>;
   };
+}
+
+// 캘린더 메모 아이템 (API 응답)
+export interface MemoItem {
+  id: number;
+  year: number;
+  week: number;
+  content: string;
+  type: MemoType; 
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// 캘린더 메모 요청 payload (등록)
+export interface MemoPayload {
+  content: string;
+  year: number;
+  week: number;
+  type: MemoType;
+}
+
+// 캘린더 메모 수정 요청 payload
+export interface UpdateMemoPayload {
+  id: number;
+  content: string;
+  type: MemoType;
 }
