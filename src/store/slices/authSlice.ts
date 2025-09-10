@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '../../types/user.types';
+import { User , MemberInfo } from '../../types/user.types';
 
 interface AuthState {
   user: User | null;
@@ -81,6 +81,29 @@ const authSlice = createSlice({
       state.isAuthenticated = true; // 토큰 갱신 후에도 로그인 상태 유지
       localStorage.setItem('accessToken', action.payload);
     },
+    updateUser: (state, action: PayloadAction<MemberInfo>) => {
+      if (state.user) {
+        // 기존 user의 필수 속성을 명시적으로 유지
+        const updatedUser: User = {
+          id: action.payload.id,
+          name: action.payload.name,
+          email: action.payload.email,
+          loginId: action.payload.login_id,
+          nickname: action.payload.nickname,
+          provider: action.payload.provider as any,
+          createdAt: action.payload.created_at,
+          
+          // API 응답에 없는 필수 필드는 기존 state에서 가져와 할당
+          password: state.user.password,
+          updatedAt: state.user.updatedAt,
+          isDeleted: state.user.isDeleted,
+        };
+
+        state.user = updatedUser;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    },
+
   },
 });
 
@@ -90,6 +113,7 @@ export const {
   setError, 
   clearError,
   setAccessToken,
+  updateUser,
 } = authSlice.actions;
 
 export default authSlice.reducer;
