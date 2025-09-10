@@ -43,3 +43,19 @@ export interface LoginResponseDto {
   timestamp: number;
   // refreshToken: string; // 쿠키에 저장 한다고 함. 다시 주석
 }
+
+export interface MemberInfo {
+  id: number;
+  login_id: string;
+  name: string;
+  email: string;
+  nickname: string;
+  provider: string;
+  created_at: string;
+}
+
+export interface MemberApiResponse {
+  status: number;
+  message: string;
+  data: MemberInfo;
+}

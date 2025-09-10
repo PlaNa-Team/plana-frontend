@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
+import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse } from '../types';
 import {
   MonthlyDiaryResponse,
   DiaryDetailResponse,
@@ -29,7 +29,7 @@ import {
   MemoItem,
   MemoPayload,
   UpdateMemoPayload,
-  MemoMonthlyResponse
+  MemoMonthlyResponse,
 
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
@@ -456,6 +456,19 @@ export const authAPI = {
         } catch (error) {
             // 토큰 갱신 실패 시 에러를 던져 인터셉터에서 잡도록 함
             throw new Error('리프레시 토큰으로 갱신에 실패했습니다.');
+        }
+    },
+    getMemberInfo: async (): Promise<MemberInfo> => {
+        try {
+        // API 명세에 따라 적절한 엔드포인트를 사용
+            const response = await apiClient.get<MemberApiResponse>('/members/info');
+            return response.data.data;
+        } catch (error) {
+            // 에러 처리
+            if (axios.isAxiosError(error)) {
+                throw new Error(error.response?.data?.message || '회원 정보 조회에 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
 }
