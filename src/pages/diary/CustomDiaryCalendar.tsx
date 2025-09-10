@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MonthlyDiaryItem } from '../../types';
+import DiaryMemoCell from './DiaryMemoCell';
 
 interface CustomDiaryCalendarProps {
     diaryMap: Map<string, MonthlyDiaryItem>;
@@ -227,11 +228,10 @@ const CustomDiaryCalendar: React.FC<CustomDiaryCalendarProps> = ({
                         // 주 끝에 메모 셀 추가
                         isEndOfWeek && (
                             <div key={`memo-${weekNumber}`} className="memo-cell">
-                                <textarea 
-                                    className="memo-textarea"
-                                    placeholder="메모를 입력하세요"
-                                    value={memoData.get(getWeekOfYear(date)) || ''}
-                                    onChange={(e) => handleMemoChange(getWeekOfYear(date), e.target.value)}
+                                <DiaryMemoCell
+                                    year={currentDate.getFullYear()}
+                                    month={currentDate.getMonth() + 1}
+                                    week={getWeekOfYear(date)}
                                 />
                             </div>
                         )
