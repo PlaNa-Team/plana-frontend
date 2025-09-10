@@ -28,6 +28,8 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
 
   // ✅ Redux 스토어에서 사용자 정보(user)를 가져옵니다.
   const user = useAppSelector(state => state.auth.user);
+  const accessToken = useAppSelector(state => state.auth.accessToken);
+  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
    
 
   const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
@@ -107,7 +109,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
               
               <div className="mypage-modal__info-row">
                 <div className="mypage-modal__label">비밀번호</div>
-                <div className="mypage-modal__value">인증이 필요합니다.</div>
+                <div className="mypage-modal__value">{isAuthenticated && accessToken ? '인증이 확인되었습니다.' : '인증이 필요합니다.'}</div>
               </div>
             </div>
             
