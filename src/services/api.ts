@@ -28,7 +28,8 @@ import {
   Tag,
   MemoItem,
   MemoPayload,
-  UpdateMemoPayload
+  UpdateMemoPayload,
+  MemoMonthlyResponse
 
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
@@ -554,6 +555,21 @@ export const calendarAPI = {
         }
     },
 
+    // 월별 메모를 조회하는 API 함수 추가
+    getMonthlyMemos: async (year: number, month: number, type: '다이어리' | '스케줄'): Promise<MemoItem[]> => {
+        try {
+            const response = await apiClient.get<MemoMonthlyResponse>(`/memos`, {
+                params: { year, month, type }
+            });
+            return response.data.data.memos;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error(error.response?.data?.message || '월별 메모 조회에 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
     /**
      * 새로운 캘린더 메모를 생성합니다.
      * POST /api/memos
@@ -581,16 +597,20 @@ export const calendarAPI = {
      */
     updateMemo: async (payload: UpdateMemoPayload): Promise<MemoItem> => {
         try {
-            const response = await apiClient.put<{ data: MemoItem }>(`/memos/${payload.id}`, payload);
-            return response.data.data;
+        // ✅ PUT 대신 PATCH 메서드를 사용하도록 수정
+        const response = await apiClient.patch<{ data: MemoItem }>(`/memos/${payload.id}`, {
+            content: payload.content,
+            type: payload.type
+        });
+        return response.data.data;
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                const errorMessage = error.response?.data?.message || '메모 수정에 실패했습니다.';
-                throw new Error(errorMessage);
-            }
-            throw new Error('네트워크 오류가 발생했습니다.');
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || '메모 수정에 실패했습니다.');
+        }
+        throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+
 
     /**
      * 캘린더 메모를 삭제합니다.

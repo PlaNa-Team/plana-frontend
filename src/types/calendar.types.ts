@@ -330,3 +330,12 @@ export interface UpdateMemoPayload {
   content: string;
   type: MemoType;
 }
+
+export interface MemoMonthlyResponse {
+    status: number;
+    message: string;
+    data: {
+        memos: MemoItem[];
+        // 백엔드 응답에 다른 필드가 있다면 여기에 추가
+    };
+}
