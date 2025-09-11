@@ -1,7 +1,12 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { User, MemberInfo } from '../../types/user.types';
+import { User, deleteIdResponse } from '../../types/user.types';
 import { authAPI } from '../../services/api';
 import axios from 'axios';
+
+// 쿠키 삭제를 위한 유틸리티 함수
+const removeCookie = (name: string) => {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
+};
 
 interface AuthState {
   user: User | null;
@@ -45,7 +50,7 @@ const initialState: AuthState = {
   isLoading: false,
 };
 
-// 🆕 비밀번호 확인을 위한 비동기 thunk
+// 비밀번호 확인을 위한 비동기 thunk
 export const passwordConfirmAsync = createAsyncThunk(
   'auth/passwordConfirm',
   async (currentPassword: string, { rejectWithValue }) => {
@@ -58,7 +63,7 @@ export const passwordConfirmAsync = createAsyncThunk(
   }
 );
 
-// 🆕 비밀번호 변경을 위한 비동기 thunk
+// 비밀번호 변경을 위한 비동기 thunk
 export const passwordUpdateAsync = createAsyncThunk(
   'auth/passwordUpdate',
   async ({ newPassword, confirmPassword }: { newPassword: string; confirmPassword: string }, { rejectWithValue }) => {
@@ -70,6 +75,20 @@ export const passwordUpdateAsync = createAsyncThunk(
     }
   }
 );
+
+// 🆕 회원 탈퇴를 위한 비동기 thunk 액션
+export const deleteMemberAsync = createAsyncThunk(
+    'auth/deleteMember',
+    async (_, { rejectWithValue }) => {
+        try {
+            await authAPI.deleteMember();
+            return true;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 
 // 닉네임 업데이트를 위한 비동기 thunk 액션 생성
 export const updateNicknameAsync = createAsyncThunk(
@@ -157,7 +176,22 @@ const authSlice = createSlice({
     resetPasswordState: (state) => {
       state.isLoading = false;
       state.error = null;
-    }
+    },
+    // 🆕 인증 정보 초기화를 위한 리듀서
+    clearAuthData: (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.accessToken = null;
+        state.isLoading = false;
+        state.error = null;
+        
+        // 1. 로컬 스토리지 데이터 삭제
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        
+        // 2. 쿠키 데이터 삭제 (리프레쉬 토큰)
+        removeCookie('refreshToken'); // 'refreshToken' 쿠키 삭제
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -200,8 +234,24 @@ const authSlice = createSlice({
       .addCase(passwordUpdateAsync.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-      });
-  },
+      })
+      .addCase(deleteMemberAsync.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+      })
+      .addCase(deleteMemberAsync.fulfilled, (state) => {
+            // 회원 탈퇴 성공 시, 상태를 초기화하는 리듀서 호출
+            // **주의: Thunk 내부에서 dispatch를 사용해야 합니다.**
+            // 여기서는 바로 리듀서 상태를 변경하거나, MyPageDeleteidBtnModal.tsx에서
+            // 성공 응답을 받고 clearAuthData를 호출하는 것이 더 명확합니다.
+            // 아래는 UI에서 처리하는 경우를 가정하고, 여기서는 로딩 상태만 관리합니다.
+            state.isLoading = false;
+      })
+       .addCase(deleteMemberAsync.rejected, (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload as string;
+        });
+    },
 });
 
 export const {
@@ -213,6 +263,7 @@ export const {
   updateUser,
   updateUserNickname,
   resetPasswordState,
+  clearAuthData,
 } = authSlice.actions;
 
 export default authSlice.reducer;

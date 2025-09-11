@@ -85,3 +85,9 @@ export interface PasswordUpdateResponse {
   message: string;
   status: number;
 }
+
+export interface deleteIdResponse {
+  timestamp: number;
+  message: string;
+  status: number;
+}

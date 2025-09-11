@@ -1,5 +1,15 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse, PasswordConfirmRequest, PasswordConfirmResponse, PasswordUpdateRequest, PasswordUpdateResponse, PaginationResponse } from '../types';
+import { 
+    SignUpRequest, 
+    IdCheckResponse, 
+    LoginResponseDto, 
+    MemberInfo, 
+    PasswordConfirmRequest, 
+    PasswordConfirmResponse, 
+    PasswordUpdateRequest, 
+    PasswordUpdateResponse, 
+    deleteIdResponse
+} from '../types';
 import {
   MonthlyDiaryResponse,
   DiaryDetailResponse,
@@ -17,7 +27,6 @@ import {
   ScheduleFormData, 
   CreateScheduleResponse, 
   UpdateScheduleResponse,
-  // 🆕 태그 관련 타입 추가
   TagListResponse,
   CreateTagRequest,
   CreateTagResponse,
@@ -30,7 +39,6 @@ import {
   MemoPayload,
   UpdateMemoPayload,
   MemoMonthlyResponse,
-
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
 
@@ -510,6 +518,18 @@ export const authAPI = {
         throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+    deleteMember: async (): Promise<deleteIdResponse> => {
+        try {
+            const response = await apiClient.delete<deleteIdResponse>('/members');
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '회원 탈퇴에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
 }
 
 
@@ -680,7 +700,7 @@ export const calendarAPI = {
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
-    }
+    },
 };
 
     // 🆕 태그 API - authAPI, calendarAPI와 동일한 패턴으로 구현
