@@ -157,6 +157,10 @@
     font-weight: $font-weight-medium;
     text-wrap-mode: nowrap;
     cursor: pointer;
+
+       &.deleteid {
+            color: #FF8888;
+        }
     
     @media (max-width: 480px) {    
       max-width: 4rem;     
