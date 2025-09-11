@@ -45,6 +45,32 @@ const initialState: AuthState = {
   isLoading: false,
 };
 
+// 🆕 비밀번호 확인을 위한 비동기 thunk
+export const passwordConfirmAsync = createAsyncThunk(
+  'auth/passwordConfirm',
+  async (currentPassword: string, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.confirmPassword(currentPassword);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// 🆕 비밀번호 변경을 위한 비동기 thunk
+export const passwordUpdateAsync = createAsyncThunk(
+  'auth/passwordUpdate',
+  async ({ newPassword, confirmPassword }: { newPassword: string; confirmPassword: string }, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.updatePassword(newPassword, confirmPassword);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // 닉네임 업데이트를 위한 비동기 thunk 액션 생성
 export const updateNicknameAsync = createAsyncThunk(
   'auth/updateNickname',
@@ -127,6 +153,11 @@ const authSlice = createSlice({
       state.user = action.payload;
       localStorage.setItem('user', JSON.stringify(action.payload));
     },
+    // 🆕 비밀번호 관련 상태 초기화를 위한 리듀서
+    resetPasswordState: (state) => {
+      state.isLoading = false;
+      state.error = null;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -145,6 +176,30 @@ const authSlice = createSlice({
       .addCase(updateNicknameAsync.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(passwordConfirmAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(passwordConfirmAsync.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(passwordConfirmAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(passwordUpdateAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(passwordUpdateAsync.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(passwordUpdateAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
@@ -157,6 +212,7 @@ export const {
   setAccessToken,
   updateUser,
   updateUserNickname,
+  resetPasswordState,
 } = authSlice.actions;
 
 export default authSlice.reducer;

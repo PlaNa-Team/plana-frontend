@@ -59,3 +59,29 @@ export interface MemberApiResponse {
   message: string;
   data: MemberInfo;
 }
+
+
+// 비밀번호 확인 요청 타입
+export interface PasswordConfirmRequest {
+  currentPassword: string;
+}
+
+// 비밀번호 확인 응답 타입
+export interface PasswordConfirmResponse {
+  timestamp: number;
+  message: string;
+  status: number;
+}
+
+// 비밀번호 변경 요청 타입
+export interface PasswordUpdateRequest {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+// 비밀번호 변경 응답 타입 (API 문서에 맞게 조정)
+export interface PasswordUpdateResponse {
+  timestamp: number;
+  message: string;
+  status: number;
+}

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse } from '../types';
+import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse, PasswordConfirmRequest, PasswordConfirmResponse, PasswordUpdateRequest, PasswordUpdateResponse, PaginationResponse } from '../types';
 import {
   MonthlyDiaryResponse,
   DiaryDetailResponse,
@@ -481,8 +481,35 @@ export const authAPI = {
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
-    }
-
+    },
+    // 🆕 현재 비밀번호 인증 API
+    confirmPassword: async (currentPassword: string): Promise<PasswordConfirmResponse> => {
+        try {
+        // API 문서에 따르면 요청 본문은 `currentPassword`를 키로 사용
+        const requestData: PasswordConfirmRequest = { currentPassword };
+        const response = await apiClient.post<PasswordConfirmResponse>('/members/password/confirm', requestData);
+        return response.data;
+        } catch (error) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || '현재 비밀번호 확인에 실패했습니다.');
+        }
+        throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    // 🆕 비밀번호 변경 API
+    updatePassword: async (newPassword: string, confirmPassword: string): Promise<PasswordUpdateResponse> => {
+        try {
+        // API 문서에 따르면 요청 본문은 `newPassword`와 `confirmPassword`를 키로 사용
+        const requestData: PasswordUpdateRequest = { newPassword, confirmPassword };
+        const response = await apiClient.patch<PasswordUpdateResponse>('/members/password', requestData);
+        return response.data;
+        } catch (error) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || '비밀번호 변경에 실패했습니다.');
+        }
+        throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
 }
 
 
