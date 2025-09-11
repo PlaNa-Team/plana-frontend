@@ -8,7 +8,9 @@ import {
     PasswordConfirmResponse, 
     PasswordUpdateRequest, 
     PasswordUpdateResponse, 
-    deleteIdResponse
+    deleteIdResponse,
+    ResetPasswordPayload,
+    ResetPasswordResponse
 } from '../types';
 import {
   MonthlyDiaryResponse,
@@ -530,8 +532,15 @@ export const authAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+    resetPassword: async (email: string, newPassword: string, confirmPassword: string): Promise<ResetPasswordResponse> => {
+        const requestData = { email, newPassword, confirmPassword };
+        const response = await apiClient.patch<ResetPasswordResponse>(
+            '/auth/password/reset',
+            requestData
+        );
+        return response.data;
+    }
 }
-
 
 // API 객체에 추가할 함수
 export const calendarAPI = {

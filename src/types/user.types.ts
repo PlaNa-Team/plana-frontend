@@ -91,3 +91,17 @@ export interface deleteIdResponse {
   message: string;
   status: number;
 }
+
+
+export interface ResetPasswordPayload {
+  email: string; 
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  status: number;
+  message: string;
+  timestamp: number;
+  error: string;
+}

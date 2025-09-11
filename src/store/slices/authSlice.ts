@@ -122,6 +122,26 @@ export const updateNicknameAsync = createAsyncThunk(
   }
 );
 
+// 비밀번호 재설정 (Reset Password) 비동기 thunk
+export const resetPasswordAsync = createAsyncThunk(
+  'auth/resetPassword',
+  async (
+    { email, newPassword, confirmPassword }: { email: string; newPassword: string; confirmPassword: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await authAPI.resetPassword(email, newPassword, confirmPassword);
+      return response;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || '비밀번호 재설정에 실패했습니다.');
+      }
+      return rejectWithValue('알 수 없는 오류가 발생했습니다.');
+    }
+  }
+);
+
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -250,10 +270,23 @@ const authSlice = createSlice({
        .addCase(deleteMemberAsync.rejected, (state, action) => {
             state.isLoading = false;
             state.error = action.payload as string;
-        });
+      })
+      .addCase(resetPasswordAsync.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+      })
+      .addCase(resetPasswordAsync.fulfilled, (state) => {
+            state.isLoading = false;
+            state.error = null;
+      })
+      .addCase(resetPasswordAsync.rejected, (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload as string;
+      })
     },
 });
 
+// 리듀서 export
 export const {
   loginSuccess,
   logout,
@@ -263,7 +296,7 @@ export const {
   updateUser,
   updateUserNickname,
   resetPasswordState,
-  clearAuthData,
+  clearAuthData
 } = authSlice.actions;
 
 export default authSlice.reducer;
