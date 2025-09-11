@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { SignUpRequest, IdCheckResponse, LoginResponseDto } from '../types';
+import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse, PasswordConfirmRequest, PasswordConfirmResponse, PasswordUpdateRequest, PasswordUpdateResponse, PaginationResponse } from '../types';
 import {
   MonthlyDiaryResponse,
   DiaryDetailResponse,
@@ -29,7 +29,7 @@ import {
   MemoItem,
   MemoPayload,
   UpdateMemoPayload,
-  MemoMonthlyResponse
+  MemoMonthlyResponse,
 
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
@@ -105,52 +105,41 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// 응답 인터셉터
+
+// ✅ 응답 인터셉터: 토큰 자동 갱신 로직 추가
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<ApiError>) => {
-    const originalRequest = error.config as any;
-
-    if (
-      error.response?.status === 401 &&
-      !originalRequest?._retry &&
-      !(originalRequest?.url || '').includes('/auth/refresh')
-    ) {
+  async (error) => {
+    const originalRequest = error.config;
+    // 401 Unauthorized 에러와 토큰 재발급 시도를 한 적이 없는 요청인지 확인
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      const currentStore = getStore();
+      const refreshToken = localStorage.getItem('refreshToken');
 
-      try {
-        // Refresh 요청
-        const refreshResponse = await authAPI.refresh();
-        const newAccessToken = refreshResponse.accessToken;
+      // 리프레시 토큰이 존재하는 경우에만 갱신 시도
+      if (refreshToken) {
+        try {
+          const refreshResponse = await authAPI.refresh();
+          const newAccessToken = refreshResponse.accessToken;
 
-        const authActions = getAuthActions();
-        const currentStore = getStore();
+          // 새로운 액세스 토큰을 로컬 스토리지와 Redux 스토어에 저장
+          currentStore.dispatch({ type: 'auth/setAccessToken', payload: newAccessToken });
+          localStorage.setItem('accessToken', newAccessToken);
 
-        if (currentStore && authActions?.setAccessToken) {
-          currentStore.dispatch(authActions.setAccessToken(newAccessToken));
+          // 헤더에 새로운 액세스 토큰 설정
+          apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+
+          // 실패했던 원래 요청을 재시도
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          return apiClient(originalRequest);
+        } catch (refreshError) {
+          // 리프레시 토큰 갱신 실패 시 로그아웃
+          currentStore.dispatch({ type: 'auth/logout' });
+          return Promise.reject(refreshError);
         }
-
-        originalRequest.headers = originalRequest.headers || {};
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        console.log("엑세스 토큰 만료로 새로운 토큰을 갱신합니다.")
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        // 🔴 Refresh Token도 만료된 경우 → 로그아웃 + 로그인 페이지 이동
-        const authActions = getAuthActions();
-        const currentStore = getStore();
-
-        if (currentStore && authActions?.logout) {
-          currentStore.dispatch(authActions.logout());
-        }
-        
-        alert("리프레쉬 토큰 만료입니다. 로그인 페이지로 이동합니다");
-        // 로그인 페이지로 이동
-        window.location.href = '/login';
-   
-        return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
@@ -447,15 +436,78 @@ export const authAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+     // ✅ 중복 제거 및 요청하신 로직으로 통일
     refresh: async (): Promise<LoginResponseDto> => {
         try {
-            // 💡 별도의 헤더 없이 apiClient를 사용하여 요청
             // 이 요청에 브라우저가 HttpOnly 쿠키에 담긴 리프레시 토큰을 자동으로 첨부합니다.
             const response = await apiClient.post<LoginResponseDto>('/auth/refresh');
             return response.data;
         } catch (error) {
-            // 토큰 갱신 실패 시 에러를 던져 인터셉터에서 잡도록 함
             throw new Error('리프레시 토큰으로 갱신에 실패했습니다.');
+        }
+    },
+    getMemberInfo: async (): Promise<MemberInfo> => {
+        try {
+            const response = await apiClient.get<MemberInfo>('/members/me');
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error(error.response?.data?.message || '회원 정보를 가져오는데 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+        // authAPI 객체 내의 updateNickname 함수 수정
+    updateNickname: async (newNickname: string): Promise<{ success: boolean; nickname: string }> => {
+        try {
+            const response = await apiClient.patch('/members/nickname', { 
+            nickname: newNickname 
+            });
+            
+            // ✅ 응답 상태가 성공인 경우 간단한 성공 응답만 반환
+            if (response.status === 200 || response.status === 204) {
+            return { 
+                success: true, 
+                nickname: newNickname 
+            };
+            }
+            
+            throw new Error('닉네임 변경에 실패했습니다.');
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+            const errorMessage = error.response?.data?.message || '닉네임 변경에 실패했습니다.';
+            throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    // 🆕 현재 비밀번호 인증 API
+    confirmPassword: async (currentPassword: string): Promise<PasswordConfirmResponse> => {
+        try {
+        // API 문서에 따르면 요청 본문은 `currentPassword`를 키로 사용
+        const requestData: PasswordConfirmRequest = { currentPassword };
+        const response = await apiClient.post<PasswordConfirmResponse>('/members/password/confirm', requestData);
+        return response.data;
+        } catch (error) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || '현재 비밀번호 확인에 실패했습니다.');
+        }
+        throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    // 🆕 비밀번호 변경 API
+    updatePassword: async (newPassword: string, confirmPassword: string): Promise<PasswordUpdateResponse> => {
+        try {
+        // API 문서에 따르면 요청 본문은 `newPassword`와 `confirmPassword`를 키로 사용
+        const requestData: PasswordUpdateRequest = { newPassword, confirmPassword };
+        const response = await apiClient.patch<PasswordUpdateResponse>('/members/password', requestData);
+        return response.data;
+        } catch (error) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || '비밀번호 변경에 실패했습니다.');
+        }
+        throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
 }

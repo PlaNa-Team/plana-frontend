@@ -43,3 +43,45 @@ export interface LoginResponseDto {
   timestamp: number;
   // refreshToken: string; // 쿠키에 저장 한다고 함. 다시 주석
 }
+
+export interface MemberInfo {
+  id: number;
+  login_id: string;
+  name: string;
+  email: string;
+  nickname: string;
+  provider: string;
+  created_at: string;
+}
+
+export interface MemberApiResponse {
+  status: number;
+  message: string;
+  data: MemberInfo;
+}
+
+
+// 비밀번호 확인 요청 타입
+export interface PasswordConfirmRequest {
+  currentPassword: string;
+}
+
+// 비밀번호 확인 응답 타입
+export interface PasswordConfirmResponse {
+  timestamp: number;
+  message: string;
+  status: number;
+}
+
+// 비밀번호 변경 요청 타입
+export interface PasswordUpdateRequest {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+// 비밀번호 변경 응답 타입 (API 문서에 맞게 조정)
+export interface PasswordUpdateResponse {
+  timestamp: number;
+  message: string;
+  status: number;
+}

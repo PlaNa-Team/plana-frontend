@@ -53,75 +53,72 @@ const Login: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    if (!validateEmail(formData.email) || !formData.password) {
-      return;
-    }
+    if (!validateEmail(formData.email) || !formData.password) {
+      return;
+    }
 
-    setIsLoading(true);
-    setLoginError('');
-    dispatch(clearError());
+    setIsLoading(true);
+    setLoginError('');
+    dispatch(clearError());
 
-    try {
-      const response = await authAPI.login({
-        email: formData.email,
-        password: formData.password
-      });
-      
-      // 백엔드 LoginResponseDto 구조에 맞춰 처리
-      if (response.accessToken && response.member) {
-        // 🔑 로그인 성공 시 콘솔 로그 추가
-        console.log('✅ 로그인 성공!');
-        console.log('Access Token:', response.accessToken);
-//         console.log('Refresh Token:', response.refreshToken);
-        console.log('토큰 만료 시간(Expires In):', response.expiresIn, '밀리초');
-        console.log('사용자 정보:', response.member);
+    try {
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // 백엔드 LoginResponseDto 구조에 맞춰 처리
+      if (response.accessToken && response.member) {
+      console.log('✅ 로그인 성공!');
+      console.log('Access Token:', response.accessToken);
+      console.log('사용자 정보:', response.member);
 
+      const memberData = response.member;
 
-        const fullUser: User = {
-          id: response.member.id,
-          name: response.member.name,
-          loginId: response.member.email,
-          email: response.member.email,
-          password: '',
-          nickname: response.member.nickname || response.member.name,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isDeleted: false,
-          provider: 'LOCAL' as Provider,
-//        refreshToken: response.refreshToken <-- 쿠키로 담기 떄문에 필요 없음
-        };
-        
-        dispatch(loginSuccess({
-          accessToken: response.accessToken,
-//        refreshToken: response.refreshToken, <-- 쿠키로 담기 떄문에 필요 없음
-          user: fullUser
-        }));
-        
-//         localStorage.setItem('refreshToken', response.refreshToken); <-- 쿠키로 담기 떄문에 필요 없음
+      const fullUser: User = {
+        // ✅ 백엔드의 스네이크 케이스 필드를 카멜 케이스로 직접 매핑
+        id: memberData.id,
+        name: memberData.name,
+        email: memberData.email,
+        loginId: (memberData as any).login_id || memberData.email,
+        nickname: memberData.nickname || memberData.name,
+        // ⚠️ 여기서 데이터가 null로 들어오지 않도록 직접 변환
+        createdAt: (memberData as any).created_at,
+        updatedAt: (memberData as any).updated_at,
+        
+        // 백엔드에 필드가 없다면 기본값 할당
+        isDeleted: (memberData as any).isDeleted ?? false,
+        password: '',
+        provider: ((memberData as any).provider as Provider) || 'LOCAL',
+      };
+      
+      dispatch(loginSuccess({
+        accessToken: response.accessToken,
+        user: fullUser
+      }));
+        
+        navigate('/calendar');
+      } else {
+        throw new Error('서버에서 올바른 응답을 받지 못했습니다.');
+      }
 
-        navigate('/calendar');
-      } else {
-        throw new Error('서버에서 올바른 응답을 받지 못했습니다.');
-      }
-
-    } catch (error: any) {
-      // ❌ 로그인 실패 시 콘솔 로그
-      console.error('❌ 로그인 실패:', error);
+    } catch (error: any) {
+      console.error('❌ 로그인 실패:', error);
       let errorMessage = '로그인에 실패했습니다.';
-      
-      if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-      
-      setLoginError(errorMessage);
-      dispatch(setError(errorMessage));
-      
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      setLoginError(errorMessage);
+      dispatch(setError(errorMessage));
+      
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
      window.location.href = 'http://localhost:8080/oauth2/authorization/google';
