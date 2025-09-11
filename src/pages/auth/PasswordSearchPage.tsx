@@ -96,30 +96,34 @@ const PasswordSearchPage: React.FC = () => {
   };
 
   const handlePasswordReset = async () => {
-    const passwordError = validatePasswords(formData.newPassword || '', formData.confirmPassword || '');
-    if (passwordError) {
-      setErrors(prev => ({ ...prev, passwordError }));
-      return;
-    }
+  const passwordError = validatePasswords(formData.newPassword || '', formData.confirmPassword || '');
+  if (passwordError) {
+    setErrors(prev => ({ ...prev, passwordError }));
+    return;
+  }
 
-    try {
-      await dispatch(
-        resetPasswordAsync({
-          email: formData.email,
-          newPassword: formData.newPassword!,
-          confirmPassword: formData.confirmPassword!
-        })
-      ).unwrap();
+  console.log('보낼 새 비밀번호:', formData.newPassword);
 
-      alert('비밀번호가 성공적으로 변경되었습니다.');
-      navigate('/login');
-    } catch (error: any) {
-      setErrors(prev => ({
-        ...prev,
-        passwordError: error?.message || '비밀번호 변경에 실패했습니다.'
-      }));
-    }
-  };
+  try {
+    const response = await dispatch(
+      resetPasswordAsync({
+        email: formData.email,
+        newPassword: formData.newPassword!,
+        confirmPassword: formData.confirmPassword!
+      })
+    ).unwrap();
+
+    console.log('비밀번호 재설정 성공 응답:', response);
+    alert('비밀번호가 성공적으로 변경되었습니다.');
+    navigate('/login');
+  } catch (error: any) {
+    console.error('비밀번호 재설정 실패 응답:', error);
+    setErrors(prev => ({
+      ...prev,
+      passwordError: error?.message || '비밀번호 변경에 실패했습니다.'
+    }));
+  }
+};
 
   return (
         <div className="ps-page">
