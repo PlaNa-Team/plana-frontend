@@ -8,6 +8,7 @@ import { DayEvent } from '../../types/calendar.types';
 import { calendarAPI } from '../../services/api';
 import { ScheduleFormData } from '../../types/calendar.types';
 import { transformDetailToFormData } from '../../services/api';
+import { TrashBinIcon } from '../../assets/icons';
 
 
 
@@ -239,15 +240,14 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
             <div className="events-list">
               {dailyEvents.map((event) => (
                 <div key={event.id} className="event-item" onClick={() => handleEventClick(event)}>
-           <div 
-  className={`event-category-indicator event-color-${event.color}`} 
-/>
+                  <div className={`event-category-indicator event-color-${event.color}`} />
                   <div className="event-content">
                     <div className="event-header">
                       <h3 className="event-title">{event.title}</h3>  
                     </div>
                      <span className="event-time">{event.time}</span>
                   </div>
+                  <TrashBinIcon width={34} height={34}/>
                 </div>
               ))}
             </div>
