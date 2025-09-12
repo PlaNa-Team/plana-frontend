@@ -36,6 +36,7 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
 
   const currentYear = useAppSelector(selectCurrentYear); // 🔑 현재 년도
   const currentMonth = useAppSelector(selectCurrentMonth); // 🔑 현재 월
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // 🔄 내부에서 모든 상태 관리
   const [isOpen, setIsOpen] = useState(false);
@@ -222,14 +223,21 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     }
   };
 
-  // 🚀 **핵심 변경사항: 일정 삭제 핸들러 추가**
-  const handleDeleteEvent = (eventId: string) => (e: React.MouseEvent) => {
-    e.stopPropagation(); // 💡 이벤트 버블링 방지
-    if (window.confirm('정말 이 일정을 삭제하시겠습니까?')) {
-        dispatch(deleteSchedule({ eventId, year: currentYear, month: currentMonth }));
-        closeModal();
-    }
+  const handleDeleteClick = (eventId: string) => (e: React.MouseEvent) => {
+    e.stopPropagation(); // 🛑 일정 클릭 방지
+    setDeleteTargetId(eventId); // 🔥 삭제할 이벤트 설정
   };
+
+  const confirmDelete = () => {
+    if (!deleteTargetId) return;
+    dispatch(deleteSchedule({ eventId: deleteTargetId, year: currentYear, month: currentMonth }));
+    setDeleteTargetId(null); // 모달 닫기
+  };
+
+  const cancelDelete = () => {
+    setDeleteTargetId(null);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -261,13 +269,23 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
                     </div>
                      <span className="event-time">{event.time}</span>
                   </div>
-                  <TrashBinIcon width={34} height={34} onClick={handleDeleteEvent(event.id)}/>
-                </div>
+                  <TrashBinIcon width={34} height={34} onClick={handleDeleteClick(event.id)} />                </div>
               ))}
             </div>
           )}
         </div>
       </div>
+      {deleteTargetId && (
+              <div className="delete-confirm-overlay" onClick={cancelDelete}>
+                <div className="delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+                  <p>정말 이 일정을 삭제하시겠습니까?</p>
+                  <div className="delete-confirm-actions">
+                    <button className="delete-cancel-button" onClick={cancelDelete}>아니오</button>
+                    <button className="delete-confirm-button" onClick={confirmDelete}>예</button>
+                  </div>
+                </div>
+              </div>
+            )}
     </div>
   );
 };
