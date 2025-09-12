@@ -41,6 +41,7 @@ import {
   MemoPayload,
   UpdateMemoPayload,
   MemoMonthlyResponse,
+  DeleteScheduleResponse
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
 
@@ -588,6 +589,24 @@ export const calendarAPI = {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 const errorMessage = error.response?.data?.message || '일정 생성에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+     // 일정 삭제
+    deleteSchedule: async (scheduleId: string): Promise<DeleteScheduleResponse> => {
+        try {
+            // 가상 ID인 경우 원본 ID 추출
+            const originalId = extractOriginalId(scheduleId);
+            
+            const response = await apiClient.delete<DeleteScheduleResponse>(
+                `/calendars/${originalId}`
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '일정 삭제에 실패했습니다.';
                 throw new Error(errorMessage);
             }
             throw new Error('네트워크 오류가 발생했습니다.');

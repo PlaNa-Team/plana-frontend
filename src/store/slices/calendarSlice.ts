@@ -28,6 +28,19 @@ export const fetchMonthlySchedules = createAsyncThunk(
   }
 );
 
+// 비동기 액션: 일정 삭제
+export const deleteSchedule = createAsyncThunk(
+  'calendar/deleteSchedule',
+  async ({ eventId, year, month }: { eventId: string; year: number; month: number }, { dispatch }) => {
+    // 💡 이벤트 삭제 API 호출
+    await calendarAPI.deleteSchedule(eventId);
+    
+    // 💡 삭제 후, 해당 월의 일정을 다시 불러와 화면을 업데이트
+    await dispatch(fetchMonthlySchedules({ year, month }));
+    return eventId;
+  }
+);
+
 const calendarSlice = createSlice({
   name: 'calendar',
   initialState: { 
@@ -78,6 +91,9 @@ const calendarSlice = createSlice({
         state.isLoadingEvents = false;
         state.eventsError = action.error.message || '일정 조회에 실패했습니다.';
         state.events = []; // 에러 시 빈 배열
+      })
+       .addCase(deleteSchedule.fulfilled, (state) => {
+        console.log('일정이 성공적으로 삭제되었습니다.');
       });
   }
 });

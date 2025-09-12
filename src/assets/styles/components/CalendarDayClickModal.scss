@@ -117,6 +117,8 @@
 
 /* 개별 일정 아이템 */
 .event-item {
+  position: relative;
+  overflow: hidden; 
   display: flex;
   align-items: center;
   padding: 0.5rem;
@@ -132,6 +134,46 @@
     border-color: var(--color-md);
     transform: translateY(-1px);
   }
+}
+
+.delete-buttons-container {
+  display: flex;
+  position: absolute; /* .event-item 내부에 위치 */
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 0; /* 초기 너비: 0 */
+  opacity: 0;
+  transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out; /* 애니메이션 효과 */
+  background-color: white; /* 배경색을 추가해 기존 콘텐츠를 가림 */
+  align-items: center;
+  justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+  padding-right: 10px; /* 오른쪽 여백 */
+}
+
+.delete-buttons-container.visible {
+  width: 120px; /* 표시될 때의 너비, 버튼 크기에 맞게 조절 */
+  opacity: 1;
+}
+
+.delete-button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: #555;
+  margin-right: 8px;
+}
+
+.confirm-button {
+  background-color: #ff4d4f;
+  color: white;
 }
 
 /* 카테고리 표시 */

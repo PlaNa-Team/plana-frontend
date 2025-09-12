@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { 
   selectEvents,
-  fetchMonthlySchedules
+  fetchMonthlySchedules,
+  deleteSchedule,
+
 } from '../../store/slices/calendarSlice';
 import { DayEvent } from '../../types/calendar.types';
 import { calendarAPI } from '../../services/api';
 import { ScheduleFormData } from '../../types/calendar.types';
 import { transformDetailToFormData } from '../../services/api';
 import { TrashBinIcon } from '../../assets/icons';
+import { selectCurrentYear, selectCurrentMonth } from '../../store/slices/calendarSlice'; // 🔑 추가
 
 
 
@@ -30,6 +33,9 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
   
   // Redux에서 월간 일정 데이터 가져오기
   const monthlyEvents = useAppSelector(selectEvents);
+
+  const currentYear = useAppSelector(selectCurrentYear); // 🔑 현재 년도
+  const currentMonth = useAppSelector(selectCurrentMonth); // 🔑 현재 월
 
   // 🔄 내부에서 모든 상태 관리
   const [isOpen, setIsOpen] = useState(false);
@@ -216,6 +222,14 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     }
   };
 
+  // 🚀 **핵심 변경사항: 일정 삭제 핸들러 추가**
+  const handleDeleteEvent = (eventId: string) => (e: React.MouseEvent) => {
+    e.stopPropagation(); // 💡 이벤트 버블링 방지
+    if (window.confirm('정말 이 일정을 삭제하시겠습니까?')) {
+        dispatch(deleteSchedule({ eventId, year: currentYear, month: currentMonth }));
+        closeModal();
+    }
+  };
   if (!isOpen) return null;
 
   return (
@@ -247,7 +261,7 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
                     </div>
                      <span className="event-time">{event.time}</span>
                   </div>
-                  <TrashBinIcon width={34} height={34}/>
+                  <TrashBinIcon width={34} height={34} onClick={handleDeleteEvent(event.id)}/>
                 </div>
               ))}
             </div>
