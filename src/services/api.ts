@@ -725,7 +725,7 @@ export const diaryAPI = {
             formData.append('file', file);
 
             const response = await apiClient.post<TempImageResponse>(
-                '/files/temp-upload', 
+                '/files/upload', 
                 formData,
                 {
                     headers: {
@@ -742,7 +742,34 @@ export const diaryAPI = {
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
-    }
+    },
+    createDiary: async (requestBody: CreateDiaryRequest): Promise<DiaryCreateResponse> => {
+        try {
+            const response = await apiClient.post<DiaryCreateResponse>(
+                '/diaries',
+                requestBody
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '다이어리 등록에 실패했습니다';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    getMonthlyDiaries: async (year: number, month: number): Promise<MonthlyDiaryResponse> => {
+        try {
+            const response = await apiClient.get<MonthlyDiaryResponse>(`/diaries?year=${year}&month=${month}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                const errorMessage = error.response.data.message || '다이어리 조회에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
 };
 
 export default apiClient;

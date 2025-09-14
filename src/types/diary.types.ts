@@ -172,7 +172,9 @@ export interface TempImageResponse {
   message?: string;
 
     data: {
-      tempUrl: string;
+      url: string;
+      fileId: string;
+      expiresAt: string;
     };
 }
 
