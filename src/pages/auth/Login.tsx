@@ -121,7 +121,7 @@ const Login: React.FC = () => {
   };
 
   const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
-     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
 
   const isFormValid = !emailError && formData.email && formData.password;
