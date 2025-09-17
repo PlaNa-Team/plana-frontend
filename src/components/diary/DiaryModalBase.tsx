@@ -8,9 +8,12 @@ import {
     updateBookData,
     clearError,
     createDiaryAsync,
+    getDiaryDetailAsync,
+    updateDiaryAsync,
 } from '../../store/slices/diarySlice';
 import {
     CreateDiaryRequest,
+    UpdateDiaryRequest,
     DailyContent,
     MovieContent as MovieContentType,
     BookContent as BookContentType,
@@ -20,6 +23,7 @@ import MovieContent from './MovieContent';
 import BookContent from './BookContent';
 import toast from 'react-hot-toast';
 import { unwrapResult } from '@reduxjs/toolkit';
+import { set } from 'date-fns';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -49,6 +53,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         isLoading,
         isUploading,
         error,
+        currentDiaryDetail,
     } = useAppSelector(state => state.diary);
 
     const modalContentRef = useRef<HTMLDivElement>(null);
@@ -61,48 +66,56 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         onClose();
     }, [dispatch, onClose]);
 
+    // 다이어리 저장 핸들러 (수정/등록 분기처리)
     const handleSave = useCallback(async () => {
-        if (!selectedDate) {
-            toast.error('날짜를 선택해 주세요.');
-            return;
-        }
+        if (!selectedDate) return;
 
-        let content;
+        let contentData: any;
         let imageUrl;
 
         switch (activeTab) {
             case 'DAILY':
-                content = { ...currentMomentData };
+                contentData = { ...currentMomentData };
                 imageUrl = currentMomentData.imageUrl;
+                delete contentData.imageUrl;
                 break;
             case 'MOVIE':
-                content = { ...currentMovieData };
+                contentData = { ...currentMovieData };
                 imageUrl = currentMovieData.imageUrl;
+                delete contentData.imageUrl;
                 break;
             case 'BOOK':
-                content = { ...currentBookData };
+                contentData = { ...currentBookData };
                 imageUrl = currentBookData.imageUrl;
+                delete contentData.imageUrl;
                 break;
             default:
                 return;
         }
 
-        const requestBody: CreateDiaryRequest = {
+        const diaryDataBody: CreateDiaryRequest = {
             diaryDate: selectedDate,
             diaryType: activeTab,
-            imageUrl: imageUrl || '',
-            content,
-            diaryTags: [],
+            imageUrl: imageUrl || undefined,
+            content: contentData,
         };
 
         try {
-            const resultAction = await dispatch(createDiaryAsync({ diaryData: requestBody }));
-            unwrapResult(resultAction);
-            toast.success('다이어리가 성공적으로 등록되었습니다!');
-            handleCloseModal();
-        } catch (err) {
+            if (diaryData?.id) { // 수정 모드 : id가 있는 경우
+                await dispatch(updateDiaryAsync({
+                    id: diaryData.id,
+                    diaryData: diaryDataBody as UpdateDiaryRequest
+                })).unwrap();
+                toast.success('다이어리가 성공적으로 등록되었습니다!');
+            } else { // 등록 모드 : id가 없는 경우
+                await dispatch(createDiaryAsync({ 
+                    diaryData: diaryDataBody
+                 })).unwrap();
+                 toast.error('다이어리 등록에 실패했습니다.');
+            }
+            onClose();
+        } catch (error) {
             toast.error('다이어리 등록에 실패했습니다.');
-            console.error('다이어리 저장 실패:', err);
         }
     }, [
         dispatch,
@@ -111,12 +124,22 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         currentMomentData,
         currentMovieData,
         currentBookData,
-        handleCloseModal,
+        onClose,
+        diaryData
     ]);
 
-    const handleTabChange = useCallback((tab: DiaryType) => {
-        setActiveTab(tab);
-    }, []);
+    // 탭 변경 핸들러
+    const handleTabChange = (newTab: DiaryType) => {
+        // 기존 다이어리 데이터가 있고, 탭을 변경하는 경우
+        if (diaryData && newTab !== activeTab) {
+            const confirmChange = window.confirm(
+                '탭을 변경하면 현재 작성 중인 내용이 사라집니다. 계속하시겠습니까?'
+            );
+            if (!confirmChange) return;
+            dispatch(clearCurrentData()); // 현재 데이터 초기화
+        }
+        setActiveTab(newTab);
+    }
 
     // 모달 외부 클릭을 감지
     useEffect(() => {
@@ -135,15 +158,23 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         };
     }, [isOpen, handleCloseModal]);
 
-    // 다이어리 상세 데이터가 로드되면 Redux 상태 업데이트 (기존 로직)
+    // 모달이 열리고, 데이터가 있을 때만 상세 정보 불러오기
     useEffect(() => {
-        // 이 부분은 기존 다이어리 수정/상세조회 기능과 관련이 있습니다.
-        if (diaryData) {
-            setActiveTab(diaryData.diaryType);
-            dispatch(clearCurrentData());
-            // TODO: 상세 조회 API 호출 및 데이터 업데이트 로직 구현 필요
+        if (isOpen && diaryData && selectedDate) {
+            dispatch(getDiaryDetailAsync({ date: selectedDate }));
+        } else if (isOpen) {
+            setActiveTab('DAILY');
         }
-    }, [diaryData, dispatch]);
+    }, [isOpen, diaryData, selectedDate, dispatch]);
+
+    // 상세 정보 로드가 완료되면 activeTab 및 상태 업데이트
+    useEffect(() => {
+        if (currentDiaryDetail && currentDiaryDetail.diaryType) {
+            setActiveTab(currentDiaryDetail.diaryType);
+        }
+    }, [currentDiaryDetail]);
+
+    const isEditMode = !!diaryData;
 
     if (!isOpen) return null;
 
@@ -202,7 +233,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     </div>
                 </div>
 
-                {diaryData?.id && (
+                {isEditMode && (
                     <button
                         className="diary-modal-delete"
                         disabled={isLoading}

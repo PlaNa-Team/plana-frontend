@@ -770,6 +770,33 @@ export const diaryAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+    getDiaryDetail: async (date: string): Promise<DiaryDetailResponse> => {
+        try {
+            const response = await apiClient.get<DiaryDetailResponse>(`/diaries/detail?date=${date}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                const errorMessage = error.response.data.message || '다이어리 상세 조회에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    updateDiary: async (id: number, requestBody: UpdateDiaryRequest): Promise<DiaryCreateResponse> => {
+        try {
+            const response = await apiClient.put<DiaryCreateResponse>(
+                `/diaries/${id}`,
+                requestBody
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '다이어리 수정에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
 };
 
 export default apiClient;

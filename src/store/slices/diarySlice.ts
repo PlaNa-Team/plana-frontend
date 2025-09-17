@@ -22,7 +22,7 @@ interface DiaryState {
     currentBookData: BookContent;
     selectedDate: string | null;
     monthlyDiaries: MonthlyDiaryItem[];
-    currentDiaryDetail: DiaryDetailResponse | undefined;
+    currentDiaryDetail: DiaryDetail | undefined;
     isLoading: boolean;
     isUploading: boolean;
     error: string | null;
@@ -128,6 +128,39 @@ export const getMonthlyDiariesAsync = createAsyncThunk<
     }
 );
 
+// 다이어리 상세 조회 Thunk
+export const getDiaryDetailAsync = createAsyncThunk<
+    DiaryDetail,
+    { date: string },
+    { rejectValue: string }
+>('diary/getDiaryDetail', async ({ date }, { rejectWithValue }) => {
+    try {
+        const response = await diaryAPI.getDiaryDetail(date);
+        return response;
+    } catch (error: any) {
+        return rejectWithValue(error.message);
+    }
+});
+
+// 다이어리 수정 Thunk
+export const updateDiaryAsync = createAsyncThunk<
+    DiaryCreateResponse,
+    { id: number; diaryData: UpdateDiaryRequest },
+    { rejectValue: string; state: RootState }
+>(
+    'diary/updateDiary',
+    async ({ id, diaryData }, { dispatch, rejectWithValue, getState }) => {
+        try {
+            const response = await diaryAPI.updateDiary(id, diaryData);
+            const { year, month } = getState().diary.currentViewMonthAndYear;
+            await dispatch(getMonthlyDiariesAsync({ year, month })); // 수정 후 월간 다이어리 다시 불러오기
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 const diarySlice = createSlice({
     name: 'diary',
     initialState,
@@ -226,6 +259,44 @@ const diarySlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload as string;
                 state.monthlyDiaries = [];
+            })
+            .addCase(getDiaryDetailAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getDiaryDetailAsync.fulfilled, (state, action) => {
+                const diaryDetail = action.payload;
+                state.currentDiaryDetail = diaryDetail;
+                state.isLoading = false;
+
+                // 탭 타입에 따라 Redux 상태 업데이트
+                if (diaryDetail.diaryType === 'DAILY') {
+                    state.currentMomentData = { ...diaryDetail.content, imageUrl: diaryDetail.imageUrl };
+                } else if (diaryDetail.diaryType === 'MOVIE') {
+                    state.currentMovieData = { ...diaryDetail.content, imageUrl: diaryDetail.imageUrl };
+                } else if (diaryDetail.diaryType === 'BOOK') {
+                    state.currentBookData = { ...diaryDetail.content, imageUrl: diaryDetail.imageUrl };
+                }
+            })
+            .addCase(getDiaryDetailAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(updateDiaryAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updateDiaryAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.showSuccessToast = true;
+                state.currentMomentData = initialState.currentMomentData;
+                state.currentMovieData = initialState.currentMovieData;
+                state.currentBookData = initialState.currentBookData;
+                state.selectedDate = null;
+            })
+            .addCase(updateDiaryAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
             })
     }
 });

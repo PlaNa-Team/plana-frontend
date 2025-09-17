@@ -5,6 +5,7 @@ import {
     clearCurrentData,
     getMonthlyDiariesAsync,
     setCurrentViewMonthAndYear,
+    getDiaryDetailAsync,
 } from '../../store/slices/diarySlice';
 import { MonthlyDiaryItem } from '../../types/diary.types';
 import CustomDiaryCalendar from './CustomDiaryCalendar';
@@ -46,9 +47,17 @@ const DiaryCalendar: React.FC = () => {
     const handleDateClick = useCallback(async (dateStr: string) => {
         const diaryData = diaryMap.get(dateStr);
 
+        if (diaryData) {
+            // 기존 다이어리 데이터가 있는 경우, 상세 데이터 조회
+            await dispatch(getDiaryDetailAsync({ date: dateStr}));
+        } else {
+            // 새 다이어리 등록하는 경우
+            dispatch(clearCurrentData());
+        }
+
         // Redux에 선택된 날짜 저장
         dispatch(setSelectedDate(dateStr));
-        setSelectedDiaryData(diaryData);
+        setSelectedDiaryData(diaryData||null);
         setIsModalOpen(true);
     }, [diaryMap, dispatch]);
 
