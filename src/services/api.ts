@@ -634,7 +634,25 @@ export const calendarAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
-        // 🆕 캘린더 메모 관련 API
+    // 전체 조회
+    searchSchedules: async (keyword: string): Promise<MonthlyScheduleResponse['data']> => {
+        try {
+            const response = await apiClient.get<MonthlyScheduleResponse>(
+                `/calendars?keyword=${keyword}`
+            );
+            console.log('검색 API 전체 응답:', response.data); // 이 줄 추가
+            return response.data.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '일정 검색에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+
+    // 🆕 캘린더 메모 관련 API
     /**
      * 캘린더 메모 목록을 조회합니다.
      * GET /api/memos?year={year}&week={week}

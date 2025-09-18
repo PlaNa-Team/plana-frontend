@@ -6,6 +6,9 @@ import { calendarAPI, transformSchedulesToEvents } from '../../services/api';
 // 달력 상태 타입 정의
 interface CalendarState {
   events: CalendarEvent[]; // calendar.types.ts의 CalendarEvent 사용
+  searchedEvents: CalendarEvent[]; // 🆕 검색 결과 상태
+  isLoadingSearches: boolean; // 🆕 검색 로딩 상태
+  searchesError: string | null; // 🆕 검색 에러 상태
   currentDate: string;
   holidays: HolidayItem[];
   isLoadingHolidays: boolean;
@@ -41,11 +44,27 @@ export const deleteSchedule = createAsyncThunk(
   }
 );
 
+export const fetchSearchedSchedules = createAsyncThunk(
+  'calendar/fetchSearchedSchedules',
+  async (keyword: string) => {
+    const responseData = await calendarAPI.searchSchedules(keyword);
+    console.log('API 응답:', responseData);
+    // responseData가 이미 schedules 배열이라면 바로 사용
+    const transformedEvents = transformSchedulesToEvents(responseData.schedules || responseData);
+    return transformedEvents;
+  }
+);
+
+
 const calendarSlice = createSlice({
   name: 'calendar',
   initialState: { 
     events: [], 
     currentDate: new Date().toISOString(),
+        searchedEvents: [],
+    isLoadingSearches: false,
+    searchesError: null,
+
     holidays: [],
     isLoadingHolidays: false,
     isLoadingEvents: false,
@@ -73,7 +92,10 @@ const calendarSlice = createSlice({
     },
     clearEventsError: (state) => {
       state.eventsError = null;
-    }
+    },
+    clearSearchedEvents: (state) => {
+      state.searchedEvents = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -94,6 +116,21 @@ const calendarSlice = createSlice({
       })
        .addCase(deleteSchedule.fulfilled, (state) => {
         console.log('일정이 성공적으로 삭제되었습니다.');
+      })
+       .addCase(fetchSearchedSchedules.pending, (state) => {
+        state.isLoadingSearches = true;
+        state.searchesError = null;
+        state.searchedEvents = []; // 로딩 시작 시 기존 검색 결과 초기화
+      })
+      .addCase(fetchSearchedSchedules.fulfilled, (state, action: PayloadAction<CalendarEvent[]>) => {
+        // payload가 이미 변환된 CalendarEvent[] 배열이므로 그대로 저장합니다.
+        state.isLoadingSearches = false;
+        state.searchedEvents = action.payload;
+      })
+      .addCase(fetchSearchedSchedules.rejected, (state, action) => {
+        state.isLoadingSearches = false;
+        state.searchesError = action.payload as string || '일정 검색에 실패했습니다.';
+        state.searchedEvents = [];
       });
   }
 });
@@ -116,6 +153,10 @@ export const selectIsLoadingEvents = (state: any) => state.calendar.isLoadingEve
 export const selectEventsError = (state: any) => state.calendar.eventsError;
 export const selectCurrentYear = (state: any) => state.calendar.currentYear;
 export const selectCurrentMonth = (state: any) => state.calendar.currentMonth;
+export const { clearSearchedEvents } = calendarSlice.actions;
+export const selectSearchedEvents = (state: any) => state.calendar.searchedEvents;
+export const selectIsLoadingSearches = (state: any) => state.calendar.isLoadingSearches;
+export const selectSearchesError = (state: any) => state.calendar.searchesError; // 👈 이 줄을 추가합니다.
 
 // reducer 내보내기
 export default calendarSlice.reducer;
