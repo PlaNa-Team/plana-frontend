@@ -640,7 +640,6 @@ export const calendarAPI = {
             const response = await apiClient.get<MonthlyScheduleResponse>(
                 `/calendars?keyword=${keyword}`
             );
-            console.log('검색 API 전체 응답:', response.data); // 이 줄 추가
             return response.data.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {

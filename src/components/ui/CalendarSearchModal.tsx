@@ -14,12 +14,14 @@ interface CalendarSearchModalProps {
   showSearchButton?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
+  onSelectSchedule?: (scheduleId: string) => void;
 }
 
 const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
   showSearchButton = true,
   isOpen: externalIsOpen,
-  onClose: externalOnClose
+  onClose: externalOnClose,
+  onSelectSchedule
 }) => {
   const dispatch = useDispatch();
   
@@ -50,20 +52,6 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
     dispatch(clearSearchedEvents());
   };
 
-  // 더미데이터 (주석처리)
-  /*
-  const allResults: SearchResult[] = useMemo(() => [
-    {
-      id: '1',
-      title: '병원예약',
-      date: '2023년 7월 13일',
-      time: '10:30 - 11:00',
-      category: 'meeting'
-    },
-    // ... 나머지 더미데이터들
-  ], []);
-  */
-
   // API 검색 호출
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -76,16 +64,34 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
     }
   }, [searchQuery, dispatch]);
 
+  // 임시 테스트용 더미데이터 (검색 결과가 안 올 때 테스트용)
+  const testResults: SearchResult[] = useMemo(() => [
+    {
+      id: '12',
+      title: '안녕',
+      date: '2025년 8월 28일',
+      time: '09:00 - 10:00'
+    },
+    {
+      id: '19',
+      title: '모르오모로',
+      date: '2025년 8월 1일',
+      time: '09:00 - 11:00'
+    }
+  ], []);
+
   // API 데이터를 기존 형식으로 변환
   const filteredResults = useMemo(() => {
-    console.log('searchQuery:', searchQuery);
-    console.log('searchedEvents:', searchedEvents);
-    
     if (!searchQuery.trim()) return [];
     
-    const results = searchedEvents.map((event: any) => {
-      console.log('processing event:', event);
-      
+    // 임시로 더미데이터 사용 (API가 안 될 때 테스트용)
+    if (searchedEvents.length === 0) {
+      return testResults.filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    return searchedEvents.map((event: any) => {
       // 날짜 포맷팅
       let dateStr = '';
       let timeStr = '';
@@ -117,20 +123,14 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
         }
       }
 
-      const result = {
+      return {
         id: event.id || '',
         title: event.title || '',
         date: dateStr,
         time: timeStr
       };
-      
-      console.log('converted result:', result);
-      return result;
     });
-    
-    console.log('final results:', results);
-    return results;
-  }, [searchedEvents, searchQuery]);
+  }, [searchedEvents, searchQuery, testResults]);
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -139,14 +139,12 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
   };
 
   const handleItemClick = (item: SearchResult) => {
-    setSelectedItem(item);
-  };
-
-  const handleConfirm = () => {
-    if (selectedItem) {
-      console.log('선택된 일정:', selectedItem);
+    if (onSelectSchedule) {
+      onSelectSchedule(item.id);
+      closeModal();
+    } else {
+      setSelectedItem(item);
     }
-    closeModal();
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,9 +172,6 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
             <div className="modal-header">
               <button className="close-button" onClick={closeModal}>
                 ×
-              </button>
-              <button className="confirm-button" onClick={handleConfirm}>
-                ✓
               </button>
             </div>
 

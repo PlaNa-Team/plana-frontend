@@ -48,7 +48,6 @@ export const fetchSearchedSchedules = createAsyncThunk(
   'calendar/fetchSearchedSchedules',
   async (keyword: string) => {
     const responseData = await calendarAPI.searchSchedules(keyword);
-    console.log('API 응답:', responseData);
     // responseData가 이미 schedules 배열이라면 바로 사용
     const transformedEvents = transformSchedulesToEvents(responseData.schedules || responseData);
     return transformedEvents;

@@ -7,6 +7,8 @@ import CalendarScheduleAddModal from '../../components/ui/CalendarScheduleAddMod
 import CalendarDayClickModal from '../../components/ui/CalendarDayClickModal';
 import { selectEvents } from '../../store/slices/calendarSlice';
 import { ScheduleFormData } from '../../types/calendar.types';
+import { calendarAPI, transformDetailToFormData } from '../../services/api';
+
 
 // 모달 상태 타입 정의
 interface ScheduleModalState {
@@ -57,10 +59,33 @@ const Calendar: React.FC = () => {
     });
   };
 
+  const handleSelectSchedule = async (scheduleId: string) => {
+  try {
+    // API로 일정 상세 정보 조회
+    const scheduleDetail = await calendarAPI.getScheduleDetail(scheduleId);
+    const formData = transformDetailToFormData(scheduleDetail.data);
+    
+    // 수정 모드로 모달 열기
+    setScheduleModalState({
+      isOpen: true,
+      mode: 'edit',
+      selectedDate: formData.startDate,
+      scheduleData: formData
+    });
+  } catch (error) {
+    console.error('일정 조회 실패:', error);
+    alert('일정을 불러오는데 실패했습니다.');
+  }
+};
+
+
   return (
     <div className="calendar-container">
       {/* 검색 모달 */}
-      <CalendarSearchModal showSearchButton={true} />
+     <CalendarSearchModal 
+        showSearchButton={true} 
+        onSelectSchedule={handleSelectSchedule}  // 이 줄 추가
+      />
       
       {/* 일정 추가/수정 모달 */}
       <CalendarScheduleAddModal
