@@ -185,3 +185,22 @@ export interface DiaryDeleteResponse {
     data: null;
   };
 }
+
+// 친구 검색 결과 아이템
+export interface FriendItem {
+  id: number;
+  loginId: string;
+}
+
+// 친구 검색 응답
+export interface FriendSearchResponse {
+  count: number;
+  message: string;
+  data: FriendItem[];
+  status: number;
+}
+
+// 다이어리 태그 요청 타입
+export interface DiaryTagRequest {
+  tagText?: string;
+}

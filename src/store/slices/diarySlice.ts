@@ -11,7 +11,9 @@ import {
     TempImageResponse,
     DiaryCreateResponse,
     MonthlyDiaryResponse,
-    DiaryDetailResponse,
+    FriendItem,
+    DiaryTagRequest,
+    FriendSearchResponse,
 } from '../../types/diary.types';
 import axios from 'axios';
 import { RootState } from '..';
@@ -27,7 +29,11 @@ interface DiaryState {
     isUploading: boolean;
     error: string | null;
     showSuccessToast: boolean;
-    currentViewMonthAndYear: { year: number; month: number; }
+    currentViewMonthAndYear: { year: number; month: number; };
+    friendSearchResults: FriendItem[];
+    selectedTags: DiaryTagRequest[];
+    isSearching: boolean;
+    searchError: string | null;
 }
 
 const initialState: DiaryState = {
@@ -68,6 +74,10 @@ const initialState: DiaryState = {
     error: null,
     showSuccessToast: false,
     currentViewMonthAndYear: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
+    friendSearchResults: [],
+    selectedTags: [],
+    isSearching: false,
+    searchError: null,
 };
 
 // 이미지 임시 업로드 Thunk
@@ -161,6 +171,42 @@ export const updateDiaryAsync = createAsyncThunk<
     }
 );
 
+// 다이어리 삭제 Thunk
+export const deleteDiaryAsync = createAsyncThunk<
+    void,
+    number,
+    { rejectValue: string; state: RootState }
+>(
+    'diary/deleteDiary',
+    async (id, { dispatch, rejectWithValue, getState }) => {
+        try {
+            await diaryAPI.deleteDiary(id);
+            // 삭제 후 캘린더를 새로고침
+            const { year, month } = getState().diary.currentViewMonthAndYear;
+            await dispatch(getMonthlyDiariesAsync({ year, month }));
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// 친구 검색 Thunk
+export const searchMembersAsync = createAsyncThunk<
+    FriendSearchResponse,
+    string,
+    { rejectValue: string }
+>(
+    'diary/searchMembers',
+    async (keyword, { rejectWithValue }) => {
+        try {
+            const response = await diaryAPI.searchMembers(keyword);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 const diarySlice = createSlice({
     name: 'diary',
     initialState,
@@ -191,6 +237,20 @@ const diarySlice = createSlice({
         // 현재 캘린더의 연월 업데이트 액션
         setCurrentViewMonthAndYear: (state, action: PayloadAction<{ year: number; month: number }>) => {
             state.currentViewMonthAndYear = action.payload;
+        },
+        addTag: (state, action: PayloadAction<DiaryTagRequest>) => {
+            if (!state.selectedTags.find(tag => tag.tagText === action.payload.tagText)) {
+                state.selectedTags.push(action.payload);
+            }
+        },
+        removeTag: (state, action: PayloadAction<string>) => {
+            state.selectedTags = state.selectedTags.filter(tag => tag.tagText !== action.payload);
+        },
+        clearSearchResults: (state) => {
+            state.friendSearchResults = [];
+        },
+        clearAllTags: (state) => {
+            state.selectedTags = [];
         },
     },
     extraReducers: (builder) => {
@@ -298,6 +358,37 @@ const diarySlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
+            .addCase(deleteDiaryAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(deleteDiaryAsync.fulfilled, (state) => {
+                state.isLoading = false;
+                state.error = null;
+                state.showSuccessToast = true;
+                state.currentDiaryDetail = undefined;
+                state.selectedDate = null;
+                state.currentMomentData = initialState.currentMomentData;
+                state.currentMovieData = initialState.currentMovieData;
+                state.currentBookData = initialState.currentBookData;
+            })
+            .addCase(deleteDiaryAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(searchMembersAsync.pending, (state) => {
+                state.isSearching = true;
+                state.searchError = null;
+            })
+            .addCase(searchMembersAsync.fulfilled, (state, action) => {
+                state.isSearching = false;
+                state.friendSearchResults = action.payload.data;
+            })
+            .addCase(searchMembersAsync.rejected, (state, action) => {
+                state.isSearching = false;
+                state.searchError = action.payload as string;
+                state.friendSearchResults = [];
+            });
     }
 });
 
@@ -310,6 +401,10 @@ export const {
     clearError,
     hideSuccessToast,
     setCurrentViewMonthAndYear,
+    addTag,
+    removeTag,
+    clearSearchResults,
+    clearAllTags,
 } = diarySlice.actions;
 
 export default diarySlice.reducer;

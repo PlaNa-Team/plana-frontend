@@ -10,6 +10,12 @@ import {
     createDiaryAsync,
     getDiaryDetailAsync,
     updateDiaryAsync,
+    deleteDiaryAsync,
+    searchMembersAsync,
+    addTag,
+    removeTag,
+    clearSearchResults,
+    clearAllTags,
 } from '../../store/slices/diarySlice';
 import {
     CreateDiaryRequest,
@@ -17,13 +23,13 @@ import {
     DailyContent,
     MovieContent as MovieContentType,
     BookContent as BookContentType,
+    FriendItem,
 } from '../../types/diary.types';
 import MomentContent from './MomentContent';
 import MovieContent from './MovieContent';
 import BookContent from './BookContent';
 import toast from 'react-hot-toast';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { set } from 'date-fns';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -54,10 +60,16 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         isUploading,
         error,
         currentDiaryDetail,
+        friendSearchResults,
+        selectedTags,
+        isSearching,
+        searchError,
     } = useAppSelector(state => state.diary);
 
     const modalContentRef = useRef<HTMLDivElement>(null);
+    const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+    const [searchInput, setSearchInput] = useState('');
     const [activeTab, setActiveTab] = useState<DiaryType>(diaryData?.diaryType || 'DAILY');
 
     const handleCloseModal = useCallback(() => {
@@ -98,6 +110,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
             diaryType: activeTab,
             imageUrl: imageUrl || undefined,
             content: contentData,
+            diaryTags: selectedTags,
         };
 
         try {
@@ -109,13 +122,14 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 toast.success('다이어리가 성공적으로 등록되었습니다!');
             } else { // 등록 모드 : id가 없는 경우
                 await dispatch(createDiaryAsync({ 
-                    diaryData: diaryDataBody
+                    diaryData: diaryDataBody as CreateDiaryRequest
                  })).unwrap();
                  toast.error('다이어리 등록에 실패했습니다.');
             }
             onClose();
         } catch (error) {
-            toast.error('다이어리 등록에 실패했습니다.');
+            const errorMessage = (error as any).message || '저장에 실패했습니다.';
+            toast.error(errorMessage);
         }
     }, [
         dispatch,
@@ -125,8 +139,29 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         currentMovieData,
         currentBookData,
         onClose,
-        diaryData
+        diaryData,
+        selectedTags,
     ]);
+
+    // 다이어리 삭제 핸들러
+    const handleDelete = useCallback(async () => {
+        if (!diaryData?.id) {
+            toast.error('삭제할 다이어리가 없습니다.');
+            return;
+        }
+
+        const confirmDelete = window.confirm('정말로 이 다이어리를 삭제하시겠습니까?');
+        if (confirmDelete) {
+            try {
+                await dispatch(deleteDiaryAsync(diaryData.id)).unwrap();
+                toast.success('다이어리가 삭제되었습니다!');
+                onClose();
+            } catch (error) {
+                const errorMessage = (error as any)?.message || '다이어리 삭제에 실패했습니다.';
+                toast.error(errorMessage);
+            }
+        }
+    }, [dispatch, diaryData, onClose]);
 
     // 탭 변경 핸들러
     const handleTabChange = (newTab: DiaryType) => {
@@ -173,6 +208,43 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
             setActiveTab(currentDiaryDetail.diaryType);
         }
     }, [currentDiaryDetail]);
+
+    // 모달이 닫힐 때 친구 태그 상태 초기화
+    useEffect(() => {
+        if (!isOpen) {
+            dispatch(clearAllTags());
+            dispatch(clearSearchResults());
+            setSearchInput('');
+        }
+    }, [isOpen, dispatch]);
+
+    // 친구 검색 입력 핸들러 (디바운스 적용)
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const keyword = e.target.value;
+        setSearchInput(keyword);
+        if (searchDebounceRef.current) {
+            clearTimeout(searchDebounceRef.current);
+        }
+        if (keyword.length > 0) {
+            searchDebounceRef.current = setTimeout(() => {
+                dispatch(searchMembersAsync(keyword));
+            }, 300);
+        } else {
+            dispatch(clearSearchResults());
+        }
+    };
+
+    // 검색된 친구 클릭 시 태그 추가
+    const handleAddTag = useCallback((friend: FriendItem) => {
+        dispatch(addTag({ tagText: friend.loginId}));
+        dispatch(clearSearchResults()); // 검색 결과 초기화
+        setSearchInput(''); // 검색창 초기화
+    }, [dispatch]);
+
+    // 태그 삭제 핸들러
+    const handleRemoveTag = useCallback((loginId: string) => {
+        dispatch(removeTag(loginId));
+    }, [dispatch]);
 
     const isEditMode = !!diaryData;
 
@@ -233,9 +305,42 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     </div>
                 </div>
 
+                <div className="diary-modal-friend-tags">
+                    <div className="diary-friend-input">
+                        <input
+                            type="text"
+                            placeholder="Friend"
+                            value={searchInput}
+                            onChange={handleSearchChange}
+                        />
+                    </div>
+
+                    {/* 검색 결과 목록 */}
+                    {searchInput.length > 0 && friendSearchResults.length > 0 && (
+                        <ul className="search-results-list">
+                            {friendSearchResults.map(friend => (
+                                <li key={friend.id} onClick={() => handleAddTag(friend)}>
+                                    {friend.loginId}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    {/* 선택된 태그 목록 */}
+                    <div className="diary-friend-tags">
+                        {selectedTags.map(tag => (
+                            <span key={tag.tagText} className="diary-friend-tag">
+                                @{tag.tagText}
+                                <button onClick={() => tag.tagText && handleRemoveTag(tag.tagText)}>×</button>
+                                </span>
+                        ))}
+                    </div>
+                </div>
+
                 {isEditMode && (
                     <button
                         className="diary-modal-delete"
+                        onClick={handleDelete}
                         disabled={isLoading}
                     >
                         <TrashBinIcon className="diary-modal-delete-icon" fill="var(--color-xl)" />

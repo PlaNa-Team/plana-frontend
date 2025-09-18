@@ -8,7 +8,8 @@ import {
   UpdateDiaryRequest,
   DiaryCreateResponse,
   DiaryDeleteResponse,
-  DiaryDetail
+  DiaryDetail,
+  FriendSearchResponse
 } from '../types/diary.types';
 import { 
   MonthlyScheduleResponse, 
@@ -797,6 +798,30 @@ export const diaryAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+    deleteDiary: async (id: number): Promise<DiaryDeleteResponse> => {
+        try {
+            const response = await apiClient.delete<DiaryDeleteResponse>(`/diaries/${id}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '다이어리 삭제에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    searchMembers: async (keyword: string): Promise<FriendSearchResponse> => {
+        try {
+            const response = await apiClient.get<FriendSearchResponse>(`/members?keyword=${keyword}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '사용자 검색에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    }
 };
 
 export default apiClient;
