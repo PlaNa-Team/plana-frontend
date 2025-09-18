@@ -1,4 +1,3 @@
-// store/slices/calendarSlice.ts - 기존 타입 활용 버전
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { HolidayItem, CalendarEvent } from '../../types/calendar.types';
 import { calendarAPI, transformSchedulesToEvents } from '../../services/api';
@@ -16,6 +15,7 @@ interface CalendarState {
   eventsError: string | null;
   currentYear: number;
   currentMonth: number;
+  isLoadingMemos: boolean; // ✅ 추가: 메모 로딩 상태
 }
 
 // 비동기 액션: 월간 일정 조회
@@ -60,16 +60,16 @@ const calendarSlice = createSlice({
   initialState: { 
     events: [], 
     currentDate: new Date().toISOString(),
-        searchedEvents: [],
+    searchedEvents: [],
     isLoadingSearches: false,
     searchesError: null,
-
     holidays: [],
     isLoadingHolidays: false,
     isLoadingEvents: false,
     eventsError: null,
     currentYear: new Date().getFullYear(),
-    currentMonth: new Date().getMonth() + 1
+    currentMonth: new Date().getMonth() + 1,
+    isLoadingMemos: false, // ✅ 추가: 초기값 설정
   } as CalendarState,
   reducers: {
     updateCurrentDate: (state, action: PayloadAction<{ start: string }>) => {
@@ -94,6 +94,9 @@ const calendarSlice = createSlice({
     },
     clearSearchedEvents: (state) => {
       state.searchedEvents = [];
+    },
+    setLoadingMemos: (state, action: PayloadAction<boolean>) => { // ✅ 추가: 메모 로딩 상태를 설정하는 리듀서
+      state.isLoadingMemos = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -140,7 +143,8 @@ export const {
   setEvents,
   setHolidays,
   setLoadingHolidays,
-  clearEventsError
+  clearEventsError,
+  setLoadingMemos, // ✅ 추가: 메모 로딩 액션 내보내기
 } = calendarSlice.actions;
 
 // Selector 함수들
@@ -155,7 +159,8 @@ export const selectCurrentMonth = (state: any) => state.calendar.currentMonth;
 export const { clearSearchedEvents } = calendarSlice.actions;
 export const selectSearchedEvents = (state: any) => state.calendar.searchedEvents;
 export const selectIsLoadingSearches = (state: any) => state.calendar.isLoadingSearches;
-export const selectSearchesError = (state: any) => state.calendar.searchesError; // 👈 이 줄을 추가합니다.
+export const selectSearchesError = (state: any) => state.calendar.searchesError;
+export const selectIsLoadingMemos = (state: any) => state.calendar.isLoadingMemos; // ✅ 추가: 메모 로딩 셀렉터 내보내기
 
 // reducer 내보내기
 export default calendarSlice.reducer;

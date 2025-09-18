@@ -13,7 +13,9 @@ import {
   selectIsLoadingEvents,
   selectEventsError,
   fetchMonthlySchedules,
-  updateCurrentDate
+  updateCurrentDate,
+  setLoadingMemos, // ✅ 추가: 메모 로딩 액션 임포트
+  selectIsLoadingMemos, // ✅ 추가: 메모 로딩 셀렉터 임포트
 } from '../../store/slices/calendarSlice';
 import { HolidayItem, MemoItem, MemoPayload, UpdateMemoPayload } from '../../types/calendar.types';
 import { calendarAPI } from '../../services/api';
@@ -75,6 +77,7 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   const holidays = useAppSelector(selectHolidays);
   const scheduleEvents = useAppSelector(selectEvents);
   const isLoadingEvents = useAppSelector(selectIsLoadingEvents);
+  const isLoadingMemos = useAppSelector(selectIsLoadingMemos); // ✅ 추가: 메모 로딩 상태 가져오기
   
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -191,10 +194,12 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
 const addMemoColumn = React.useCallback(async () => {
     if (isUpdating.current) return;
     isUpdating.current = true;
+    dispatch(setLoadingMemos(true)); // ✅ 추가: 로딩 시작
 
     const calendarEl = containerRef.current?.querySelector('.fc');
     if (!calendarEl) {
         isUpdating.current = false;
+        dispatch(setLoadingMemos(false)); // ✅ 추가: 로딩 종료
         return;
     }
 
@@ -232,8 +237,9 @@ const addMemoColumn = React.useCallback(async () => {
         monthlyMemos = await calendarAPI.getMonthlyMemos(currentYear, currentMonth, "스케줄");
     } catch (error) {
         console.error("월별 메모 조회 실패:", error);
+    } finally {
         isUpdating.current = false;
-        return;
+        dispatch(setLoadingMemos(false)); // ✅ 추가: 로딩 종료
     }
     
     // DOM 준비 대기
@@ -383,7 +389,7 @@ const addMemoColumn = React.useCallback(async () => {
     }
 
     isUpdating.current = false;
-}, [handleTextareaClick, handleTextareaFocus, handleTextareaMouseDown]);
+}, [dispatch, handleTextareaClick, handleTextareaFocus, handleTextareaMouseDown]); // ✅ 추가: dispatch를 의존성 배열에 추가
 
   const updateCalendar = React.useCallback(() => {
     setTimeout(() => {
@@ -460,6 +466,29 @@ useEffect(() => {
           zIndex: 1000
         }}>
           Redux 일정: {scheduleEvents.length}개 | 로딩: {isLoadingEvents ? 'Y' : 'N'}
+        </div>
+      )}
+      {isLoadingMemos && ( // ✅ 추가: 메모 로딩 중일 때 로딩 오버레이 표시
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          zIndex: 999
+        }}>
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          }}>
+            메모를 불러오는 중입니다...
+          </div>
         </div>
       )}
 
