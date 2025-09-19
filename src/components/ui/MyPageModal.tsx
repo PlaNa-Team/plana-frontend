@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../../store';
+import { useAppDispatch, useAppSelector  } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 import MyPagePwBtnModal from '../ui/MyPagePwBtnModal';
 import MyPageNicknameBtnModal from "../ui/MyPageNicknameBtnModal";
@@ -10,6 +10,14 @@ interface MyPageModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+  
+// 날짜를 YYYY-MM-DD 형식으로 변환하는 함수
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}.${month}.${day}`;
+};
 
 const MyPageModal: React.FC<MyPageModalProps> = ({ 
   isOpen, 
@@ -17,6 +25,12 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  // ✅ Redux 스토어에서 사용자 정보(user)를 가져옵니다.
+  const user = useAppSelector(state => state.auth.user);
+  const accessToken = useAppSelector(state => state.auth.accessToken);
+  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
+   
 
   const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
   const [isMyPageNicknameModalOpen, setisMyPageNicknameModalOpen] = useState(false);
@@ -40,7 +54,6 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
       setIsLoggingOut(false);
     }
   }
-    
 
   // 모달이 열릴 때 body 스크롤 막기
   useEffect(() => {
@@ -55,7 +68,10 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   };
 }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !user) return null;
+
+  // ✅ 이제 user 객체가 null이 아니므로 안전하게 접근 가능
+  const createdAt = new Date(user.createdAt);
 
   return (
     <>
@@ -63,7 +79,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
       <div className="mypage-modal" onClick={(e) => e.stopPropagation()}>
         <div className="mypage-modal__header">
           <div className="mypage-modal__title-section">
-            <div className="mypage-modal__user">우감자</div>
+            <div className="mypage-modal__user">{user.nickname}</div>
             <h1 className="mypage-modal__title">MyPage</h1>
               {/* 로그아웃 버튼 - 로딩 상태 포함 */}
               <button className="mypage-modal__action-btn" onClick={handleLogout} disabled={isLoggingOut}>
@@ -83,17 +99,17 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
               
               <div className="mypage-modal__info-row">
                 <div className="mypage-modal__label">이름</div>
-                <div className="mypage-modal__value">우민혁</div>
+                <div className="mypage-modal__value">{user.name}</div>
               </div>
               
               <div className="mypage-modal__info-row">
                 <div className="mypage-modal__label">닉네임</div>
-                <div className="mypage-modal__value">우감자</div>
+                <div className="mypage-modal__value">{user.nickname}</div>
               </div>
               
               <div className="mypage-modal__info-row">
                 <div className="mypage-modal__label">비밀번호</div>
-                <div className="mypage-modal__value">인증이 필요합니다.</div>
+                <div className="mypage-modal__value">{isAuthenticated && accessToken ? '인증이 확인되었습니다.' : '인증이 필요합니다.'}</div>
               </div>
             </div>
             
@@ -116,7 +132,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
               
               <div className="mypage-modal__info-row">
                 <div className="mypage-modal__label">시작일</div>
-                <div className="mypage-modal__value">2025.06.19</div>
+                <div className="mypage-modal__value">{createdAt ? formatDate(createdAt) : '정보 없음'}</div>
               </div>
               
               <div className="mypage-modal__info-row">
