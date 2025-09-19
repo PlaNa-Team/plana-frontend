@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Redux 상태를 React 앱에 연결하는 Provider
 import { Provider } from 'react-redux';
 // 우리가 만든 Redux 스토어 가져오기
-import { store } from './store';
+import { store, useAppDispatch } from './store';
 // Redux 상태를 읽어오는 커스텀 훅
 import { useAppSelector } from './store';
 
@@ -23,10 +23,31 @@ import Layout from './components/common/Layout';
 // 스타일
 import './assets/styles/main.scss';
 
+// 토스트 메시지
+import CustomToast from './components/ui/Toast';
+import { hideSuccessToast, clearError } from './store/slices/diarySlice';
 
-function App() {
+function AppContent() {
+  const dispatch = useAppDispatch();
+  const { showSuccessToast, error } = useAppSelector( state => state.diary );
+  
+  // 성공 토스트가 닫힐 때 Redux 상태를 업데이트하는 핸들러
+  const handleSuccessToastClose = (open: boolean) => {
+    if (!open) {
+      dispatch(hideSuccessToast());
+    }
+  };
+
   return (
-    <Provider store={store}>
+    <>
+      {/* 성공 토스트: Redux 상태에 따라 표시 */}
+      <CustomToast
+        title="알림"
+        description="다이어리가 성공적으로 등록되었습니다!"
+        isOpen={showSuccessToast}
+        onOpenChange={handleSuccessToastClose}
+      />
+
       <Router>
         <Routes>
           {/* 공개 페이지들 (레이아웃 없음) */}
@@ -62,8 +83,16 @@ function App() {
           } />
         </Routes>
       </Router>
-    </Provider>
+    </>
   );
+}
+
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent/>
+    </Provider>
+  )
 }
 
 export default App;

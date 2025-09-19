@@ -3,6 +3,9 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { 
     setSelectedDate,
     clearCurrentData,
+    getMonthlyDiariesAsync,
+    setCurrentViewMonthAndYear,
+    getDiaryDetailAsync,
 } from '../../store/slices/diarySlice';
 import { MonthlyDiaryItem } from '../../types/diary.types';
 import CustomDiaryCalendar from './CustomDiaryCalendar';
@@ -14,31 +17,47 @@ const DiaryCalendar: React.FC = () => {
         monthlyDiaries,
         selectedDate,
         isLoading,
-        error
+        error,
+        currentViewMonthAndYear,
     } = useAppSelector(state => state.diary);
 
     // 지역 상태 관리
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDiaryData, setSelectedDiaryData] = useState<any>(null);
-    const [currentViewDate, setCurrentViewDate] = useState(new Date());
+
+    // Redux 상태 사용
+    const currentViewDate = useMemo(() => new Date(currentViewMonthAndYear.year, currentViewMonthAndYear.month - 1), [currentViewMonthAndYear]);
 
     // 날짜별 다이어리 매핑
     const diaryMap = useMemo(() => {
         const map = new Map<string, MonthlyDiaryItem>();
         monthlyDiaries.forEach(diary => {
-            map.set(diary.diaryDate, diary);
+            const dateOnly = diary.diaryDate.split('T')[0];
+            map.set(dateOnly, diary);
         });
         return map;
     }, [monthlyDiaries]);
+
+    // 월별 다이어리 데이터 조회
+    useEffect(() => {
+        dispatch(getMonthlyDiariesAsync(currentViewMonthAndYear));
+    }, [dispatch, currentViewMonthAndYear]);
 
     // 날짜 클릭 핸들러
     const handleDateClick = useCallback(async (dateStr: string) => {
         const diaryData = diaryMap.get(dateStr);
 
+        if (diaryData) {
+            // 기존 다이어리 데이터가 있는 경우, 상세 데이터 조회
+            await dispatch(getDiaryDetailAsync({ date: dateStr}));
+        } else {
+            // 새 다이어리 등록하는 경우
+            dispatch(clearCurrentData());
+        }
+
         // Redux에 선택된 날짜 저장
         dispatch(setSelectedDate(dateStr));
-        setSelectedDiaryData(diaryData);
-
+        setSelectedDiaryData(diaryData||null);
         setIsModalOpen(true);
     }, [diaryMap, dispatch]);
 
@@ -48,11 +67,14 @@ const DiaryCalendar: React.FC = () => {
         dispatch(setSelectedDate(null));
         dispatch(clearCurrentData());
         setSelectedDiaryData(null);
-    }, [dispatch]);
+    }, [dispatch, currentViewMonthAndYear]);
 
+    // 월 변경 핸들러
     const handleMonthChange = useCallback((newDate: Date) => {
-        setCurrentViewDate(newDate);
-    }, []);
+        const newYear = newDate.getFullYear();
+        const newMonth = newDate.getMonth() + 1;
+        dispatch(setCurrentViewMonthAndYear({ year: newYear, month: newMonth }));
+    }, [dispatch]);
 
     return (
         <div className="diary-calendar-container">
@@ -61,7 +83,6 @@ const DiaryCalendar: React.FC = () => {
                 <div className='loading-overlay'>
                     <div className='loading-spinner'></div>
                 </div>
-            {/* )} */}
 
             <CustomDiaryCalendar 
                 diaryMap={diaryMap}

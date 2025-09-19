@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { CheckIcon, XIcon, TrashBinIcon } from '../../assets/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
 import {
@@ -7,19 +7,29 @@ import {
     updateMovieData,
     updateBookData,
     clearError,
+    createDiaryAsync,
+    getDiaryDetailAsync,
+    updateDiaryAsync,
+    deleteDiaryAsync,
+    searchMembersAsync,
+    addTag,
+    removeTag,
+    clearSearchResults,
+    clearAllTags,
 } from '../../store/slices/diarySlice';
 import {
     CreateDiaryRequest,
     UpdateDiaryRequest,
     DailyContent,
-    MovieContent as MovieContentType, // 이름 중복 해결을 위해 별칭 추가
+    MovieContent as MovieContentType,
     BookContent as BookContentType,
+    FriendItem,
 } from '../../types/diary.types';
-import CustomToast from '../ui/Toast';
 import MomentContent from './MomentContent';
 import MovieContent from './MovieContent';
 import BookContent from './BookContent';
 import toast from 'react-hot-toast';
+import { unwrapResult } from '@reduxjs/toolkit';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -39,73 +49,141 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     isOpen,
     onClose,
     selectedDate,
-    diaryData
+    diaryData,
 }) => {
     const dispatch = useAppDispatch();
     const {
         currentMomentData,
         currentMovieData,
         currentBookData,
-        currentDiaryDetail,
         isLoading,
         isUploading,
-        error
+        error,
+        currentDiaryDetail,
+        friendSearchResults,
+        selectedTags,
+        isSearching,
+        searchError,
     } = useAppSelector(state => state.diary);
 
     const modalContentRef = useRef<HTMLDivElement>(null);
+    const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+    const [searchInput, setSearchInput] = useState('');
     const [activeTab, setActiveTab] = useState<DiaryType>(diaryData?.diaryType || 'DAILY');
-    const [isSaving, setIsSaving] = useState(false);
-    const [isToastOpen, setIsToastOpen] = useState(false);
 
-    useEffect(() => {
-        if (diaryData && diaryData.diaryType) {
-            setActiveTab(diaryData.diaryType);
-            dispatch(clearCurrentData());
+    const handleCloseModal = useCallback(() => {
+        dispatch(clearCurrentData());
+        dispatch(clearError());
+        onClose();
+    }, [dispatch, onClose]);
 
-            // 상세 조회 api 로직
-        }
-    }, [diaryData, dispatch]);
+    // 다이어리 저장 핸들러 (수정/등록 분기처리)
+    const handleSave = useCallback(async () => {
+        if (!selectedDate) return;
 
-    const handleToastClose = (open: boolean) => {
-        if (!open) {
-            dispatch(clearError());
-            setIsToastOpen(false);
-        }
-    };
+        let contentData: any;
+        let imageUrl;
 
-    const handleSaveDiary = () => {
-        if (!selectedDate) {
-            toast.error('날짜를 선택해 주세요.');
-            return;
-        }
-
-        let content: DailyContent | MovieContentType | BookContentType;
         switch (activeTab) {
             case 'DAILY':
-                content = currentMomentData;
+                contentData = { ...currentMomentData };
+                imageUrl = currentMomentData.imageUrl;
+                delete contentData.imageUrl;
                 break;
             case 'MOVIE':
-                content = currentMovieData;
+                contentData = { ...currentMovieData };
+                imageUrl = currentMovieData.imageUrl;
+                delete contentData.imageUrl;
                 break;
             case 'BOOK':
-                content = currentBookData;
+                contentData = { ...currentBookData };
+                imageUrl = currentBookData.imageUrl;
+                delete contentData.imageUrl;
                 break;
             default:
                 return;
         }
+
+        const diaryDataBody: CreateDiaryRequest = {
+            diaryDate: selectedDate,
+            diaryType: activeTab,
+            imageUrl: imageUrl || undefined,
+            content: contentData,
+            diaryTags: selectedTags,
+        };
+
+        try {
+            if (diaryData?.id) { // 수정 모드 : id가 있는 경우
+                await dispatch(updateDiaryAsync({
+                    id: diaryData.id,
+                    diaryData: diaryDataBody as UpdateDiaryRequest
+                })).unwrap();
+                toast.success('다이어리가 성공적으로 등록되었습니다!');
+            } else { // 등록 모드 : id가 없는 경우
+                await dispatch(createDiaryAsync({ 
+                    diaryData: diaryDataBody as CreateDiaryRequest
+                 })).unwrap();
+                 toast.error('다이어리 등록에 실패했습니다.');
+            }
+            onClose();
+        } catch (error) {
+            const errorMessage = (error as any).message || '저장에 실패했습니다.';
+            toast.error(errorMessage);
+        }
+    }, [
+        dispatch,
+        selectedDate,
+        activeTab,
+        currentMomentData,
+        currentMovieData,
+        currentBookData,
+        onClose,
+        diaryData,
+        selectedTags,
+    ]);
+
+    // 다이어리 삭제 핸들러
+    const handleDelete = useCallback(async () => {
+        if (!diaryData?.id) {
+            toast.error('삭제할 다이어리가 없습니다.');
+            return;
+        }
+
+        const confirmDelete = window.confirm('정말로 이 다이어리를 삭제하시겠습니까?');
+        if (confirmDelete) {
+            try {
+                await dispatch(deleteDiaryAsync(diaryData.id)).unwrap();
+                toast.success('다이어리가 삭제되었습니다!');
+                onClose();
+            } catch (error) {
+                const errorMessage = (error as any)?.message || '다이어리 삭제에 실패했습니다.';
+                toast.error(errorMessage);
+            }
+        }
+    }, [dispatch, diaryData, onClose]);
+
+    // 탭 변경 핸들러
+    const handleTabChange = (newTab: DiaryType) => {
+        // 기존 다이어리 데이터가 있고, 탭을 변경하는 경우
+        if (diaryData && newTab !== activeTab) {
+            const confirmChange = window.confirm(
+                '탭을 변경하면 현재 작성 중인 내용이 사라집니다. 계속하시겠습니까?'
+            );
+            if (!confirmChange) return;
+            dispatch(clearCurrentData()); // 현재 데이터 초기화
+        }
+        setActiveTab(newTab);
     }
 
     // 모달 외부 클릭을 감지
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // modalContentRef가 설정되어 있고, 클릭한 대상이 모달 외부인 경우
             if (modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
-                onClose();
+                handleCloseModal();
             }
         };
 
-        // 모달이 열려 있을 때만 이벤트 리스너 추가
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
@@ -113,32 +191,62 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen, onClose]);
+    }, [isOpen, handleCloseModal]);
 
-    // 다이어리 상세 데이터가 로드되면 Redux 상태 업데이트
+    // 모달이 열리고, 데이터가 있을 때만 상세 정보 불러오기
     useEffect(() => {
-        if (currentDiaryDetail) {
-            const content = currentDiaryDetail.content;
-            if (currentDiaryDetail.diaryType === 'DAILY') {
-                dispatch(updateMomentData(content as DailyContent));
-            } else if (currentDiaryDetail.diaryType === 'BOOK') {
-                dispatch(updateBookData(content as BookContentType));
-            } else if (currentDiaryDetail.diaryType === 'MOVIE') {
-                dispatch(updateMovieData(content as MovieContentType));
-            }
+        if (isOpen && diaryData && selectedDate) {
+            dispatch(getDiaryDetailAsync({ date: selectedDate }));
+        } else if (isOpen) {
+            setActiveTab('DAILY');
+        }
+    }, [isOpen, diaryData, selectedDate, dispatch]);
+
+    // 상세 정보 로드가 완료되면 activeTab 및 상태 업데이트
+    useEffect(() => {
+        if (currentDiaryDetail && currentDiaryDetail.diaryType) {
             setActiveTab(currentDiaryDetail.diaryType);
         }
-    }, [currentDiaryDetail, dispatch]);
+    }, [currentDiaryDetail]);
 
-    const handleCloseModal = () => {
-        dispatch(clearCurrentData());
-        dispatch(clearError());
-        onClose();
-    }
+    // 모달이 닫힐 때 친구 태그 상태 초기화
+    useEffect(() => {
+        if (!isOpen) {
+            dispatch(clearAllTags());
+            dispatch(clearSearchResults());
+            setSearchInput('');
+        }
+    }, [isOpen, dispatch]);
 
-    const handleTabChange = (tab: DiaryType) => {
-        setActiveTab(tab);
-    }
+    // 친구 검색 입력 핸들러 (디바운스 적용)
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const keyword = e.target.value;
+        setSearchInput(keyword);
+        if (searchDebounceRef.current) {
+            clearTimeout(searchDebounceRef.current);
+        }
+        if (keyword.length > 0) {
+            searchDebounceRef.current = setTimeout(() => {
+                dispatch(searchMembersAsync(keyword));
+            }, 300);
+        } else {
+            dispatch(clearSearchResults());
+        }
+    };
+
+    // 검색된 친구 클릭 시 태그 추가
+    const handleAddTag = useCallback((friend: FriendItem) => {
+        dispatch(addTag({ tagText: friend.loginId}));
+        dispatch(clearSearchResults()); // 검색 결과 초기화
+        setSearchInput(''); // 검색창 초기화
+    }, [dispatch]);
+
+    // 태그 삭제 핸들러
+    const handleRemoveTag = useCallback((loginId: string) => {
+        dispatch(removeTag(loginId));
+    }, [dispatch]);
+
+    const isEditMode = !!diaryData;
 
     if (!isOpen) return null;
 
@@ -146,15 +254,16 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         <div className="diary-modal-backdrop" onClick={handleCloseModal}>
             <div className='diary-modal' ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
                 <div className='diary-modal-header'>
-                    <button 
+                    <button
                         className='diary-modal-close'
-                        onClick={handleCloseModal} 
-                        disabled={isLoading}
+                        onClick={handleCloseModal}
+                        disabled={isLoading || isUploading}
                     >
                         <XIcon width='24' height='24' fill='var(--color-xl)' />
                     </button>
-                    <button 
+                    <button
                         className='diary-modal-save'
+                        onClick={handleSave}
                         disabled={isLoading || isUploading}
                     >
                         <CheckIcon width='24' height='24' fill='var(--color-xl)' />
@@ -190,21 +299,48 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     </div>
 
                     <div className='tab-content'>
-                        {activeTab === 'DAILY' && (
-                            <MomentContent/>
-                        )}
-                        {activeTab === 'MOVIE' && (
-                            <MovieContent/>
-                        )}
-                        {activeTab === 'BOOK' && (
-                            <BookContent/>
-                        )}
+                        {activeTab === 'DAILY' && <MomentContent />}
+                        {activeTab === 'MOVIE' && <MovieContent />}
+                        {activeTab === 'BOOK' && <BookContent />}
                     </div>
                 </div>
-            
-                {diaryData?.id && (
+
+                <div className="diary-modal-friend-tags">
+                    <div className="diary-friend-input">
+                        <input
+                            type="text"
+                            placeholder="Friend"
+                            value={searchInput}
+                            onChange={handleSearchChange}
+                        />
+                    </div>
+
+                    {/* 검색 결과 목록 */}
+                    {searchInput.length > 0 && friendSearchResults.length > 0 && (
+                        <ul className="search-results-list">
+                            {friendSearchResults.map(friend => (
+                                <li key={friend.id} onClick={() => handleAddTag(friend)}>
+                                    {friend.loginId}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    {/* 선택된 태그 목록 */}
+                    <div className="diary-friend-tags">
+                        {selectedTags.map(tag => (
+                            <span key={tag.tagText} className="diary-friend-tag">
+                                @{tag.tagText}
+                                <button onClick={() => tag.tagText && handleRemoveTag(tag.tagText)}>×</button>
+                                </span>
+                        ))}
+                    </div>
+                </div>
+
+                {isEditMode && (
                     <button
                         className="diary-modal-delete"
+                        onClick={handleDelete}
                         disabled={isLoading}
                     >
                         <TrashBinIcon className="diary-modal-delete-icon" fill="var(--color-xl)" />
@@ -218,13 +354,6 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                         </div>
                     </div>
                 )}
-
-                <CustomToast
-                    title={error ? '오류 발생' : '알림'}
-                    description={error || '저장 성공'}
-                    isOpen={!!error}
-                    onOpenChange={handleToastClose}
-                />
             </div>
         </div>
     );
