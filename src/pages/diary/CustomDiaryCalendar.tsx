@@ -86,8 +86,8 @@ const CustomDiaryCalendar: React.FC<CustomDiaryCalendarProps> = ({
         const totalDays = monthEndWeek * 7;
 
         for (let i = 0; i < totalDays; i++) {
-            const date = new Date(start);
-            date.setDate(start.getDate() + i);
+            const date = new Date(calendarStart);
+            date.setDate(calendarStart.getDate() + i);
             days.push(date);
         }
         return days;
@@ -216,11 +216,12 @@ const CustomDiaryCalendar: React.FC<CustomDiaryCalendarProps> = ({
                             </div>
                             {hasDiary && (
                                 <div className='diary-img'>
-                                    <img
-                                        src={hasDiary.imageUrl}
-                                        alt={`${dateStr} 다이어리`}
-                                        className='diary-thumbnail'
-                                    />
+                                    {/* 이미지가 있으면 이미지, 없으면 아이콘 등 */}
+                                    {hasDiary.imageUrl ? (
+                                        <img src={hasDiary.imageUrl} className="diary-thumbnail" />
+                                    ) : (
+                                        <span className="diary-dot" />
+                                    )}
                                 </div>
                             )}
                         </div>,

@@ -20,7 +20,8 @@ import {
   UpdateDiaryRequest,
   DiaryCreateResponse,
   DiaryDeleteResponse,
-  DiaryDetail
+  DiaryDetail,
+  FriendSearchResponse
 } from '../types/diary.types';
 import { 
   MonthlyScheduleResponse, 
@@ -842,7 +843,7 @@ export const diaryAPI = {
             formData.append('file', file);
 
             const response = await apiClient.post<TempImageResponse>(
-                '/files/temp-upload', 
+                '/files/upload', 
                 formData,
                 {
                     headers: {
@@ -856,6 +857,84 @@ export const diaryAPI = {
             if (axios.isAxiosError(error)) {
             const errorMessage = error.response?.data?.message || '이미지 업로드에 실패했습니다.';
             throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    createDiary: async (requestBody: CreateDiaryRequest): Promise<DiaryCreateResponse> => {
+        try {
+            const response = await apiClient.post<DiaryCreateResponse>(
+                '/diaries',
+                requestBody
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '다이어리 등록에 실패했습니다';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    getMonthlyDiaries: async (year: number, month: number): Promise<MonthlyDiaryResponse> => {
+        try {
+            const response = await apiClient.get<MonthlyDiaryResponse>(`/diaries?year=${year}&month=${month}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                const errorMessage = error.response.data.message || '다이어리 조회에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    getDiaryDetail: async (date: string): Promise<DiaryDetailResponse> => {
+        try {
+            const response = await apiClient.get<DiaryDetailResponse>(`/diaries/detail?date=${date}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                const errorMessage = error.response.data.message || '다이어리 상세 조회에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    updateDiary: async (id: number, requestBody: UpdateDiaryRequest): Promise<DiaryCreateResponse> => {
+        try {
+            const response = await apiClient.put<DiaryCreateResponse>(
+                `/diaries/${id}`,
+                requestBody
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '다이어리 수정에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    deleteDiary: async (id: number): Promise<DiaryDeleteResponse> => {
+        try {
+            const response = await apiClient.delete<DiaryDeleteResponse>(`/diaries/${id}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '다이어리 삭제에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    searchMembers: async (keyword: string): Promise<FriendSearchResponse> => {
+        try {
+            const response = await apiClient.get<FriendSearchResponse>(`/members?keyword=${keyword}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '사용자 검색에 실패했습니다.';
+                throw new Error(errorMessage);
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
