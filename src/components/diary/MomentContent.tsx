@@ -39,69 +39,72 @@ const MomentContent: React.FC<MomentContentProps> = () => {
 
     return (
         <div className='diary-content'>
-            <div className='first-row'>
-                <div className='image-upload-area'>
-                    {momentData.imageUrl ? (
-                        <img
-                            src={momentData.imageUrl}
-                            alt="Uploaded Preview"
-                            className="uploaded-image-preview"
-                        />
-                    ) : (
-                        <>
-                            <input
-                                type='file'
-                                accept='image/*'
-                                onChange={handleFileChange}
-                                ref={fileInputRef}
-                                className='file-input'
-                                style={{ display: 'none'}}
+            <div className='daliy-content'>
+                <div className='first-row'>
+                    <div className='image-upload'>
+                        {momentData.imageUrl ? (
+                            <img
+                                src={momentData.imageUrl}
+                                alt="Uploaded Preview"
+                                className="image-upload-preview"
                             />
-                            <label
-                                role='button'
-                                onClick={handleImageClick}
-                                className='image-upload-button'
-                            >
-                                이미지 업로드
-                            </label>
-                        </>
-                    )}
-                </div>
+                        ) : (
+                            <>
+                                <input
+                                    type='file'
+                                    accept='image/*'
+                                    onChange={handleFileChange}
+                                    ref={fileInputRef}
+                                    className='file-input'
+                                    style={{ display: 'none'}}
+                                />
+                                <label
+                                    role='button'
+                                    onClick={handleImageClick}
+                                    className='image-upload-button'
+                                >
+                                    이미지 업로드
+                                </label>
+                            </>
+                        )}
+                    </div>
 
-                <div className='input-section'>
-                    <input
-                        type='text'
-                        placeholder='title'
-                        value={momentData.title}
-                        onChange={handleTitleChange}
-                        className='title-input'
-                    />
-
-                    <div className='location-group'>
-                        <span className='location-label'>Location</span>
-                        <LocationIcon
-                            className='location-icon'
-                            fill='var(--color-xl)'
-                        />
+                    <div className='input-section'>
                         <input
                             type='text'
-                            value={momentData.location}
-                            onChange={handleLocationChange}
-                            className='location-input'
+                            placeholder='title'
+                            value={momentData.title}
+                            onChange={handleTitleChange}
+                            className='title-input'
                         />
+
+                        <div className='location-group'>
+                            <span className='location-label'>Location</span>
+                            <LocationIcon
+                                className='location-icon'
+                                fill='var(--color-xl)'
+                            />
+                            <input
+                                type='text'
+                                value={momentData.location}
+                                onChange={handleLocationChange}
+                                className='location-input'
+                                placeholder='장소 입력'
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div className='second-row'>
-                <div className='memo-group'>
-                    <span className='memo-label'>Memo</span>
-                    <textarea
-                        value={momentData.memo}
-                        onChange={handleMemoChange}
-                        className='memo-textarea'
-                        rows={8}
-                    />
+                <div className='second-row'>
+                    <div className='memo-group'>
+                        <span className='memo-label'>Memo</span>
+                        <textarea
+                            value={momentData.memo}
+                            onChange={handleMemoChange}
+                            className='memo-textarea'
+                            rows={8}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

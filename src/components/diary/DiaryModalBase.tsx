@@ -273,26 +273,26 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 <div className='diary-modal-main'>
                     <div className='diary-modal-sidebar'>
                         <button
-                            className={`diary-tab ${activeTab === 'DAILY' ? 'active' : ''}`}
+                            className={`diary-modal-tab ${activeTab === 'DAILY' ? 'active' : ''}`}
                             onClick={() => handleTabChange('DAILY')}
                         >
-                            <span className='diary-tab-text'>
+                            <span className='diary-modal-tab-text'>
                                 D<br/>A<br/>I<br/>L<br/>Y
                             </span>
                         </button>
                         <button
-                            className={`diary-tab ${activeTab === 'MOVIE' ? 'active' : ''}`}
+                            className={`diary-modal-tab ${activeTab === 'MOVIE' ? 'active' : ''}`}
                             onClick={() => handleTabChange('MOVIE')}
                         >
-                            <span className='diary-tab-text'>
+                            <span className='diary-modal-tab-text'>
                                 M<br/>O<br/>V<br/>I<br/>E
                             </span>
                         </button>
                         <button
-                            className={`diary-tab ${activeTab === 'BOOK' ? 'active' : ''}`}
+                            className={`diary-modal-tab ${activeTab === 'BOOK' ? 'active' : ''}`}
                             onClick={() => handleTabChange('BOOK')}
                         >
-                            <span className='diary-tab-text'>
+                            <span className='diary-modal-tab-text'>
                                 B<br/>O<br/>O<br/>K
                             </span>
                         </button>
