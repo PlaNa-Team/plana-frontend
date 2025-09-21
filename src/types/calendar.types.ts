@@ -339,3 +339,11 @@ export interface MemoMonthlyResponse {
         // 백엔드 응답에 다른 필드가 있다면 여기에 추가
     };
 }
+
+// 일정 삭제 API 응답 타입
+export interface DeleteScheduleResponse {
+  status: number;
+  message: string;
+}
+
+

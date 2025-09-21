@@ -117,8 +117,10 @@
 
 /* 개별 일정 아이템 */
 .event-item {
+  position: relative;
+  overflow: hidden; 
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding: 0.5rem;
   background: var(--color-xs);
   color: var(--color-xl);
@@ -132,6 +134,97 @@
     border-color: var(--color-md);
     transform: translateY(-1px);
   }
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.delete-confirm-modal {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  text-align: center;
+  max-width: 300px;
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.delete-cancel-button {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.delete-confirm-button {
+  background-color: #ff4d4f;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delete-buttons-container {
+  display: flex;
+  position: absolute; /* .event-item 내부에 위치 */
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 0; /* 초기 너비: 0 */
+  opacity: 0;
+  transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out; /* 애니메이션 효과 */
+  background-color: white; /* 배경색을 추가해 기존 콘텐츠를 가림 */
+  align-items: center;
+  justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+  padding-right: 10px; /* 오른쪽 여백 */
+}
+
+.delete-buttons-container.visible {
+  width: 120px; /* 표시될 때의 너비, 버튼 크기에 맞게 조절 */
+  opacity: 1;
+}
+
+.delete-button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: #555;
+  margin-right: 8px;
+}
+
+.confirm-button {
+  background-color: #ff4d4f;
+  color: white;
 }
 
 /* 카테고리 표시 */

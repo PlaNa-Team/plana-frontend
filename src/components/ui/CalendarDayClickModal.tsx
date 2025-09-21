@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { 
   selectEvents,
-  fetchMonthlySchedules
+  fetchMonthlySchedules,
+  deleteSchedule,
+
 } from '../../store/slices/calendarSlice';
 import { DayEvent } from '../../types/calendar.types';
 import { calendarAPI } from '../../services/api';
 import { ScheduleFormData } from '../../types/calendar.types';
 import { transformDetailToFormData } from '../../services/api';
+import { TrashBinIcon } from '../../assets/icons';
+import { selectCurrentYear, selectCurrentMonth } from '../../store/slices/calendarSlice'; // 🔑 추가
 
 
 
@@ -29,6 +33,10 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
   
   // Redux에서 월간 일정 데이터 가져오기
   const monthlyEvents = useAppSelector(selectEvents);
+
+  const currentYear = useAppSelector(selectCurrentYear); // 🔑 현재 년도
+  const currentMonth = useAppSelector(selectCurrentMonth); // 🔑 현재 월
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // 🔄 내부에서 모든 상태 관리
   const [isOpen, setIsOpen] = useState(false);
@@ -215,6 +223,21 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
     }
   };
 
+  const handleDeleteClick = (eventId: string) => (e: React.MouseEvent) => {
+    e.stopPropagation(); // 🛑 일정 클릭 방지
+    setDeleteTargetId(eventId); // 🔥 삭제할 이벤트 설정
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTargetId) return;
+    dispatch(deleteSchedule({ eventId: deleteTargetId, year: currentYear, month: currentMonth }));
+    setDeleteTargetId(null); // 모달 닫기
+  };
+
+  const cancelDelete = () => {
+    setDeleteTargetId(null);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -239,21 +262,30 @@ const CalendarDayClickModal: React.FC<CalendarDayClickModalProps> = ({
             <div className="events-list">
               {dailyEvents.map((event) => (
                 <div key={event.id} className="event-item" onClick={() => handleEventClick(event)}>
-           <div 
-  className={`event-category-indicator event-color-${event.color}`} 
-/>
+                  <div className={`event-category-indicator event-color-${event.color}`} />
                   <div className="event-content">
                     <div className="event-header">
                       <h3 className="event-title">{event.title}</h3>  
                     </div>
                      <span className="event-time">{event.time}</span>
                   </div>
-                </div>
+                  <TrashBinIcon width={34} height={34} onClick={handleDeleteClick(event.id)} />                </div>
               ))}
             </div>
           )}
         </div>
       </div>
+      {deleteTargetId && (
+              <div className="delete-confirm-overlay" onClick={cancelDelete}>
+                <div className="delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+                  <p>정말 이 일정을 삭제하시겠습니까?</p>
+                  <div className="delete-confirm-actions">
+                    <button className="delete-cancel-button" onClick={cancelDelete}>아니오</button>
+                    <button className="delete-confirm-button" onClick={confirmDelete}>예</button>
+                  </div>
+                </div>
+              </div>
+            )}
     </div>
   );
 };

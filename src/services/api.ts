@@ -1,5 +1,17 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse, PasswordConfirmRequest, PasswordConfirmResponse, PasswordUpdateRequest, PasswordUpdateResponse, PaginationResponse } from '../types';
+import { 
+    SignUpRequest, 
+    IdCheckResponse, 
+    LoginResponseDto, 
+    MemberInfo, 
+    PasswordConfirmRequest, 
+    PasswordConfirmResponse, 
+    PasswordUpdateRequest, 
+    PasswordUpdateResponse, 
+    deleteIdResponse,
+    ResetPasswordPayload,
+    ResetPasswordResponse
+} from '../types';
 import {
   MonthlyDiaryResponse,
   DiaryDetailResponse,
@@ -18,7 +30,6 @@ import {
   ScheduleFormData, 
   CreateScheduleResponse, 
   UpdateScheduleResponse,
-  // 🆕 태그 관련 타입 추가
   TagListResponse,
   CreateTagRequest,
   CreateTagResponse,
@@ -31,7 +42,7 @@ import {
   MemoPayload,
   UpdateMemoPayload,
   MemoMonthlyResponse,
-
+  DeleteScheduleResponse
 } from '../types/calendar.types';
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
 
@@ -511,8 +522,27 @@ export const authAPI = {
         throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+    deleteMember: async (): Promise<deleteIdResponse> => {
+        try {
+            const response = await apiClient.delete<deleteIdResponse>('/members');
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '회원 탈퇴에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    resetPassword: async (email: string, newPassword: string, confirmPassword: string): Promise<ResetPasswordResponse> => {
+        const requestData = { email, newPassword, confirmPassword };
+        const response = await apiClient.patch<ResetPasswordResponse>(
+            '/auth/password/reset',
+            requestData
+        );
+        return response.data;
+    }
 }
-
 
 // API 객체에 추가할 함수
 export const calendarAPI = {
@@ -565,6 +595,24 @@ export const calendarAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
+     // 일정 삭제
+    deleteSchedule: async (scheduleId: string): Promise<DeleteScheduleResponse> => {
+        try {
+            // 가상 ID인 경우 원본 ID 추출
+            const originalId = extractOriginalId(scheduleId);
+            
+            const response = await apiClient.delete<DeleteScheduleResponse>(
+                `/calendars/${originalId}`
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '일정 삭제에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
     // 일정 수정
     updateSchedule: async (scheduleId: string, formData: ScheduleFormData): Promise<UpdateScheduleResponse> => {
         try {
@@ -587,7 +635,24 @@ export const calendarAPI = {
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
-        // 🆕 캘린더 메모 관련 API
+    // 전체 조회
+    searchSchedules: async (keyword: string): Promise<MonthlyScheduleResponse['data']> => {
+        try {
+            const response = await apiClient.get<MonthlyScheduleResponse>(
+                `/calendars?keyword=${keyword}`
+            );
+            return response.data.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '일정 검색에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+
+    // 🆕 캘린더 메모 관련 API
     /**
      * 캘린더 메모 목록을 조회합니다.
      * GET /api/memos?year={year}&week={week}
@@ -681,7 +746,7 @@ export const calendarAPI = {
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
-    }
+    },
 };
 
     // 🆕 태그 API - authAPI, calendarAPI와 동일한 패턴으로 구현

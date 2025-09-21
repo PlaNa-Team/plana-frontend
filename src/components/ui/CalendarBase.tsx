@@ -8,14 +8,12 @@ import {
   setHolidays,
   setLoadingHolidays,
   selectHolidays,
-  selectIsLoadingHolidays,
   selectEvents,
   selectIsLoadingEvents,
-  selectEventsError,
   fetchMonthlySchedules,
-  updateCurrentDate
+  updateCurrentDate,
 } from '../../store/slices/calendarSlice';
-import { HolidayItem, MemoItem, MemoPayload, UpdateMemoPayload } from '../../types/calendar.types';
+import { HolidayItem, MemoItem } from '../../types/calendar.types';
 import { calendarAPI } from '../../services/api';
 
 // 주차 계산 헬퍼 함수
@@ -75,6 +73,8 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   const holidays = useAppSelector(selectHolidays);
   const scheduleEvents = useAppSelector(selectEvents);
   const isLoadingEvents = useAppSelector(selectIsLoadingEvents);
+  // ✅ 삭제: 메모 로딩 상태 가져오기
+  // const isLoadingMemos = useAppSelector(selectIsLoadingMemos); 
   
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -156,21 +156,21 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     });
   }, [getDayColorClass]);
 
-  const handleTextareaClick = (e: Event) => {
+  const handleTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
     e.preventDefault();
     const target = e.target as HTMLTextAreaElement;
     target.focus();
   };
 
-  const handleTextareaFocus = (e: Event) => {
+  const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
   };
 
-  const handleTextareaMouseDown = (e: Event) => {
+  const handleTextareaMouseDown = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
   };
-
+  
   const renderDayCellContent = React.useCallback(
     (dayInfo: any) => {
       if (dayCellContent) {
@@ -187,209 +187,149 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
     [dayCellContent, getDayColorClass]
   );
 
-  // 간단한 메모 컬럼 추가 함수
-const addMemoColumn = React.useCallback(async () => {
+  const addMemoColumn = React.useCallback(async () => {
     if (isUpdating.current) return;
     isUpdating.current = true;
+    
+    // ✅ 삭제: dispatch(setLoadingMemos(true));
 
     const calendarEl = containerRef.current?.querySelector('.fc');
     if (!calendarEl) {
-        isUpdating.current = false;
-        return;
+      isUpdating.current = false;
+      // ✅ 삭제: dispatch(setLoadingMemos(false));
+      return;
     }
 
-    // 기존 메모 셀 제거
-    calendarEl.querySelectorAll('.memo-header-cell, .memo-body-cell').forEach(cell => cell.remove());
+    const currentDate = calendarRef.current?.getApi().getDate() || new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
 
-    // 셀 너비 조정
+    let monthlyMemos: MemoItem[] = [];
+    try {
+      monthlyMemos = await calendarAPI.getMonthlyMemos(currentYear, currentMonth, "스케줄");
+    } catch (error) {
+      console.error("월별 메모 조회 실패:", error);
+    } finally {
+      // ✅ 삭제: dispatch(setLoadingMemos(false));
+    }
+
+    let memoHeaderCell = calendarEl.querySelector('.memo-header-cell') as HTMLElement | null;
+    if (!memoHeaderCell) {
+      const headerRow = calendarEl.querySelector('.fc-col-header tr');
+      if (headerRow) {
+        memoHeaderCell = document.createElement('th');
+        memoHeaderCell.className = 'fc-col-header-cell memo-header-cell';
+        memoHeaderCell.style.width = '12.5%';
+        memoHeaderCell.innerHTML = `<div class="fc-scrollgrid-sync-inner"><div class="fc-col-header-cell-cushion">메모</div></div>`;
+        headerRow.appendChild(memoHeaderCell);
+      }
+    }
+    
     calendarEl.querySelectorAll('.fc-col-header-cell, .fc-daygrid-day').forEach((cell: Element) => {
         (cell as HTMLElement).style.width = '12.5%';
     });
 
-    // 메모 헤더 추가
-    const headerRow = calendarEl.querySelector('.fc-col-header tr');
-    if (headerRow) {
-        const memoHeaderCell = document.createElement('th');
-        memoHeaderCell.className = 'fc-col-header-cell memo-header-cell';
-        memoHeaderCell.style.width = '12.5%';
-        memoHeaderCell.innerHTML = `
-            <div class="fc-scrollgrid-sync-inner">
-                <div class="fc-col-header-cell-cushion">메모</div>
-            </div>
-        `;
-        headerRow.appendChild(memoHeaderCell);
-    }
-
-    // 현재 월 정보
-    const currentDate = calendarRef.current?.getApi().getDate() || new Date();
-    const currentMonth = currentDate.getMonth() + 1; // getMonth()는 0부터 시작하므로 +1
-    const currentYear = currentDate.getFullYear();
-
-    // ✅ 변경된 부분: API 호출 로직
-    let monthlyMemos: MemoItem[] = [];
-    try {
-        // 월별 메모를 한 번에 조회하도록 수정 (year, month, type 파라미터 사용)
-        monthlyMemos = await calendarAPI.getMonthlyMemos(currentYear, currentMonth, "스케줄");
-    } catch (error) {
-        console.error("월별 메모 조회 실패:", error);
-        isUpdating.current = false;
-        return;
-    }
-    
-    // DOM 준비 대기
-    await new Promise(resolve => setTimeout(resolve, 100));
     const bodyRows = calendarEl.querySelectorAll('.fc-daygrid-body tr[role="row"]');
-
-    // 처리된 주차 추적
     const processedWeeks = new Set<number>();
 
-    // 각 주별 메모 셀 생성
     for (const row of Array.from(bodyRows)) {
-        const dateCells = row.querySelectorAll('.fc-daygrid-day[data-date]');
-        if (dateCells.length === 0) continue;
+      const dateCells = row.querySelectorAll('.fc-daygrid-day[data-date]');
+      if (dateCells.length === 0) continue;
 
-        let weekDate: Date | null = null;
-        let hasRelevantDate = false;
-        
-        for (const cell of Array.from(dateCells)) { 
-            const dateAttr = cell.getAttribute('data-date');
-            if (dateAttr) {
-                const cellDate = new Date(dateAttr);
-                if (cellDate.getFullYear() === currentYear) {
-                    if (cellDate.getMonth() + 1 === currentMonth ||
-                        Math.abs((cellDate.getFullYear() * 12 + cellDate.getMonth()) - (currentYear * 12 + currentMonth - 1)) <= 1) {
-                        hasRelevantDate = true;
-                        if (!weekDate || cellDate.getMonth() + 1 === currentMonth) {
-                            weekDate = cellDate;
-                        }
-                    }
-                }
-            }
-        }
+      let weekDate: Date | null = null;
+      for (const cell of Array.from(dateCells)) { 
+          const dateAttr = cell.getAttribute('data-date');
+          if (dateAttr) {
+              const cellDate = new Date(dateAttr);
+              if (cellDate.getFullYear() === currentYear && (cellDate.getMonth() + 1 === currentMonth || Math.abs((cellDate.getFullYear() * 12 + cellDate.getMonth()) - (currentYear * 12 + currentMonth - 1)) <= 1)) {
+                  if (!weekDate || cellDate.getMonth() + 1 === currentMonth) {
+                      weekDate = cellDate;
+                  }
+              }
+          }
+      }
 
-        if (!hasRelevantDate || !weekDate) continue;
+      if (!weekDate) continue;
 
-        const weekNumber = getWeekNumber(weekDate);
-        
-        console.log(`처리할 주차: ${weekNumber} (기준 날짜: ${weekDate.toISOString().split('T')[0]})`);
-        
-        // 중복 방지
-        if (processedWeeks.has(weekNumber)) {
-            console.log(`주차 ${weekNumber} 이미 처리됨 - 건너뛰기`);
-            continue;
-        }
-        processedWeeks.add(weekNumber);
-        
-        // ✅ 변경된 부분: 이미 조회한 데이터에서 찾기
-        const existingMemo = monthlyMemos.find(memo => 
-            memo.week === weekNumber && memo.year === currentYear
-        ) || null;
+      const weekNumber = getWeekNumber(weekDate);
+      if (processedWeeks.has(weekNumber)) {
+          continue;
+      }
+      processedWeeks.add(weekNumber);
+      
+      const existingMemo = monthlyMemos.find(memo => memo.week === weekNumber && memo.year === currentYear) || null;
 
-        // 메모 셀 생성
-        const memoBodyCell = document.createElement('td');
-        memoBodyCell.className = 'fc-daygrid-day memo-body-cell';
-        memoBodyCell.style.width = '12.5%';
-        
-        memoBodyCell.innerHTML = `
-            <div class="fc-daygrid-day-frame">
-                <div class="memo-content">
-                    <textarea 
-                        placeholder="텍스트를 입력하세요" 
-                        class="memo-textarea"
-                        data-memo-id="${existingMemo?.id || ''}"
-                        data-week="${weekNumber}"
-                        data-year="${currentYear}"
-                    >${existingMemo?.content || ''}</textarea>
-                </div>
-            </div>
-        `;
-        row.appendChild(memoBodyCell);
+      let memoBodyCell = row.querySelector('.memo-body-cell') as HTMLElement | null;
+      let textareaEl: HTMLTextAreaElement | null = null;
+      
+      if (!memoBodyCell) {
+          memoBodyCell = document.createElement('td');
+          memoBodyCell.className = 'fc-daygrid-day memo-body-cell';
+          memoBodyCell.style.width = '12.5%';
+          memoBodyCell.innerHTML = `<div class="fc-daygrid-day-frame"><div class="memo-content"><textarea placeholder="텍스트를 입력하세요" class="memo-textarea"></textarea></div></div>`;
+          row.appendChild(memoBodyCell);
+          textareaEl = memoBodyCell.querySelector('.memo-textarea');
+      } else {
+          textareaEl = memoBodyCell.querySelector('.memo-textarea');
+      }
+
+      if (textareaEl) {
+        textareaEl.value = existingMemo?.content || '';
+        textareaEl.setAttribute('data-memo-id', existingMemo?.id?.toString() || '');
+        textareaEl.setAttribute('data-week', weekNumber.toString());
+        textareaEl.setAttribute('data-year', currentYear.toString());
+      }
     }
 
-    // 이벤트 핸들러 설정
     const textareas = calendarEl.querySelectorAll('.memo-textarea');
-    for (let i = 0; i < textareas.length; i++) {
-        const textareaEl = textareas[i] as HTMLTextAreaElement;
-        
-        textareaEl.addEventListener('click', handleTextareaClick);
-        textareaEl.addEventListener('focus', handleTextareaFocus);
-        textareaEl.addEventListener('mousedown', handleTextareaMouseDown);
-
-        // 간단한 저장 함수 - 중복 체크 강화
-        const saveMemo = async () => {
-            const content = textareaEl.value.trim();
-            if (!content) return;
-
-            const memoId = textareaEl.getAttribute('data-memo-id');
-            const week = parseInt(textareaEl.getAttribute('data-week') || '1');
-            const year = parseInt(textareaEl.getAttribute('data-year') || currentYear.toString());
-
-            console.log(`메모 저장 시도 - 주차: ${week}, 연도: ${year}, ID: ${memoId || 'new'}, 내용: ${content}`);
-
-            try {
-                if (memoId && memoId !== '') {
-                    // 기존 메모 수정
-                    console.log('기존 메모 수정 시도');
-                    await calendarAPI.updateMemo({
-                        id: parseInt(memoId),
-                        content,
-                        type: '스케줄'
-                    });
-                    console.log('메모 수정 완료');
-                } else {
-                    // 새 메모 생성 전에 기존 메모 확인
-                    console.log('새 메모 생성 전 중복 체크');
-                    
-                    // 서버에서 해당 주차 메모가 이미 있는지 확인
-                    // 만약 중복 체크가 필요하면 여기서 먼저 조회
-                    
-                    const newMemo = await calendarAPI.createMemo({
-                        content,
-                        year,
-                        week,
-                        type: '스케줄'
-                    });
-                    console.log('메모 생성 완료:', newMemo);
-                    
-                    // 생성된 ID를 저장
-                    textareaEl.setAttribute('data-memo-id', newMemo.id.toString());
-                }
-                
-                // 성공 표시
-                textareaEl.style.borderColor = '#4CAF50';
-                setTimeout(() => {
-                    textareaEl.style.borderColor = '';
-                }, 1000);
-            } catch (error) {
-                console.error('메모 저장 실패:', error);
-                
-                // 에러 표시
-                textareaEl.style.borderColor = '#f44336';
-                setTimeout(() => {
-                    textareaEl.style.borderColor = '';
-                }, 2000);
-            }
-        };
-
-        // 엔터키와 블러 이벤트
-        textareaEl.addEventListener('keypress', (e: KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            textareaEl.blur(); // 엔터키로 포커스 해제 -> blur 이벤트만 동작하도록 유도
-        }
+    textareas.forEach(textareaEl => {
+      textareaEl.addEventListener('click', handleTextareaClick as unknown as EventListener);
+      textareaEl.addEventListener('focus', handleTextareaFocus as unknown as EventListener);
+      textareaEl.addEventListener('mousedown', handleTextareaMouseDown as unknown as EventListener);
+      textareaEl.addEventListener('blur', saveMemo);
     });
 
-        textareaEl.addEventListener('blur', saveMemo); // 포커스가 해제될 때만 저장
-    }
-
     isUpdating.current = false;
-}, [handleTextareaClick, handleTextareaFocus, handleTextareaMouseDown]);
+  }, [handleTextareaClick, handleTextareaFocus, handleTextareaMouseDown]);
+
+  const saveMemo = React.useCallback(async (e: Event) => {
+    const textareaEl = e.target as HTMLTextAreaElement;
+    const content = textareaEl.value.trim();
+    if (!content) return;
+
+    const memoId = textareaEl.getAttribute('data-memo-id');
+    const week = parseInt(textareaEl.getAttribute('data-week') || '1');
+    const year = parseInt(textareaEl.getAttribute('data-year') || '0');
+
+    try {
+      if (memoId && memoId !== '') {
+        await calendarAPI.updateMemo({
+          id: parseInt(memoId),
+          content,
+          type: '스케줄'
+        });
+      } else {
+        const newMemo = await calendarAPI.createMemo({
+          content,
+          year,
+          week,
+          type: '스케줄'
+        });
+        textareaEl.setAttribute('data-memo-id', newMemo.id.toString());
+      }
+      
+      textareaEl.style.borderColor = '#4CAF50';
+      setTimeout(() => { textareaEl.style.borderColor = ''; }, 1000);
+    } catch (error) {
+      console.error('메모 저장 실패:', error);
+      textareaEl.style.borderColor = '#f44336';
+      setTimeout(() => { textareaEl.style.borderColor = ''; }, 2000);
+    }
+  }, []);
 
   const updateCalendar = React.useCallback(() => {
-    setTimeout(() => {
-      addMemoColumn();
-      applyDateColors();
-    }, 100);
+    addMemoColumn();
+    applyDateColors();
   }, [addMemoColumn, applyDateColors]);
 
   const handleLoading = (isLoading: boolean) => {
@@ -398,16 +338,12 @@ const addMemoColumn = React.useCallback(async () => {
     }
   };
 
-  const handleViewDidMount = () => {
-    updateCalendar();
-  };
-
   const handleDatesSet = React.useCallback(
     async (dateInfo: any) => {
       if (onDatesSet) {
         onDatesSet(dateInfo);
       }
-
+      
       const startDate = new Date(dateInfo.start);
       const endDate = new Date(dateInfo.end);
       const middleDate = new Date((startDate.getTime() + endDate.getTime()) / 2);
@@ -415,11 +351,8 @@ const addMemoColumn = React.useCallback(async () => {
       const currentYear = middleDate.getFullYear();
       const currentMonth = middleDate.getMonth() + 1;
 
-      // 월 변경시 플래그 리셋
       isUpdating.current = false;
-
       loadHolidays(currentYear.toString());
-      updateCalendar();
 
       try {
         dispatch(updateCurrentDate({ start: dateInfo.startStr }));
@@ -427,26 +360,23 @@ const addMemoColumn = React.useCallback(async () => {
       } catch (error) {
         console.error('일정 로드 실패:', error);
       }
+      updateCalendar();
     },
     [onDatesSet, dispatch, loadHolidays, updateCalendar]
   );
-
+  
   const renderMoreLinkContent = (info: any) => {
     return <div className="custom-more-link">더보기</div>;
   };
 
-useEffect(() => {
+  useEffect(() => {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     
-    console.log('=== 초기 로드 fetchMonthlySchedules API 요청 ===');
-    console.log('year:', year, 'type:', typeof year);
-    console.log('month:', month, 'type:', typeof month);
-    console.log('전체 파라미터:', { year, month });
-    
     dispatch(fetchMonthlySchedules({ year, month }));
   }, [dispatch]);
+  
   return (
     <div className={`calendar-base ${className}`} ref={containerRef}>
       {process.env.NODE_ENV === 'development' && (
@@ -462,6 +392,7 @@ useEffect(() => {
           Redux 일정: {scheduleEvents.length}개 | 로딩: {isLoadingEvents ? 'Y' : 'N'}
         </div>
       )}
+      {/* ✅ 삭제: 메모 로딩 오버레이 부분 */}
 
       <FullCalendar
         ref={calendarRef}
@@ -483,7 +414,6 @@ useEffect(() => {
         eventResize={onEventResize}
         dateClick={handleDateClick}
         datesSet={handleDatesSet}
-        viewDidMount={handleViewDidMount}
         loading={handleLoading}
         eventContent={eventContent}
         dayCellContent={renderDayCellContent}

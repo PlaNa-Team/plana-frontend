@@ -66,12 +66,12 @@ const BookContent: React.FC<BookContentProps> = () => {
     return (
         <div className='diary-content'>
             <div className='first-row'>
-                <div className='image-upload-area'>
+                <div className='image-upload'>
                     {bookData.imageUrl ? (
                         <img
                             src={bookData.imageUrl}
                             alt="Uploaded Preview"
-                            className="uploaded-image-preview"
+                            className="image-upload-preview"
                         />
                     ) : (
                         <>

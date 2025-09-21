@@ -5,6 +5,7 @@ import { logout } from '../../store/slices/authSlice';
 import MyPagePwBtnModal from '../ui/MyPagePwBtnModal';
 import MyPageNicknameBtnModal from "../ui/MyPageNicknameBtnModal";
 import MyPageNameBtnModal from "./MyPagenameBtnModal";
+import MyPageDeleteidBtnModal from "./MyPageDeleteidBtnModal";
 
 interface MyPageModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   const [isMyPagePwModalOpen, setIsMyPagePwModalOpen] = useState(false);
   const [isMyPageNicknameModalOpen, setisMyPageNicknameModalOpen] = useState(false);
   const [isMyPageNameModalOpen, setisMyPageNameModalOpen] = useState(false);
+  const [isMyPageDeleteIdModalOpen, setisMyPageDeleteIdModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = () => {
@@ -157,12 +159,18 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
             </div>
           </div>
         </div>
+          <div className="mypage-modal__button-group">
+            <button className="mypage-modal__action-btn deleteid" onClick={() => setisMyPageDeleteIdModalOpen(true)}>회원 탈퇴</button>
+          </div>
       </div>
     </div>
+
+    
 
     <MyPagePwBtnModal isOpen={isMyPagePwModalOpen} onClose={() => setIsMyPagePwModalOpen(false)} />
     <MyPageNicknameBtnModal isOpen={isMyPageNicknameModalOpen} onClose={() => setisMyPageNicknameModalOpen(false)}/>
     <MyPageNameBtnModal isOpen={isMyPageNameModalOpen} onClose={()=> setisMyPageNameModalOpen(false)}/>
+    <MyPageDeleteidBtnModal isOpen={isMyPageDeleteIdModalOpen} onClose={()=> setisMyPageDeleteIdModalOpen(false)}/>
     </>
   );
 };

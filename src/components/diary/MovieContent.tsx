@@ -62,12 +62,12 @@ const MovieContent: React.FC<MovieContentProps> = () => {
     return (
         <div className='diary-content'>
             <div className='first-row'>
-                <div className='image-upload-area'>
+                <div className='image-upload'>
                     {movieData.imageUrl ? (
                         <img
                             src={movieData.imageUrl}
                             alt="Uploaded Preview"
-                            className="uploaded-image-preview"
+                            className="image-upload-preview"
                         />
                     ) : (
                         <>
