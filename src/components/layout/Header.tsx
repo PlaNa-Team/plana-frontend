@@ -7,8 +7,11 @@ import { toggleTheme } from '../../store/slices/themeSlice';
 import { RootState } from '../../store';
 import  Popover  from '../ui/Popover';
 import MyPageModal from '../ui/MyPageModal';
+import { useStompNotification } from '../../hooks/useStompNotification';
+
 
 function Header() {
+    useStompNotification(); // 알림용 커스텀 훅 호출
     const location = useLocation();
     const dispatch = useDispatch();
     const [isMyPageModalOpen, setIsMyPageModalOpen] = useState(false);
