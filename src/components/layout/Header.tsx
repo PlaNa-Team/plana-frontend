@@ -5,12 +5,14 @@ import { BellIcon, PersonIcon } from '../../assets/icons';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { toggleTheme } from '../../store/slices/themeSlice';
 import { RootState } from '../../store';
+import  Popover  from '../ui/Popover';
 import MyPageModal from '../ui/MyPageModal';
 
 function Header() {
     const location = useLocation();
     const dispatch = useDispatch();
     const [isMyPageModalOpen, setIsMyPageModalOpen] = useState(false);
+
 
     // Redux store에서 현재 테마 상태 가져오기
     const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
@@ -42,7 +44,20 @@ function Header() {
             <div className="header__mode">{ getCurrentMode() }</div>
         </div>
         <div className="header__icons">
-            <BellIcon fill="var(--color-xl)" />
+            <Popover> 
+                <div style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    <BellIcon 
+                        // onClick 핸들러 제거: Popover.Trigger가 클릭 이벤트를 처리합니다.
+                        fill="var(--color-xl)"     
+                    />
+                    {/* 읽지 않은 알림 개수 표시 (Badge) */}
+                    {unreadCount > 0 && (
+                        <div className="notification-badge">
+                            {unreadCount}
+                        </div>
+                    )}
+                </div>
+            </Popover>
             <div onClick={() => setIsMyPageModalOpen(true)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <PersonIcon 
                     fill="var(--color-xl)"
