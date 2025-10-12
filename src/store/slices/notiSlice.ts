@@ -139,6 +139,15 @@ export const fetchNotifications = createAsyncThunk(
       clearError: (state) => {
         state.error = null;
       },
+        //실시간 알림을 상태에 반영하는 리듀서
+      addNewNotification: (state, action: PayloadAction<ExtendedUnifiedAlarm>) => {
+        // 알림 목록의 가장 앞에 새 알림 추가
+        state.notifications.unshift(action.payload); 
+        // 읽지 않은 알림 카운트 증가 (새 알림은 기본적으로 isRead: false로 들어온다고 가정)
+        if (!action.payload.isRead) {
+            state.unreadCount += 1;
+        }
+      }
     },
     extraReducers: (builder) => {
       builder
@@ -191,5 +200,5 @@ export const fetchNotifications = createAsyncThunk(
     },
   });
   
-  export const { setPopoverOpen, clearError } = notificationSlice.actions;
+  export const { setPopoverOpen, clearError, addNewNotification  } = notificationSlice.actions;
   export default notificationSlice.reducer;
