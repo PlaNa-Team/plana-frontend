@@ -46,3 +46,23 @@
       }
     }
   }
+
+  /* notification-badge 기본 스타일 */
+.notification-badge {
+    /* 빨간색 배경 */
+    background-color: var(--color-red); /* 변수 사용 또는 직접 지정 */
+    color: rgb(238, 0, 0); /* 폰트 색상 (숫자가 없으면 필요 없지만 유지) */
+    
+    /* 점으로 만들기 */
+    width: 10px; /* 점의 크기 */
+    height: 10px; /* 점의 크기 */
+    border-radius: 50%;
+    
+    /* 텍스트(숫자)가 없으므로 아래는 제거하거나 수정 */
+    /* padding: 2px 5px; */ 
+    /* font-size: 0.7rem; */
+    
+    display: flex; /* 가운데 정렬용 */
+    justify-content: center;
+    align-items: center;
+}

@@ -16,6 +16,7 @@ import { PasswordSearchPage } from './pages/auth';
 import { Calendar } from './pages/calendar';    // calendar/index.ts에서 export된 Calendar
 import { Diary } from './pages/diary';          // diary/index.ts에서 export된 Diary
 import { Project } from './pages/project';      // project/index.ts에서 export된 Project
+import { useStompNotification } from '../src/hooks/useStompNotification'
 
 // 레이아웃 컴포넌트
 import Layout from './components/common/Layout';
@@ -31,6 +32,7 @@ function AppContent() {
   const dispatch = useAppDispatch();
   const { showSuccessToast, error } = useAppSelector( state => state.diary );
   
+  useStompNotification(); // 알림용 커스텀 훅 호출
   // 성공 토스트가 닫힐 때 Redux 상태를 업데이트하는 핸들러
   const handleSuccessToastClose = (open: boolean) => {
     if (!open) {
