@@ -44,6 +44,13 @@ import {
   MemoMonthlyResponse,
   DeleteScheduleResponse
 } from '../types/calendar.types';
+import {
+    FetchNotificationsResponse,
+    MarkAsReadResponse,
+    MarkAllAsReadResponse,
+    TagResponseRequest,
+    TagResponseResponse,
+} from '../types/Notification.types'; // 새로 생성한 타입 import
 import { getHexFromColorName, getColorNameFromHex } from '../../src/utils/colors'; // 색상 변환 함수 import
 
 let store: any = null;
@@ -833,6 +840,82 @@ export const calendarAPI = {
         }
     }
 }
+
+
+// API 객체에 Notification 관련 함수 추가
+export const API = {
+    // ... 기존 API 함수들 (getMonthlyDiaries, createDiary, deleteDiary, searchMembers 등) ...
+
+    /**
+     * 알림 목록 조회
+     * GET /notifications
+     */
+    fetchNotifications: async (): Promise<FetchNotificationsResponse> => {
+        try {
+            const response = await apiClient.get<FetchNotificationsResponse>('/notifications');
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '알림 목록을 불러오는데 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * 개별 알림 읽음 처리
+     * PATCH /notifications/{notificationId}/read
+     */
+    markAsRead: async (notificationId: number): Promise<MarkAsReadResponse> => {
+        try {
+            // PATCH 요청 시 body가 없거나 빈 객체일 수 있음 (API 명세에 따름)
+            const response = await apiClient.put<MarkAsReadResponse>(`/notifications/${notificationId}/read`, {}); 
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '알림 읽음 처리에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * 전체 알림 읽음 처리
+     * PATCH /notifications/read-all
+     */
+    markAllAsRead: async (): Promise<MarkAllAsReadResponse> => {
+        try {
+            const response = await apiClient.put<MarkAllAsReadResponse>(`/notifications/read-all`, {});
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '전체 알림 읽음 처리에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * 다이어리 태그 응답 처리 (수락/거절)
+     * PATCH /notifications/tag-response
+     */
+    handleTagResponse: async (payload: TagResponseRequest): Promise<TagResponseResponse> => {
+        try {
+            const response = await apiClient.put<TagResponseResponse>(`/api/diary-tags/{id}/status`, payload);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || '태그 응답 처리에 실패했습니다.';
+                throw new Error(errorMessage);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+};
+
 
 // 다이어리 API 객체
 export const diaryAPI = {
