@@ -87,6 +87,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     // 다이어리 저장 핸들러 (수정/등록 분기처리)
     const handleSave = useCallback(async () => {
         if (!selectedDate) return;
+        console.log("🟡 handleSave called");
 
         let contentData: any;
         let imageUrl;
@@ -116,25 +117,29 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
             diaryType: activeTab,
             imageUrl: imageUrl || undefined,
             content: contentData,
-            diaryTags: selectedTags,
+            ...(selectedTags.length > 0 ? { diaryTags: selectedTags } : {}),
         };
 
         try {
+            console.log("🟢 start saving", diaryData?.id ? "update" : "create", diaryDataBody);
             if (diaryData?.id) { // 수정 모드 : id가 있는 경우
-                await dispatch(updateDiaryAsync({
+                const result = await dispatch(updateDiaryAsync({
                     id: diaryData.id,
                     diaryData: diaryDataBody as UpdateDiaryRequest
-                })).unwrap();
+                }));
+                console.log("🟢 update result", result);
+                unwrapResult(result);
                 toast.success('다이어리가 성공적으로 수정되었습니다!');
             } else { // 등록 모드 : id가 없는 경우
-                await dispatch(createDiaryAsync({
-                    diaryData: diaryDataBody as CreateDiaryRequest
-                 })).unwrap();
-                 toast.error('다이어리 등록에 실패했습니다.');
+                const result = await dispatch(createDiaryAsync({ diaryData: diaryDataBody as CreateDiaryRequest }));
+                console.log("🟢 create result", result);
+                unwrapResult(result);
+                toast.success('다이어리가 등록되었습니다!');
             }
-            dispatch(lockReleaseAsync(diaryData?.id || 0)); // 수정 후 락 해제
+            await dispatch(lockReleaseAsync(diaryData?.id || 0));
             onClose();
         } catch (error) {
+            console.error("🔴 handleSave error:", error);
             const errorMessage = (error as any).message || '저장에 실패했습니다.';
             toast.error(errorMessage);
         }
@@ -354,24 +359,28 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 </div>
 
                 <div className="diary-modal-friend-tags">
-                    <div className="diary-friend-input">
-                        <input
-                            type="text"
-                            placeholder="Friend"
-                            value={searchInput}
-                            onChange={handleSearchChange}
-                        />
-                    </div>
+                    {!isEditMode && (
+                        <>
+                            <div className="diary-friend-input">
+                                <input
+                                    type="text"
+                                    placeholder="Friend"
+                                    value={searchInput}
+                                    onChange={handleSearchChange}
+                                />
+                            </div>
 
-                    {/* 검색 결과 목록 */}
-                    {searchInput.length > 0 && friendSearchResults.length > 0 && (
-                        <ul className="search-results-list">
-                            {friendSearchResults.map(friend => (
-                                <li key={friend.id} onClick={() => handleAddTag(friend)}>
-                                    {friend.loginId}
-                                </li>
-                            ))}
-                        </ul>
+                            {/* 검색 결과 목록 */}
+                            {searchInput.length > 0 && friendSearchResults.length > 0 && (
+                                <ul className="search-results-list">
+                                    {friendSearchResults.map(friend => (
+                                        <li key={friend.id} onClick={() => handleAddTag(friend)}>
+                                            {friend.loginId}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </>
                     )}
 
                     {/* 선택된 태그 목록 */}
@@ -379,8 +388,10 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                         {selectedTags.map(tag => (
                             <span key={tag.tagText} className="diary-friend-tag">
                                 @{tag.tagText}
-                                <button onClick={() => tag.tagText && handleRemoveTag(tag.tagText)}>×</button>
-                                </span>
+                                {!isEditMode && (
+                                    <button onClick={() => tag.tagText && handleRemoveTag(tag.tagText)}>×</button>
+                                )}
+                            </span>
                         ))}
                     </div>
                 </div>
