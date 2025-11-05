@@ -19,6 +19,7 @@ import {
     removeTag,
     clearSearchResults,
     clearAllTags,
+    setSelectedTags,
 } from '../../store/slices/diarySlice';
 import {
     CreateDiaryRequest,
@@ -27,6 +28,8 @@ import {
     MovieContent as MovieContentType,
     BookContent as BookContentType,
     FriendItem,
+    UiSelectedTag,
+    DiaryTagRequest,
 } from '../../types/diary.types';
 import MomentContent from './MomentContent';
 import MovieContent from './MovieContent';
@@ -80,6 +83,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     const handleCloseModal = useCallback(() => {
         if (diaryData?.id) dispatch(lockReleaseAsync(diaryData.id)); // 수정 모드일 때 닫으면 락 해제
         dispatch(clearCurrentData());
+        dispatch(clearAllTags());
         dispatch(clearError());
         onClose();
     }, [dispatch, onClose, diaryData]);
@@ -87,7 +91,6 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     // 다이어리 저장 핸들러 (수정/등록 분기처리)
     const handleSave = useCallback(async () => {
         if (!selectedDate) return;
-        console.log("🟡 handleSave called");
 
         let contentData: any;
         let imageUrl;
@@ -117,29 +120,34 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
             diaryType: activeTab,
             imageUrl: imageUrl || undefined,
             content: contentData,
-            ...(selectedTags.length > 0 ? { diaryTags: selectedTags } : {}),
+            ...(selectedTags.length > 0 
+                ? {
+                    diaryTags: selectedTags
+                    .map(tag => {
+                        const memberId = tag.memberId ?? tag.id;
+                        return memberId ? { memberId } : { loginId: tag.loginId };
+                    })
+                    .filter((tag): tag is DiaryTagRequest => !!tag)
+                }
+            : {}),
         };
 
         try {
-            console.log("🟢 start saving", diaryData?.id ? "update" : "create", diaryDataBody);
             if (diaryData?.id) { // 수정 모드 : id가 있는 경우
                 const result = await dispatch(updateDiaryAsync({
                     id: diaryData.id,
                     diaryData: diaryDataBody as UpdateDiaryRequest
                 }));
-                console.log("🟢 update result", result);
                 unwrapResult(result);
                 toast.success('다이어리가 성공적으로 수정되었습니다!');
             } else { // 등록 모드 : id가 없는 경우
                 const result = await dispatch(createDiaryAsync({ diaryData: diaryDataBody as CreateDiaryRequest }));
-                console.log("🟢 create result", result);
                 unwrapResult(result);
                 toast.success('다이어리가 등록되었습니다!');
             }
             await dispatch(lockReleaseAsync(diaryData?.id || 0));
             onClose();
         } catch (error) {
-            console.error("🔴 handleSave error:", error);
             const errorMessage = (error as any).message || '저장에 실패했습니다.';
             toast.error(errorMessage);
         }
@@ -210,21 +218,25 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         };
     }, [isOpen, handleCloseModal]);
 
-    // 모달이 열리고, 데이터가 있을 때만 상세 정보 불러오기
+    // 모달 열릴 때: 등록 모드면 태그 초기화
     useEffect(() => {
-        if (isOpen && diaryData && selectedDate) {
-            dispatch(getDiaryDetailAsync({ date: selectedDate }));
-        } else if (isOpen) {
-            setActiveTab('DAILY');
+        if (isOpen && !diaryData) {
+            dispatch(clearAllTags());
         }
-    }, [isOpen, diaryData, selectedDate, dispatch]);
+    }, [isOpen, diaryData, dispatch]);
 
-    // 상세 정보 로드가 완료되면 activeTab 및 상태 업데이트
+    // 수정 모드: 응답 태그를 UI 태그로 세팅
     useEffect(() => {
-        if (currentDiaryDetail && currentDiaryDetail.diaryType) {
-            setActiveTab(currentDiaryDetail.diaryType);
+        if (!isOpen) return;
+        if (isEditMode && currentDiaryDetail?.diaryTags) {
+            const uiTag: UiSelectedTag[] = currentDiaryDetail.diaryTags
+                .map(tag => ({
+                    loginId: tag.loginId!,
+                    memberId: tag.memberId,
+                }));
+            dispatch(setSelectedTags(uiTag));
         }
-    }, [currentDiaryDetail]);
+    }, [isOpen, isEditMode, currentDiaryDetail, dispatch]);
 
     // 모달이 닫힐 때 친구 태그 상태 초기화
     useEffect(() => {
@@ -272,7 +284,8 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
 
     // 검색된 친구 클릭 시 태그 추가
     const handleAddTag = useCallback((friend: FriendItem) => {
-        dispatch(addTag({ tagText: friend.loginId}));
+        const uiTag: UiSelectedTag = { id: friend.id, loginId: friend.loginId };
+        dispatch(addTag(uiTag));
         dispatch(clearSearchResults()); // 검색 결과 초기화
         setSearchInput(''); // 검색창 초기화
     }, [dispatch]);
@@ -359,40 +372,38 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 </div>
 
                 <div className="diary-modal-friend-tags">
-                    {!isEditMode && (
-                        <>
-                            <div className="diary-friend-input">
-                                <input
-                                    type="text"
-                                    placeholder="Friend"
-                                    value={searchInput}
-                                    onChange={handleSearchChange}
-                                />
-                            </div>
+                    <div className="diary-friend-input">
+                        <input
+                            type="text"
+                            placeholder="Friend"
+                            value={searchInput}
+                            onChange={handleSearchChange}
+                        />
+                    </div>
 
-                            {/* 검색 결과 목록 */}
-                            {searchInput.length > 0 && friendSearchResults.length > 0 && (
-                                <ul className="search-results-list">
-                                    {friendSearchResults.map(friend => (
-                                        <li key={friend.id} onClick={() => handleAddTag(friend)}>
-                                            {friend.loginId}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </>
+                    {/* 검색 결과 목록 */}
+                    {searchInput.length > 0 && friendSearchResults.length > 0 && (
+                        <ul className="search-results-list">
+                            {friendSearchResults.map(friend => (
+                                <li key={friend.id} onClick={() => handleAddTag(friend)}>
+                                    {friend.loginId}
+                                </li>
+                            ))}
+                        </ul>
                     )}
 
                     {/* 선택된 태그 목록 */}
                     <div className="diary-friend-tags">
-                        {selectedTags.map(tag => (
-                            <span key={tag.tagText} className="diary-friend-tag">
-                                @{tag.tagText}
-                                {!isEditMode && (
-                                    <button onClick={() => tag.tagText && handleRemoveTag(tag.tagText)}>×</button>
-                                )}
-                            </span>
-                        ))}
+                        {selectedTags
+                            .map(tag => (
+                                <span key={tag.loginId} className="diary-friend-tag">
+                                    @{tag.loginId}
+                                    {/* 기존 태그 (memberId 존재하는 경우)는 X 표시 안 함 */}
+                                    {!tag.memberId && (
+                                        <button onClick={() => handleRemoveTag(tag.loginId)}>×</button>
+                                    )}
+                                </span>
+                            ))}
                     </div>
                 </div>
 
