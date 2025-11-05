@@ -1,4 +1,5 @@
 // TypeScript 타입 정의 - 다이어리 관련 타입
+
 export interface Diary {
   id: number;
   diaryDate: string; // yyyy-MM-dd
@@ -7,6 +8,27 @@ export interface Diary {
   createdAt: string;
   updatedAt: string;
   isDeleted: boolean;
+}
+
+// ===== 콘텐츠 타입별 세부 구조 =====
+
+export interface Daily {
+  id: number;
+  title: string;
+  location?: string;
+  memo?: string;
+}
+
+export interface Book {
+  id: number;
+  title: string;
+  author?: string;
+  publisher?: string;
+  genre?: string;
+  startDate?: string;
+  endDate?: string;
+  rating?: number;
+  comment?: string;
 }
 
 export interface Movie {
@@ -20,24 +42,7 @@ export interface Movie {
   comment?: string;
 }
 
-export interface Book {
-  id: number;
-  title: string;
-  author?: string;
-  publisher?: string;
-  genre?: string;
-  startDate?: string; // yyyy-MM-dd
-  endDate?: string; // yyyy-MM-dd
-  rating?: number;
-  comment?: string;
-}
-
-export interface Daily {
-  id: number;
-  title: string;
-  location?: string;
-  memo?: string;
-}
+// ===== 메모 관련 =====
 
 export type MemoType = '다이어리' | '스케줄';
 
@@ -53,7 +58,7 @@ export interface Memo {
   type: MemoType;
 }
 
-// === API 응답 관련 타입 추가 ===
+// ===== 다이어리 태그 관련 =====
 
 export interface FriendTag {
   id: number;
@@ -61,7 +66,7 @@ export interface FriendTag {
   loginId?: string;
   memberNickname?: string;
   tagText?: string;
-  tagStatus: string;
+  tagStatus: 'PENDING' | 'ACCEPTED' | 'REJECTED';
 }
 
 export interface DiaryTagRequest {
@@ -69,7 +74,8 @@ export interface DiaryTagRequest {
   tagText?: string;
 }
 
-// 콘텐츠 타입별 요청 데이터
+// ===== 콘텐츠 타입별 요청 데이터 =====
+
 export interface DailyContent {
   title: string;
   location?: string;
@@ -102,18 +108,8 @@ export interface MovieContent {
   imageUrl?: string | null;
 }
 
-// 월간 다이어리 목록 응답
-export interface MonthlyDiaryResponse {
-  status: number;
-  message?: string;
-  body: {
-    data: {
-      diaryList: MonthlyDiaryItem[];
-    };
-  };
-}
+// ===== 월간 다이어리 조회 =====
 
-// 월간 다이어리 아이템
 export interface MonthlyDiaryItem {
   id: number;
   diaryDate: string;
@@ -122,7 +118,17 @@ export interface MonthlyDiaryItem {
   title: string;
 }
 
-// 다이어리 등록/수정 요청
+export interface MonthlyDiaryResponse {
+  status: number;
+  body: {
+      data: {
+          diaryList: MonthlyDiaryItem[];
+      };
+  };
+}
+
+// ===== 다이어리 등록/수정 요청 =====
+
 export interface CreateDiaryRequest {
   diaryDate: string;
   diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
@@ -133,28 +139,33 @@ export interface CreateDiaryRequest {
 
 export interface UpdateDiaryRequest extends CreateDiaryRequest {}
 
-// 다이어리 등록/수정 응답
+// ===== 다이어리 등록/수정 응답 =====
+
 export interface DiaryCreateResponse {
   status: number;
-  message?: string;
   body: {
-    data: DiaryDetail;
+      data: DiaryDetail;
   };
 }
 
-// 다이어리 상세 조회 응답
-export interface DiaryDetailResponse {
-  id: number;
-  diaryDate: string;
-  diaryType: 'DAILY' | 'BOOK' | 'MOVIE';
-  imageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  content: DailyContent | BookContent | MovieContent;
-  diaryTags?: FriendTag[];
+// ===== 락 관련 응답 =====
+
+export interface LockAcquireResponse {
+  acquired: boolean;
+  expiresAt: string; // "2025-09-28T12:24:06.735098400Z"
+  token: string;
+  ownerId: number;
+  ttlSeconds: number;
 }
 
-// 다이어리 상세 정보 타입 (백엔드 응답과 동일하게 camelCase 유지)
+export interface LockRenewResponse {
+  acquired: boolean;
+  expiresAt: string;
+  ttlSeconds: number;
+}
+
+// ===== 다이어리 상세 정보 =====
+
 export interface DiaryDetail {
   id: number;
   diaryDate: string;
@@ -166,41 +177,43 @@ export interface DiaryDetail {
   diaryTags?: FriendTag[];
 }
 
-// 이미지 임시 업로드 응답
-export interface TempImageResponse {
-  status: number;
-  message?: string;
-
-    data: {
-      url: string;
-      fileId: string;
-      expiresAt: string;
-    };
-}
-
-// 다이어리 삭제 응답
-export interface DiaryDeleteResponse {
+export interface DiaryDetailResponse {
   status: number;
   body: {
-    data: null;
+      data: DiaryDetail;
+      lockInfo?: LockAcquireResponse;
   };
 }
 
-// 친구 검색 결과 아이템
+// ===== 이미지 임시 업로드 응답 =====
+
+export interface TempImageResponse {
+  status: number;
+  data: {
+      tempUrl: string;
+      tempId: string;
+      expiresAt: string;
+  };
+}
+
+// ===== 다이어리 삭제 응답 =====
+
+export interface DiaryDeleteResponse {
+  status: number;
+  body: {
+      data: null;
+  };
+}
+
+// ===== 친구 검색 관련 =====
+
 export interface FriendItem {
   id: number;
   loginId: string;
 }
 
-// 친구 검색 응답
 export interface FriendSearchResponse {
   count: number;
-  message: string;
   data: FriendItem[];
   status: number;
-}
-
-// 다이어리 태그 요청 타입
-export interface DiaryTagRequest {
-  tagText?: string;
 }

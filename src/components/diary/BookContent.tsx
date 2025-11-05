@@ -3,75 +3,43 @@ import { StarEmptyIcon, StarFullIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { updateBookData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
-interface BookContentProps {
-}
-
-const BookContent: React.FC<BookContentProps> = () => {
+const BookContent: React.FC = () => {
     const dispatch = useAppDispatch();
-    const bookData = useAppSelector(state => state.diary.currentBookData);
+    const { currentBookData, currentDiaryDetail } = useAppSelector(state => state.diary);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const didInitRef = useRef(false);
+
+    useEffect(() => {
+        if (!didInitRef.current && currentDiaryDetail && currentDiaryDetail.diaryType === 'BOOK') {
+            const content = currentDiaryDetail.content as any;
+            dispatch(updateBookData({ ...content, imageUrl: currentDiaryDetail.imageUrl }));
+            didInitRef.current = true;
+        }
+    }, [currentDiaryDetail, dispatch]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            dispatch(uploadTempImageAsync({ file, diaryType: 'BOOK'}));
-        }
+        if (file) dispatch(uploadTempImageAsync({ file, diaryType: 'BOOK' }));
     };
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ title: e.target.value }));
+    const handleChange = (key: string, value: any) => {
+        dispatch(updateBookData({ [key]: value }));
     };
 
-    const handleAuthorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ author: e.target.value }));
-    };
-
-    const handleGenreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ genre: e.target.value }));
-    };
-
-    const handlePublisherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ publisher: e.target.value }));
-    };
-
-    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ startDate: e.target.value }));
-    };
-
-    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ endDate: e.target.value }));
-    };
-
-    const handleRereadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateBookData({ reread: e.target.checked }));
-    };
-
-    const handleStarClick = (rating: number) => {
-        dispatch(updateBookData({ rating }));
-    };
-
-    const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        dispatch(updateBookData({ comment: e.target.value }));
-    };
-
-    const handleImageClick = () => {
-        const fileInput = fileInputRef.current;
-        if (fileInput) {
-            fileInput.click();
-        }
-    };
-
-    const currentRating = bookData.rating ?? 0;
+    const handleImageClick = () => fileInputRef.current?.click();
+    const currentRating = currentBookData.rating ?? 0;
 
     return (
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload-area'>
-                    {bookData.imageUrl ? (
+                    {currentBookData.imageUrl ? (
                         <img
-                            src={bookData.imageUrl}
-                            alt="Uploaded Preview"
-                            className="uploaded-image-preview"
+                            src={currentBookData.imageUrl}
+                            alt='Uploaded Preview'
+                            className='uploaded-image-preview'
+                            onClick={handleImageClick}
                         />
                     ) : (
                         <>
@@ -81,7 +49,7 @@ const BookContent: React.FC<BookContentProps> = () => {
                                 onChange={handleFileChange}
                                 ref={fileInputRef}
                                 className='file-input'
-                                style={{ display: 'none'}}
+                                style={{ display: 'none' }}
                             />
                             <label
                                 role='button'
@@ -93,20 +61,21 @@ const BookContent: React.FC<BookContentProps> = () => {
                         </>
                     )}
                 </div>
+
                 <div className='input-section'>
                     <input
                         type='text'
                         placeholder='title'
-                        value={bookData.title}
-                        onChange={handleTitleChange}
+                        value={currentBookData.title || ''}
+                        onChange={(e) => handleChange('title', e.target.value)}
                         className='title-input'
                     />
                     <div className='info-row'>
                         <span className='info-label'>Author</span>
                         <input
                             type='text'
-                            value={bookData.author}
-                            onChange={handleAuthorChange}
+                            value={currentBookData.author || ''}
+                            onChange={(e) => handleChange('author', e.target.value)}
                             className='info-input'
                         />
                     </div>
@@ -114,8 +83,8 @@ const BookContent: React.FC<BookContentProps> = () => {
                         <span className='info-label'>Publisher</span>
                         <input
                             type='text'
-                            value={bookData.publisher}
-                            onChange={handlePublisherChange}
+                            value={currentBookData.publisher || ''}
+                            onChange={(e) => handleChange('publisher', e.target.value)}
                             className='info-input'
                         />
                     </div>
@@ -123,8 +92,8 @@ const BookContent: React.FC<BookContentProps> = () => {
                         <span className='info-label'>Genre</span>
                         <input
                             type='text'
-                            value={bookData.genre}
-                            onChange={handleGenreChange}
+                            value={currentBookData.genre || ''}
+                            onChange={(e) => handleChange('genre', e.target.value)}
                             className='info-input'
                         />
                     </div>
@@ -135,17 +104,17 @@ const BookContent: React.FC<BookContentProps> = () => {
                 <div className='info-row'>
                     <span className='info-label'>Rating</span>
                     <div className='star-rating'>
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                             <button
                                 key={star}
-                                type="button"
+                                type='button'
                                 className={`star ${star <= currentRating ? 'filled' : 'empty'}`}
-                                onClick={() => handleStarClick(star)}
+                                onClick={() => handleChange('rating', star)}
                             >
                                 {star <= currentRating ? (
-                                    <StarFullIcon className="star-icon filled" fill="var(--color-xl)" width="20" />
+                                    <StarFullIcon className='star-icon filled' fill='var(--color-xl)' width='20' />
                                 ) : (
-                                    <StarEmptyIcon className="star-icon empty" fill="var(--color-xl)" width="20" />
+                                    <StarEmptyIcon className='star-icon empty' fill='var(--color-xl)' width='20' />
                                 )}
                             </button>
                         ))}
@@ -157,15 +126,15 @@ const BookContent: React.FC<BookContentProps> = () => {
                     <div className='date-range'>
                         <input
                             type='date'
-                            value={bookData.startDate}
-                            onChange={handleStartDateChange}
+                            value={currentBookData.startDate || ''}
+                            onChange={(e) => handleChange('startDate', e.target.value)}
                             className='date-input'
                         />
                         <span className='date-separator'> ~ </span>
                         <input
                             type='date'
-                            value={bookData.endDate}
-                            onChange={handleEndDateChange}
+                            value={currentBookData.endDate || ''}
+                            onChange={(e) => handleChange('endDate', e.target.value)}
                             className='date-input'
                         />
                     </div>
@@ -175,8 +144,8 @@ const BookContent: React.FC<BookContentProps> = () => {
                     <span className='comment-label'>Comment</span>
                     <textarea
                         placeholder='책에 대한 생각을 적어보세요.'
-                        value={bookData.comment}
-                        onChange={handleCommentChange}
+                        value={currentBookData.comment || ''}
+                        onChange={(e) => handleChange('comment', e.target.value)}
                         className='comment-textarea'
                         rows={6}
                     />

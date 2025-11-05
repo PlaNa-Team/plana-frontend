@@ -8,7 +8,6 @@ import {
     updateBookData,
     clearError,
     createDiaryAsync,
-    getDiaryDetailAsync,
     updateDiaryAsync,
     deleteDiaryAsync,
     searchMembersAsync,
@@ -16,10 +15,12 @@ import {
     removeTag,
     clearSearchResults,
     clearAllTags,
+    getDiaryDetailWithLockAsync,
+    releaseDiaryLockAsync,
+    renewDiaryLockAsync,
 } from '../../store/slices/diarySlice';
 import {
     CreateDiaryRequest,
-    UpdateDiaryRequest,
     DailyContent,
     MovieContent as MovieContentType,
     BookContent as BookContentType,
@@ -29,7 +30,6 @@ import MomentContent from './MomentContent';
 import MovieContent from './MovieContent';
 import BookContent from './BookContent';
 import toast from 'react-hot-toast';
-import { unwrapResult } from '@reduxjs/toolkit';
 
 export type DiaryType = 'DAILY' | 'BOOK' | 'MOVIE';
 
@@ -58,27 +58,37 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         currentBookData,
         isLoading,
         isUploading,
-        error,
         currentDiaryDetail,
         friendSearchResults,
         selectedTags,
-        isSearching,
-        searchError,
+        lockToken,
+        lockExpiresAt,
     } = useAppSelector(state => state.diary);
 
     const modalContentRef = useRef<HTMLDivElement>(null);
     const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+    const renewIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const [searchInput, setSearchInput] = useState('');
     const [activeTab, setActiveTab] = useState<DiaryType>(diaryData?.diaryType || 'DAILY');
 
-    const handleCloseModal = useCallback(() => {
-        dispatch(clearCurrentData());
-        dispatch(clearError());
-        onClose();
-    }, [dispatch, onClose]);
+    const isEditMode = !!diaryData;
 
-    // 다이어리 저장 핸들러 (수정/등록 분기처리)
+    /** 🔐 모달 닫기 시: 락 해제 및 상태 초기화 */
+    const handleCloseModal = useCallback(async () => {
+        if (diaryData?.id) {
+            await dispatch(releaseDiaryLockAsync(diaryData.id));
+        }
+        onClose(); // 먼저 닫고
+        setTimeout(() => {
+            dispatch(clearCurrentData()); // 나중에 초기화
+            dispatch(clearError());
+            dispatch(clearAllTags());
+            dispatch(clearSearchResults());
+        }, 100);
+    }, [dispatch, onClose, diaryData]);    
+
+    /** 💾 저장 (등록/수정 분기) */
     const handleSave = useCallback(async () => {
         if (!selectedDate) return;
 
@@ -105,7 +115,7 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 return;
         }
 
-        const diaryDataBody: CreateDiaryRequest = {
+        const diaryBody: CreateDiaryRequest = {
             diaryDate: selectedDate,
             diaryType: activeTab,
             imageUrl: imageUrl || undefined,
@@ -114,22 +124,16 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         };
 
         try {
-            if (diaryData?.id) { // 수정 모드 : id가 있는 경우
-                await dispatch(updateDiaryAsync({
-                    id: diaryData.id,
-                    diaryData: diaryDataBody as UpdateDiaryRequest
-                })).unwrap();
-                toast.success('다이어리가 성공적으로 등록되었습니다!');
-            } else { // 등록 모드 : id가 없는 경우
-                await dispatch(createDiaryAsync({ 
-                    diaryData: diaryDataBody as CreateDiaryRequest
-                 })).unwrap();
-                 toast.error('다이어리 등록에 실패했습니다.');
+            if (isEditMode && diaryData?.id) {
+                await dispatch(updateDiaryAsync({ id: diaryData.id, payload: diaryBody })).unwrap();
+                toast.success('다이어리가 수정되었습니다!');
+            } else {
+                await dispatch(createDiaryAsync({ diaryData: diaryBody })).unwrap();
+                toast.success('다이어리가 저장되었습니다!');
             }
-            onClose();
+            await handleCloseModal();
         } catch (error) {
-            const errorMessage = (error as any).message || '저장에 실패했습니다.';
-            toast.error(errorMessage);
+            toast.error('다이어리 저장에 실패했습니다.');
         }
     }, [
         dispatch,
@@ -138,12 +142,13 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         currentMomentData,
         currentMovieData,
         currentBookData,
-        onClose,
-        diaryData,
         selectedTags,
+        isEditMode,
+        diaryData,
+        handleCloseModal,
     ]);
 
-    // 다이어리 삭제 핸들러
+    /** 🗑 다이어리 삭제 */
     const handleDelete = useCallback(async () => {
         if (!diaryData?.id) {
             toast.error('삭제할 다이어리가 없습니다.');
@@ -155,76 +160,66 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
             try {
                 await dispatch(deleteDiaryAsync(diaryData.id)).unwrap();
                 toast.success('다이어리가 삭제되었습니다!');
-                onClose();
-            } catch (error) {
-                const errorMessage = (error as any)?.message || '다이어리 삭제에 실패했습니다.';
-                toast.error(errorMessage);
+                await handleCloseModal();
+            } catch {
+                toast.error('다이어리 삭제에 실패했습니다.');
             }
         }
-    }, [dispatch, diaryData, onClose]);
+    }, [dispatch, diaryData, handleCloseModal]);
 
-    // 탭 변경 핸들러
+    /** 🔄 탭 전환 시 */
     const handleTabChange = (newTab: DiaryType) => {
-        // 기존 다이어리 데이터가 있고, 탭을 변경하는 경우
         if (diaryData && newTab !== activeTab) {
             const confirmChange = window.confirm(
                 '탭을 변경하면 현재 작성 중인 내용이 사라집니다. 계속하시겠습니까?'
             );
             if (!confirmChange) return;
-            dispatch(clearCurrentData()); // 현재 데이터 초기화
+            dispatch(clearCurrentData());
         }
         setActiveTab(newTab);
-    }
+    };
 
-    // 모달 외부 클릭을 감지
+    /** 🧠 모달 외부 클릭 시 닫기 */
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
                 handleCloseModal();
             }
         };
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen, handleCloseModal]);
 
-    // 모달이 열리고, 데이터가 있을 때만 상세 정보 불러오기
+    /** 🧷 상세 조회 & 락 획득 */
     useEffect(() => {
-        if (isOpen && diaryData && selectedDate) {
-            dispatch(getDiaryDetailAsync({ date: selectedDate }));
+        if (isOpen && diaryData?.id && selectedDate) {
+            dispatch(getDiaryDetailWithLockAsync(selectedDate));
         } else if (isOpen) {
             setActiveTab('DAILY');
         }
     }, [isOpen, diaryData, selectedDate, dispatch]);
 
-    // 상세 정보 로드가 완료되면 activeTab 및 상태 업데이트
+    /** 🔁 락 자동 갱신 (expiresAt 3초 전) */
     useEffect(() => {
-        if (currentDiaryDetail && currentDiaryDetail.diaryType) {
-            setActiveTab(currentDiaryDetail.diaryType);
+        if (lockExpiresAt && diaryData?.id) {
+            const expires = new Date(lockExpiresAt).getTime();
+            const now = new Date().getTime();
+            const delay = Math.max(expires - now - 3000, 0);
+            if (renewIntervalRef.current) clearTimeout(renewIntervalRef.current);
+            renewIntervalRef.current = setTimeout(() => {
+                dispatch(renewDiaryLockAsync(diaryData.id));
+            }, delay);
         }
-    }, [currentDiaryDetail]);
+        return () => {
+            if (renewIntervalRef.current) clearTimeout(renewIntervalRef.current);
+        };
+    }, [lockExpiresAt, dispatch, diaryData]);
 
-    // 모달이 닫힐 때 친구 태그 상태 초기화
-    useEffect(() => {
-        if (!isOpen) {
-            dispatch(clearAllTags());
-            dispatch(clearSearchResults());
-            setSearchInput('');
-        }
-    }, [isOpen, dispatch]);
-
-    // 친구 검색 입력 핸들러 (디바운스 적용)
+    /** 🔍 친구 검색 */
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const keyword = e.target.value;
         setSearchInput(keyword);
-        if (searchDebounceRef.current) {
-            clearTimeout(searchDebounceRef.current);
-        }
+        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
         if (keyword.length > 0) {
             searchDebounceRef.current = setTimeout(() => {
                 dispatch(searchMembersAsync(keyword));
@@ -234,71 +229,74 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         }
     };
 
-    // 검색된 친구 클릭 시 태그 추가
-    const handleAddTag = useCallback((friend: FriendItem) => {
-        dispatch(addTag({ tagText: friend.loginId}));
-        dispatch(clearSearchResults()); // 검색 결과 초기화
-        setSearchInput(''); // 검색창 초기화
-    }, [dispatch]);
+    /** 👥 친구 태그 추가 / 삭제 */
+    const handleAddTag = useCallback(
+        (friend: FriendItem) => {
+            dispatch(addTag({ tagText: friend.loginId }));
+            dispatch(clearSearchResults());
+            setSearchInput('');
+        },
+        [dispatch]
+    );
 
-    // 태그 삭제 핸들러
-    const handleRemoveTag = useCallback((loginId: string) => {
-        dispatch(removeTag(loginId));
-    }, [dispatch]);
-
-    const isEditMode = !!diaryData;
+    const handleRemoveTag = useCallback(
+        (loginId: string) => {
+            dispatch(removeTag(loginId));
+        },
+        [dispatch]
+    );
 
     if (!isOpen) return null;
 
     return (
         <div className="diary-modal-backdrop" onClick={handleCloseModal}>
-            <div className='diary-modal' ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
-                <div className='diary-modal-header'>
+            <div className="diary-modal" ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
+                <div className="diary-modal-header">
                     <button
-                        className='diary-modal-close'
+                        className="diary-modal-close"
                         onClick={handleCloseModal}
                         disabled={isLoading || isUploading}
                     >
-                        <XIcon width='24' height='24' fill='var(--color-xl)' />
+                        <XIcon width="24" height="24" fill="var(--color-xl)" />
                     </button>
                     <button
-                        className='diary-modal-save'
+                        className="diary-modal-save"
                         onClick={handleSave}
                         disabled={isLoading || isUploading}
                     >
-                        <CheckIcon width='24' height='24' fill='var(--color-xl)' />
+                        <CheckIcon width="24" height="24" fill="var(--color-xl)" />
                     </button>
                 </div>
 
-                <div className='diary-modal-main'>
-                    <div className='diary-modal-sidebar'>
+                <div className="diary-modal-main">
+                    <div className="diary-modal-sidebar">
                         <button
                             className={`diary-tab ${activeTab === 'DAILY' ? 'active' : ''}`}
                             onClick={() => handleTabChange('DAILY')}
                         >
-                            <span className='diary-tab-text'>
-                                D<br/>A<br/>I<br/>L<br/>Y
+                            <span className="diary-tab-text">
+                                D<br />A<br />I<br />L<br />Y
                             </span>
                         </button>
                         <button
                             className={`diary-tab ${activeTab === 'MOVIE' ? 'active' : ''}`}
                             onClick={() => handleTabChange('MOVIE')}
                         >
-                            <span className='diary-tab-text'>
-                                M<br/>O<br/>V<br/>I<br/>E
+                            <span className="diary-tab-text">
+                                M<br />O<br />V<br />I<br />E
                             </span>
                         </button>
                         <button
                             className={`diary-tab ${activeTab === 'BOOK' ? 'active' : ''}`}
                             onClick={() => handleTabChange('BOOK')}
                         >
-                            <span className='diary-tab-text'>
-                                B<br/>O<br/>O<br/>K
+                            <span className="diary-tab-text">
+                                B<br />O<br />O<br />K
                             </span>
                         </button>
                     </div>
 
-                    <div className='tab-content'>
+                    <div className="tab-content">
                         {activeTab === 'DAILY' && <MomentContent />}
                         {activeTab === 'MOVIE' && <MovieContent />}
                         {activeTab === 'BOOK' && <BookContent />}
@@ -315,7 +313,6 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                         />
                     </div>
 
-                    {/* 검색 결과 목록 */}
                     {searchInput.length > 0 && friendSearchResults.length > 0 && (
                         <ul className="search-results-list">
                             {friendSearchResults.map(friend => (
@@ -326,13 +323,12 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                         </ul>
                     )}
 
-                    {/* 선택된 태그 목록 */}
                     <div className="diary-friend-tags">
                         {selectedTags.map(tag => (
                             <span key={tag.tagText} className="diary-friend-tag">
                                 @{tag.tagText}
                                 <button onClick={() => tag.tagText && handleRemoveTag(tag.tagText)}>×</button>
-                                </span>
+                            </span>
                         ))}
                     </div>
                 </div>
@@ -348,8 +344,8 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 )}
 
                 {(isLoading || isUploading) && (
-                    <div className='loading-overlay'>
-                        <div className='loading-spinner'>
+                    <div className="loading-overlay">
+                        <div className="loading-spinner">
                             {isUploading ? '이미지 업로드 중...' : '로딩 중...'}
                         </div>
                     </div>

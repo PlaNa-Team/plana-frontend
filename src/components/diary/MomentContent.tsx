@@ -3,49 +3,45 @@ import { LocationIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { updateMomentData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
-interface MomentContentProps {
-}
-
-const MomentContent: React.FC<MomentContentProps> = () => {
+const MomentContent: React.FC = () => {
     const dispatch = useAppDispatch();
-    const momentData = useAppSelector(state => state.diary.currentMomentData);
+    const { currentMomentData, currentDiaryDetail } = useAppSelector(state => state.diary);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // 상세 데이터 존재 시 초기값 반영
+    const didInitRef = useRef(false);
+
+    useEffect(() => {
+        if (!didInitRef.current && currentDiaryDetail && currentDiaryDetail.diaryType === 'DAILY') {
+            const { title, location, memo } = currentDiaryDetail.content as any;
+            dispatch(updateMomentData({ title, location, memo, imageUrl: currentDiaryDetail.imageUrl }));
+            didInitRef.current = true;
+        }
+    }, [currentDiaryDetail, dispatch]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY'}));
+            dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY' }));
         }
     };
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMomentData({ title: e.target.value }));
+    const handleInputChange = (key: 'title' | 'location' | 'memo', value: string) => {
+        dispatch(updateMomentData({ [key]: value }));
     };
 
-    const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMomentData({ location: e.target.value }));
-    };
-
-    const handleMemoChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        dispatch(updateMomentData({ memo: e.target.value }));
-    };
-
-    const handleImageClick = () => {
-        const fileInput = fileInputRef.current;
-        if (fileInput) {
-            fileInput.click();
-        }
-    };
+    const handleImageClick = () => fileInputRef.current?.click();
 
     return (
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload-area'>
-                    {momentData.imageUrl ? (
+                    {currentMomentData.imageUrl ? (
                         <img
-                            src={momentData.imageUrl}
-                            alt="Uploaded Preview"
-                            className="uploaded-image-preview"
+                            src={currentMomentData.imageUrl}
+                            alt='Uploaded Preview'
+                            className='uploaded-image-preview'
+                            onClick={handleImageClick}
                         />
                     ) : (
                         <>
@@ -55,7 +51,7 @@ const MomentContent: React.FC<MomentContentProps> = () => {
                                 onChange={handleFileChange}
                                 ref={fileInputRef}
                                 className='file-input'
-                                style={{ display: 'none'}}
+                                style={{ display: 'none' }}
                             />
                             <label
                                 role='button'
@@ -72,21 +68,18 @@ const MomentContent: React.FC<MomentContentProps> = () => {
                     <input
                         type='text'
                         placeholder='title'
-                        value={momentData.title}
-                        onChange={handleTitleChange}
+                        value={currentMomentData.title || ''}
+                        onChange={(e) => handleInputChange('title', e.target.value)}
                         className='title-input'
                     />
 
                     <div className='location-group'>
                         <span className='location-label'>Location</span>
-                        <LocationIcon
-                            className='location-icon'
-                            fill='var(--color-xl)'
-                        />
+                        <LocationIcon className='location-icon' fill='var(--color-xl)' />
                         <input
                             type='text'
-                            value={momentData.location}
-                            onChange={handleLocationChange}
+                            value={currentMomentData.location || ''}
+                            onChange={(e) => handleInputChange('location', e.target.value)}
                             className='location-input'
                         />
                     </div>
@@ -97,8 +90,8 @@ const MomentContent: React.FC<MomentContentProps> = () => {
                 <div className='memo-group'>
                     <span className='memo-label'>Memo</span>
                     <textarea
-                        value={momentData.memo}
-                        onChange={handleMemoChange}
+                        value={currentMomentData.memo || ''}
+                        onChange={(e) => handleInputChange('memo', e.target.value)}
                         className='memo-textarea'
                         rows={8}
                     />

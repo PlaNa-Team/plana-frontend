@@ -1,15 +1,17 @@
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
 import { SignUpRequest, IdCheckResponse, LoginResponseDto, MemberInfo, MemberApiResponse, PasswordConfirmRequest, PasswordConfirmResponse, PasswordUpdateRequest, PasswordUpdateResponse, PaginationResponse } from '../types';
 import {
   MonthlyDiaryResponse,
-  DiaryDetailResponse,
   TempImageResponse,
   CreateDiaryRequest,
-  UpdateDiaryRequest,
   DiaryCreateResponse,
   DiaryDeleteResponse,
+  FriendSearchResponse,
+  DiaryDetailResponse,
+  UpdateDiaryRequest,
+  LockAcquireResponse,
+  LockRenewResponse,
   DiaryDetail,
-  FriendSearchResponse
 } from '../types/diary.types';
 import { 
   MonthlyScheduleResponse, 
@@ -770,110 +772,178 @@ export const calendarAPI = {
 }
 
 // 다이어리 API 객체
-export const diaryAPI = {
-    // 다이어리 이미지 업로드 api
-    uploadTempImage: async (file: File): Promise<TempImageResponse> => {
+export const diaryApi = {
+    // 1. 월간 다이어리 조회
+    getMonthlyDiaries: async (year: number, month: number) => {
+        try {
+            const response = await apiClient.get(`/diaries`, {
+                params: { year, month },
+                withCredentials: true,
+            });
+            return response.data.body?.data?.diaryList ?? [];
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error('월간 다이어리 데이터를 불러오지 못했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    // 2. 다이어리 상세 조회 + 락 토큰 획득
+    getDiaryDetailWithLock: async (date: string) => {
+        try {
+            const detailRes = await apiClient.get(`/diaries/detail`, {
+                params: { date },
+                withCredentials: true,
+            });
+
+            const diaryId = detailRes.data?.id;
+            let lockData = null;
+
+            if (diaryId) {
+                try {
+                    const lockRes = await apiClient.post(`/locks/diaries/${diaryId}/acquire`, null, {
+                        withCredentials: true,
+                    });
+                    lockData = lockRes.data;
+                } catch {
+                    console.warn('락 획득 실패');
+                }
+            }
+
+            return {
+                diary: detailRes.data,
+                lock: lockData,
+            };
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error('다이어리 상세 데이터를 불러오지 못했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    // 3. 다이어리 등록
+    createDiary: async (payload: any) => {
+        try {
+            const response = await apiClient.post(`/diaries`, payload, {
+                withCredentials: true,
+            });
+            return response.data.body?.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error('다이어리 등록에 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    // 4. 다이어리 수정 (락 토큰 필요)
+    updateDiary: async (id: number, payload: any, lockToken: string) => {
+        try {
+            const response = await apiClient.put(`/diaries/${id}`, payload, {
+                headers: { 'X-Lock-Token': lockToken },
+                withCredentials: true,
+            });
+            return response.data.body?.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error('다이어리 수정에 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    // 5. 다이어리 삭제
+    deleteDiary: async (id: number) => {
+        try {
+            await apiClient.delete(`/diaries/${id}`, { withCredentials: true });
+            return true;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error('다이어리 삭제에 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    // 6. 다이어리 태그 상태 변경 (수락 / 거절)
+    updateDiaryTagStatus: async (tagId: number, tagStatus: '수락' | '거절') => {
+        try {
+            const response = await apiClient.put(`/diary-tags/${tagId}/status`, { tagStatus }, {
+                withCredentials: true,
+            });
+            return response.data.body?.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error('태그 상태 변경에 실패했습니다.');
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
+    // 7. 락 갱신
+    renewDiaryLock: async (diaryId: number, lockToken: string) => {
+        try {
+            const response = await apiClient.post(`/locks/diaries/${diaryId}/renew`, null, {
+                headers: { 'X-Lock-Token': lockToken },
+                withCredentials: true,
+            });
+            return response.data;
+        } catch {
+            return { acquired: false };
+        }
+    },
+
+    // 8. 락 해제
+    releaseDiaryLock: async (diaryId: number, lockToken: string) => {
+        try {
+            await apiClient.post(`/locks/diaries/${diaryId}/release`, null, {
+                headers: { 'X-Lock-Token': lockToken },
+                withCredentials: true,
+            });
+            return true;
+        } catch {
+            console.warn('락 해제 실패');
+            return false;
+        }
+    },
+
+    // 9. 다이어리 이미지 임시 업로드
+    uploadTempImage: async (file: File) => {
         try {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await apiClient.post<TempImageResponse>(
-                '/files/upload', 
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                    withCredentials: true
-                }
-            );
-            return response.data;
+            const response = await apiClient.post(`/files/temp-upload`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+            });
+
+            return response.data.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {
-            const errorMessage = error.response?.data?.message || '이미지 업로드에 실패했습니다.';
-            throw new Error(errorMessage);
+                throw new Error('이미지 업로드에 실패했습니다.');
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
-    createDiary: async (requestBody: CreateDiaryRequest): Promise<DiaryCreateResponse> => {
+
+    // 10. 친구 검색
+    searchMembers: async (keyword: string) => {
         try {
-            const response = await apiClient.post<DiaryCreateResponse>(
-                '/diaries',
-                requestBody
-            );
-            return response.data;
+            const response = await apiClient.get(`/members`, {
+                params: { keyword },
+                withCredentials: true,
+            });
+            return response.data; // message는 무시
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                const errorMessage = error.response?.data?.message || '다이어리 등록에 실패했습니다';
-                throw new Error(errorMessage);
+                throw new Error('친구 검색에 실패했습니다.');
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
     },
-    getMonthlyDiaries: async (year: number, month: number): Promise<MonthlyDiaryResponse> => {
-        try {
-            const response = await apiClient.get<MonthlyDiaryResponse>(`/diaries?year=${year}&month=${month}`);
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error) && error.response) {
-                const errorMessage = error.response.data.message || '다이어리 조회에 실패했습니다.';
-                throw new Error(errorMessage);
-            }
-            throw new Error('네트워크 오류가 발생했습니다.');
-        }
-    },
-    getDiaryDetail: async (date: string): Promise<DiaryDetailResponse> => {
-        try {
-            const response = await apiClient.get<DiaryDetailResponse>(`/diaries/detail?date=${date}`);
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error) && error.response) {
-                const errorMessage = error.response.data.message || '다이어리 상세 조회에 실패했습니다.';
-                throw new Error(errorMessage);
-            }
-            throw new Error('네트워크 오류가 발생했습니다.');
-        }
-    },
-    updateDiary: async (id: number, requestBody: UpdateDiaryRequest): Promise<DiaryCreateResponse> => {
-        try {
-            const response = await apiClient.put<DiaryCreateResponse>(
-                `/diaries/${id}`,
-                requestBody
-            );
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                const errorMessage = error.response?.data?.message || '다이어리 수정에 실패했습니다.';
-                throw new Error(errorMessage);
-            }
-            throw new Error('네트워크 오류가 발생했습니다.');
-        }
-    },
-    deleteDiary: async (id: number): Promise<DiaryDeleteResponse> => {
-        try {
-            const response = await apiClient.delete<DiaryDeleteResponse>(`/diaries/${id}`);
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                const errorMessage = error.response?.data?.message || '다이어리 삭제에 실패했습니다.';
-                throw new Error(errorMessage);
-            }
-            throw new Error('네트워크 오류가 발생했습니다.');
-        }
-    },
-    searchMembers: async (keyword: string): Promise<FriendSearchResponse> => {
-        try {
-            const response = await apiClient.get<FriendSearchResponse>(`/members?keyword=${keyword}`);
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                const errorMessage = error.response?.data?.message || '사용자 검색에 실패했습니다.';
-                throw new Error(errorMessage);
-            }
-            throw new Error('네트워크 오류가 발생했습니다.');
-        }
-    }
 };
 
 export default apiClient;

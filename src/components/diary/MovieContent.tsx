@@ -3,71 +3,43 @@ import { StarEmptyIcon, StarFullIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { updateMovieData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
-interface MovieContentProps {
-}
-
-const MovieContent: React.FC<MovieContentProps> = () => {
+const MovieContent: React.FC = () => {
     const dispatch = useAppDispatch();
-    const movieData = useAppSelector(state => state.diary.currentMovieData);
+    const { currentMovieData, currentDiaryDetail } = useAppSelector(state => state.diary);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const didInitRef = useRef(false);
+
+    useEffect(() => {
+        if (!didInitRef.current && currentDiaryDetail && currentDiaryDetail.diaryType === 'MOVIE') {
+            const content = currentDiaryDetail.content as any;
+            dispatch(updateMovieData({ ...content, imageUrl: currentDiaryDetail.imageUrl }));
+            didInitRef.current = true;
+        }
+    }, [currentDiaryDetail, dispatch]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            dispatch(uploadTempImageAsync({ file, diaryType: 'MOVIE'}));
-        }
+        if (file) dispatch(uploadTempImageAsync({ file, diaryType: 'MOVIE' }));
     };
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMovieData({ title: e.target.value }));
+    const handleChange = (key: string, value: any) => {
+        dispatch(updateMovieData({ [key]: value }));
     };
 
-    const handleDirectorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMovieData({ director: e.target.value }));
-    };
-
-    const handleGenreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMovieData({ genre: e.target.value }));
-    };
-
-    const handleActorsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMovieData({ actors: e.target.value }));
-    };
-
-    const handleReleaseDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMovieData({ releaseDate: e.target.value }));
-    };
-
-    const handleRewatchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMovieData({ rewatch: e.target.checked }));
-    };
-
-    const handleStarClick = (rating: number) => {
-        dispatch(updateMovieData({ rating }));
-    };
-
-    const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        dispatch(updateMovieData({ comment: e.target.value }));
-    };
-
-    const handleImageClick = () => {
-        const fileInput = fileInputRef.current;
-        if (fileInput) {
-            fileInput.click();
-        }
-    };
-
-    const currentRating = movieData.rating ?? 0;
+    const handleImageClick = () => fileInputRef.current?.click();
+    const currentRating = currentMovieData.rating ?? 0;
 
     return (
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload-area'>
-                    {movieData.imageUrl ? (
+                    {currentMovieData.imageUrl ? (
                         <img
-                            src={movieData.imageUrl}
-                            alt="Uploaded Preview"
-                            className="uploaded-image-preview"
+                            src={currentMovieData.imageUrl}
+                            alt='Uploaded Preview'
+                            className='uploaded-image-preview'
+                            onClick={handleImageClick}
                         />
                     ) : (
                         <>
@@ -77,7 +49,7 @@ const MovieContent: React.FC<MovieContentProps> = () => {
                                 onChange={handleFileChange}
                                 ref={fileInputRef}
                                 className='file-input'
-                                style={{ display: 'none'}}
+                                style={{ display: 'none' }}
                             />
                             <label
                                 role='button'
@@ -94,16 +66,16 @@ const MovieContent: React.FC<MovieContentProps> = () => {
                     <input
                         type='text'
                         placeholder='title'
-                        value={movieData.title}
-                        onChange={handleTitleChange}
+                        value={currentMovieData.title || ''}
+                        onChange={(e) => handleChange('title', e.target.value)}
                         className='title-input'
                     />
                     <div className='info-row'>
                         <span className='info-label'>Director</span>
                         <input
                             type='text'
-                            value={movieData.director}
-                            onChange={handleDirectorChange}
+                            value={currentMovieData.director || ''}
+                            onChange={(e) => handleChange('director', e.target.value)}
                             className='info-input'
                         />
                     </div>
@@ -111,8 +83,8 @@ const MovieContent: React.FC<MovieContentProps> = () => {
                         <span className='info-label'>Actors</span>
                         <input
                             type='text'
-                            value={movieData.actors}
-                            onChange={handleActorsChange}
+                            value={currentMovieData.actors || ''}
+                            onChange={(e) => handleChange('actors', e.target.value)}
                             className='info-input'
                         />
                     </div>
@@ -120,8 +92,8 @@ const MovieContent: React.FC<MovieContentProps> = () => {
                         <span className='info-label'>Genre</span>
                         <input
                             type='text'
-                            value={movieData.genre}
-                            onChange={handleGenreChange}
+                            value={currentMovieData.genre || ''}
+                            onChange={(e) => handleChange('genre', e.target.value)}
                             className='info-input'
                         />
                     </div>
@@ -132,17 +104,17 @@ const MovieContent: React.FC<MovieContentProps> = () => {
                 <div className='info-row'>
                     <span className='info-label'>Rating</span>
                     <div className='star-rating'>
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                             <button
                                 key={star}
-                                type="button"
+                                type='button'
                                 className={`star ${star <= currentRating ? 'filled' : 'empty'}`}
-                                onClick={() => handleStarClick(star)}
+                                onClick={() => handleChange('rating', star)}
                             >
                                 {star <= currentRating ? (
-                                    <StarFullIcon className="star-icon filled" fill="var(--color-xl)" width="20" />
+                                    <StarFullIcon className='star-icon filled' fill='var(--color-xl)' width='20' />
                                 ) : (
-                                    <StarEmptyIcon className="star-icon empty" fill="var(--color-xl)" width="20" />
+                                    <StarEmptyIcon className='star-icon empty' fill='var(--color-xl)' width='20' />
                                 )}
                             </button>
                         ))}
@@ -153,8 +125,8 @@ const MovieContent: React.FC<MovieContentProps> = () => {
                     <span className='comment-label'>Comment</span>
                     <textarea
                         placeholder='영화에 대한 생각을 적어보세요.'
-                        value={movieData.comment}
-                        onChange={handleCommentChange}
+                        value={currentMovieData.comment || ''}
+                        onChange={(e) => handleChange('comment', e.target.value)}
                         className='comment-textarea'
                         rows={6}
                     />
