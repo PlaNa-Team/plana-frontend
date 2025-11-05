@@ -379,21 +379,6 @@ const CalendarBase: React.FC<CalendarBaseProps> = ({
   
   return (
     <div className={`calendar-base ${className}`} ref={containerRef}>
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ 
-          position: 'absolute', 
-          top: '10px', 
-          right: '10px', 
-          background: '#f0f0f0', 
-          padding: '5px', 
-          fontSize: '12px',
-          zIndex: 1000
-        }}>
-          Redux 일정: {scheduleEvents.length}개 | 로딩: {isLoadingEvents ? 'Y' : 'N'}
-        </div>
-      )}
-      {/* ✅ 삭제: 메모 로딩 오버레이 부분 */}
-
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}

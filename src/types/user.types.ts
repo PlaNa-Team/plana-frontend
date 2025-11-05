@@ -1,5 +1,5 @@
 // TypeScript 타입 정의 - 사용자 관련 타입
-export type Provider = 'GOOGLE' | 'LOCAL';
+export type Provider = 'GOOGLE' | 'LOCAL' | 'KAKAO' | 'NAVER';
 
 export interface User {
   id: number;

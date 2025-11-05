@@ -40,22 +40,46 @@ const MyPageModal: React.FC<MyPageModalProps> = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = () => {
-    try {
+  try {
     setIsLoggingOut(true);
-    dispatch(logout());
 
+    // 1️⃣ Redux/LocalStorage 초기화 (우리 서버 기준 로그아웃)
+    dispatch(logout());
     onClose();
-    navigate('/login');
-    } catch (error) {
-      console.error('로그아웃 중 오류 발생:', error);
-      
-      dispatch(logout());
-      onClose();
-      navigate('/login');
-    } finally { 
-      setIsLoggingOut(false);
+
+    // 2️⃣ 소셜 로그아웃 URL 분기
+    const provider = user?.provider?.toUpperCase(); // ex) 'KAKAO', 'NAVER', 'GOOGLE'
+
+    if (provider === "KAKAO") {
+      // 카카오 로그아웃 URL (client_id는 실제 카카오 REST API 키로 교체)
+      const kakaoClientId = "41bf883e7365fa566f6cd16ff9b4dfd1";
+      const redirectUri = "http://localhost:3000/login";
+      window.location.href = `https://kauth.kakao.com/oauth/logout?client_id=${kakaoClientId}&logout_redirect_uri=${redirectUri}`;
+      return;
     }
+
+    if (provider === "NAVER") {
+      // 네이버 로그아웃 URL
+      window.location.href = "https://nid.naver.com/nidlogin.logout";
+      return;
+    }
+
+    if (provider === "GOOGLE") {
+      // 구글 로그아웃 URL
+      window.location.href = "https://accounts.google.com/Logout";
+      return;
+    }
+
+    // 3️⃣ 기본 (로컬 로그인 사용자)
+    navigate('/login');
+  } catch (error) {
+    console.error('로그아웃 중 오류 발생:', error);
+    dispatch(logout());
+    navigate('/login');
+  } finally {
+    setIsLoggingOut(false);
   }
+};
 
   // 모달이 열릴 때 body 스크롤 막기
   useEffect(() => {

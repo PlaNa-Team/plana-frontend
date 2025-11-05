@@ -17,6 +17,7 @@ import { Calendar } from './pages/calendar';    // calendar/index.ts에서 expor
 import { Diary } from './pages/diary';          // diary/index.ts에서 export된 Diary
 import { Project } from './pages/project';      // project/index.ts에서 export된 Project
 import { useStompNotification } from '../src/hooks/useStompNotification'
+import AuthCallback from './pages/auth/AuthCallback';
 
 // 레이아웃 컴포넌트
 import Layout from './components/common/Layout';
@@ -53,10 +54,12 @@ function AppContent() {
       <Router>
         <Routes>
           {/* 공개 페이지들 (레이아웃 없음) */}
-          <Route path="/" element={<Landing />} />
+          {/* <Route path="/" element={<Landing />} /> 랜딩페이지 미사용, 로그인 페이지를 랜딩이자 초기페이지로 */} 
+          <Route path="/" element={<Login />} />  
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUpPage/>} />
           <Route path="/passwordsearch" element={<PasswordSearchPage/>}/>
+          <Route path="/auth/callback" element={<AuthCallback />} />
           
           {/* 메인 앱 페이지들 (레이아웃 적용) */}
           <Route path="/calendar" element={
@@ -71,11 +74,11 @@ function AppContent() {
             </Layout>
           } />
           
-          <Route path="/project" element={
+          {/* <Route path="/project" element={
             <Layout>
               <Project />
             </Layout>
-          } />
+          } /> 현재 프로젝트 저널 미개발 향후 디벨롭 예정. */}
           
           {/* 기본적으로 캘린더로 리다이렉트 */}
           <Route path="/app" element={

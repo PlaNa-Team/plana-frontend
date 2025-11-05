@@ -33,7 +33,7 @@ function Footer() {
         <p className="footer__titles">다이어리</p>
       </div>
 
-      <div 
+      {/*    현재 프로젝트 저널 미개발 향후 디벨롭 예정.   <div 
         className={`footer__containers ${isActive('/project') ? 'footer__containers--active' : ''}`}
         onClick={() => navigate('/project')}
       >
@@ -42,7 +42,7 @@ function Footer() {
           className="footer__icons"
         />
         <p className="footer__titles">프로젝트</p>
-      </div>
+      </div> */}
       
       
     </div>
