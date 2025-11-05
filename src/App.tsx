@@ -72,11 +72,11 @@ function AppContent() {
             </Layout>
           } />
           
-          <Route path="/project" element={
+          {/* <Route path="/project" element={
             <Layout>
               <Project />
             </Layout>
-          } />
+          } /> 현재 프로젝트 저널 미개발 향후 디벨롭 예정. */}
           
           {/* 기본적으로 캘린더로 리다이렉트 */}
           <Route path="/app" element={
