@@ -21,7 +21,9 @@ import {
   DiaryCreateResponse,
   DiaryDeleteResponse,
   DiaryDetail,
-  FriendSearchResponse
+  FriendSearchResponse,
+  LockAcquireResponse,
+  LockRenewResponse
 } from '../types/diary.types';
 import { 
   MonthlyScheduleResponse, 
@@ -987,7 +989,12 @@ export const diaryAPI = {
         try {
             const response = await apiClient.put<DiaryCreateResponse>(
                 `/diaries/${id}`,
-                requestBody
+                requestBody,
+                {
+                    headers: {
+                        'X-Lock-Token': localStorage.getItem('lockToken') || ''
+                    }
+                }
             );
             return response.data;
         } catch (error) {
@@ -1000,8 +1007,28 @@ export const diaryAPI = {
     },
     deleteDiary: async (id: number): Promise<DiaryDeleteResponse> => {
         try {
-            const response = await apiClient.delete<DiaryDeleteResponse>(`/diaries/${id}`);
-            return response.data;
+            const headers: Record<string, string> = {};
+            const lockToken = localStorage.getItem('lockToken');
+            if (lockToken) {
+                headers['X-Lock-Token'] = lockToken;
+            }
+
+            const response = await apiClient.delete<DiaryDeleteResponse>(`/diaries/${id}`, {
+                headers,
+                withCredentials: true,
+                validateStatus: () => true,
+            });
+
+            if (response.status === 200 || response.status === 204) {
+                return {
+                    status: response.status,
+                    message: (response.data as any)?.message || '다이어리가 삭제되었습니다.',
+                    body: { data: null },
+                } as DiaryDeleteResponse;
+            }
+
+            const msg = (response.data as any)?.message || '다이어리 삭제에 실패했습니다.';
+            throw new Error(msg);
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 const errorMessage = error.response?.data?.message || '다이어리 삭제에 실패했습니다.';
@@ -1021,7 +1048,60 @@ export const diaryAPI = {
             }
             throw new Error('네트워크 오류가 발생했습니다.');
         }
-    }
+    },
+    // 락 획득
+    acquireLock: async (diaryId: number): Promise<LockAcquireResponse> => {
+        try {
+            const response = await apiClient.post<LockAcquireResponse>(
+                `/locks/diaries/${diaryId}/acquire`
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const msg = error.response?.data?.message || '다이어리 락 획득에 실패했습니다.';
+                throw new Error(msg);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    // 락 갱신
+    renewLock: async (diaryId: number, lockToken: string): Promise<LockRenewResponse> => {
+        try {
+            const response = await apiClient.post<LockRenewResponse>(
+                `/locks/diaries/${diaryId}/renew`,
+                {},
+                {
+                    headers: { 'X-Lock-Token': lockToken }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const msg = error.response?.data?.message || '다이어리 락 갱신에 실패했습니다.';
+                throw new Error(msg);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+    // 락 해제
+    releaseLock: async (diaryId: number, lockToken: string): Promise<void> => {
+        try {
+            await apiClient.post(
+                `/locks/diaries/${diaryId}/release`,
+                {},
+                {
+                    headers: { 'X-Lock-Token': lockToken }
+                }
+            );
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const msg = error.response?.data?.message || '다이어리 락 해제에 실패했습니다.';
+                throw new Error(msg);
+            }
+            throw new Error('네트워크 오류가 발생했습니다.');
+        }
+    },
+
 };
 
 export default apiClient;

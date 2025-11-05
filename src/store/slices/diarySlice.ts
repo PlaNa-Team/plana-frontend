@@ -14,6 +14,8 @@ import {
     FriendItem,
     DiaryTagRequest,
     FriendSearchResponse,
+    LockAcquireResponse,
+    LockRenewResponse
 } from '../../types/diary.types';
 import axios from 'axios';
 import { RootState } from '..';
@@ -29,11 +31,14 @@ interface DiaryState {
     isUploading: boolean;
     error: string | null;
     showSuccessToast: boolean;
+    toastMessage: string | null;
     currentViewMonthAndYear: { year: number; month: number; };
     friendSearchResults: FriendItem[];
     selectedTags: DiaryTagRequest[];
     isSearching: boolean;
     searchError: string | null;
+    lockToken: string | null;
+    lockExpiresAt: string | null;
 }
 
 const initialState: DiaryState = {
@@ -73,11 +78,14 @@ const initialState: DiaryState = {
     isUploading: false,
     error: null,
     showSuccessToast: false,
+    toastMessage: null,
     currentViewMonthAndYear: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
     friendSearchResults: [],
     selectedTags: [],
     isSearching: false,
     searchError: null,
+    lockToken: null,
+    lockExpiresAt: null,
 };
 
 // 이미지 임시 업로드 Thunk
@@ -152,6 +160,53 @@ export const getDiaryDetailAsync = createAsyncThunk<
     }
 });
 
+// 락 획득 Thunk
+export const lockAcquireAsync = createAsyncThunk<
+    LockAcquireResponse,
+    number,
+    { rejectValue: string }
+>('/diary/lockAcquire', async (diaryId, { rejectWithValue }) => {
+    try {
+        const response = await diaryAPI.acquireLock(diaryId);
+        localStorage.setItem('lockToken', response.token);
+        return response;
+    } catch (error: any) {
+        return rejectWithValue(error.message);
+    }
+});
+
+// 락 갱신 Thunk
+export const lockRenewAsync = createAsyncThunk<
+    LockRenewResponse,
+    number,
+    { state: RootState; rejectValue: string }
+>('/diary/lockRenew', async (diaryId, { getState, rejectWithValue }) => {
+    const { lockToken } = getState().diary;
+    if (!lockToken) return rejectWithValue('락 토큰이 없습니다.');  
+    try {
+        const response = await diaryAPI.renewLock(diaryId, lockToken);
+        return response;
+    } catch (error: any) {
+        return rejectWithValue(error.message);
+    }
+});
+
+// 락 해제 Thunk
+export const lockReleaseAsync = createAsyncThunk<
+    void,
+    number,
+    { state: RootState; rejectValue: string }
+>('/diary/lockRelease', async (diaryId, { getState, rejectWithValue }) => {
+    const { lockToken } = getState().diary;
+    if (!lockToken) return rejectWithValue('락 토큰이 없습니다.');
+    try {
+        await diaryAPI.releaseLock(diaryId, lockToken);
+        localStorage.removeItem('lockToken');
+    } catch (error: any) {
+        return rejectWithValue(error.message);
+    }
+});
+
 // 다이어리 수정 Thunk
 export const updateDiaryAsync = createAsyncThunk<
     DiaryCreateResponse,
@@ -173,17 +228,17 @@ export const updateDiaryAsync = createAsyncThunk<
 
 // 다이어리 삭제 Thunk
 export const deleteDiaryAsync = createAsyncThunk<
-    void,
+    string,
     number,
     { rejectValue: string; state: RootState }
 >(
     'diary/deleteDiary',
     async (id, { dispatch, rejectWithValue, getState }) => {
         try {
-            await diaryAPI.deleteDiary(id);
-            // 삭제 후 캘린더를 새로고침
+            const res = await diaryAPI.deleteDiary(id);
             const { year, month } = getState().diary.currentViewMonthAndYear;
             await dispatch(getMonthlyDiariesAsync({ year, month }));
+            return '다이어리가 삭제되었습니다.';
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -295,6 +350,7 @@ const diarySlice = createSlice({
                 state.currentMovieData = initialState.currentMovieData;
                 state.currentBookData = initialState.currentBookData;
                 state.selectedDate = null;
+                state.toastMessage = '다이어리가 성공적으로 등록되었습니다!';
             })
             .addCase(createDiaryAsync.rejected, (state, action) => {
                 state.isLoading = false;
@@ -342,6 +398,26 @@ const diarySlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
+            .addCase(lockAcquireAsync.fulfilled, (state, action) => {
+                state.lockToken = action.payload.token;
+                state.lockExpiresAt = action.payload.expiresAt;
+            })
+            .addCase(lockAcquireAsync.rejected, (state, action) => {
+                state.error = action.payload || '락 획득 실패';
+            })
+            .addCase(lockRenewAsync.fulfilled, (state, action) => {
+                state.lockExpiresAt = action.payload.expiresAt;
+            })
+            .addCase(lockRenewAsync.rejected, (state, action) => {
+                state.error = action.payload || '락 갱신 실패';
+            })
+            .addCase(lockReleaseAsync.fulfilled, (state) => {
+                state.lockToken = null;
+                state.lockExpiresAt = null;
+            })
+            .addCase(lockReleaseAsync.rejected, (state, action) => {
+                state.error = action.payload || '락 해제 실패';
+            })
             .addCase(updateDiaryAsync.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -353,6 +429,7 @@ const diarySlice = createSlice({
                 state.currentMovieData = initialState.currentMovieData;
                 state.currentBookData = initialState.currentBookData;
                 state.selectedDate = null;
+                state.toastMessage = '다이어리가 수정되었습니다.'
             })
             .addCase(updateDiaryAsync.rejected, (state, action) => {
                 state.isLoading = false;
@@ -371,6 +448,7 @@ const diarySlice = createSlice({
                 state.currentMomentData = initialState.currentMomentData;
                 state.currentMovieData = initialState.currentMovieData;
                 state.currentBookData = initialState.currentBookData;
+                state.toastMessage = '다이어리가 삭제되었습니다.'
             })
             .addCase(deleteDiaryAsync.rejected, (state, action) => {
                 state.isLoading = false;

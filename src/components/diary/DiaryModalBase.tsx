@@ -9,6 +9,9 @@ import {
     clearError,
     createDiaryAsync,
     getDiaryDetailAsync,
+    lockAcquireAsync,
+    lockRenewAsync,
+    lockReleaseAsync,
     updateDiaryAsync,
     deleteDiaryAsync,
     searchMembersAsync,
@@ -64,6 +67,8 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         selectedTags,
         isSearching,
         searchError,
+        lockToken,
+        lockExpiresAt,
     } = useAppSelector(state => state.diary);
 
     const modalContentRef = useRef<HTMLDivElement>(null);
@@ -73,10 +78,11 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
     const [activeTab, setActiveTab] = useState<DiaryType>(diaryData?.diaryType || 'DAILY');
 
     const handleCloseModal = useCallback(() => {
+        if (diaryData?.id) dispatch(lockReleaseAsync(diaryData.id)); // 수정 모드일 때 닫으면 락 해제
         dispatch(clearCurrentData());
         dispatch(clearError());
         onClose();
-    }, [dispatch, onClose]);
+    }, [dispatch, onClose, diaryData]);
 
     // 다이어리 저장 핸들러 (수정/등록 분기처리)
     const handleSave = useCallback(async () => {
@@ -119,13 +125,14 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     id: diaryData.id,
                     diaryData: diaryDataBody as UpdateDiaryRequest
                 })).unwrap();
-                toast.success('다이어리가 성공적으로 등록되었습니다!');
+                toast.success('다이어리가 성공적으로 수정되었습니다!');
             } else { // 등록 모드 : id가 없는 경우
-                await dispatch(createDiaryAsync({ 
+                await dispatch(createDiaryAsync({
                     diaryData: diaryDataBody as CreateDiaryRequest
                  })).unwrap();
                  toast.error('다이어리 등록에 실패했습니다.');
             }
+            dispatch(lockReleaseAsync(diaryData?.id || 0)); // 수정 후 락 해제
             onClose();
         } catch (error) {
             const errorMessage = (error as any).message || '저장에 실패했습니다.';
@@ -143,6 +150,8 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         selectedTags,
     ]);
 
+    const isEditMode = !!diaryData;
+
     // 다이어리 삭제 핸들러
     const handleDelete = useCallback(async () => {
         if (!diaryData?.id) {
@@ -151,17 +160,20 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         }
 
         const confirmDelete = window.confirm('정말로 이 다이어리를 삭제하시겠습니까?');
-        if (confirmDelete) {
-            try {
-                await dispatch(deleteDiaryAsync(diaryData.id)).unwrap();
-                toast.success('다이어리가 삭제되었습니다!');
-                onClose();
-            } catch (error) {
-                const errorMessage = (error as any)?.message || '다이어리 삭제에 실패했습니다.';
-                toast.error(errorMessage);
+        if (!confirmDelete) return;
+
+        try {
+            const msg = await dispatch(deleteDiaryAsync(diaryData.id)).unwrap();
+            toast.success(msg);
+            if (lockToken) {
+                dispatch(lockReleaseAsync(diaryData.id)); // 삭제 후 락 해제
             }
+            onClose();
+        } catch (error) {
+            const errorMessage = (error as any)?.message || '다이어리 삭제에 실패했습니다.';
+            toast.error(errorMessage);
         }
-    }, [dispatch, diaryData, onClose]);
+    }, [dispatch, diaryData, lockToken, onClose]);
 
     // 탭 변경 핸들러
     const handleTabChange = (newTab: DiaryType) => {
@@ -218,6 +230,25 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         }
     }, [isOpen, dispatch]);
 
+    // 락 자동 갱신
+        useEffect(() => {
+            if (!isEditMode || !diaryData?.id || !lockExpiresAt) return;
+            const expires = new Date(lockExpiresAt).getTime();
+            const now = Date.now();
+            const renewBefore = expires - now - 3000; // 만료 3초 전에 갱신 시도
+    
+            if (renewBefore > 0) {
+                const timer = setTimeout(() => {
+                    dispatch(lockRenewAsync(diaryData.id))
+                        .unwrap()
+                        .then(() => console.log('다이어리 수정 잠금이 갱신되었습니다.'))
+                        .catch(() => toast.error('다이어리 수정 잠금 갱신에 실패했습니다.'));
+                }, renewBefore);
+    
+                return () => clearTimeout(timer);
+            }
+        }, [lockExpiresAt, isEditMode, diaryData, dispatch]);
+
     // 친구 검색 입력 핸들러 (디바운스 적용)
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const keyword = e.target.value;
@@ -246,13 +277,27 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
         dispatch(removeTag(loginId));
     }, [dispatch]);
 
-    const isEditMode = !!diaryData;
+    // 모달 내부 클릭 시 락 획득
+    const handleAnyClickInside = useCallback(async () => {
+        if (isEditMode && diaryData?.id && !lockToken) {
+            dispatch(lockAcquireAsync(diaryData.id))
+                .unwrap()
+                .then(() => toast.success('다이어리 수정 잠금이 설정되었습니다.'))
+                .catch(() => toast.error('다이어리 수정 잠금 설정에 실패했습니다.'));
+        }
+    }, [dispatch, diaryData, isEditMode, lockToken]);
 
     if (!isOpen) return null;
 
     return (
         <div className="diary-modal-backdrop" onClick={handleCloseModal}>
-            <div className='diary-modal' ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
+            <div className='diary-modal' 
+                ref={modalContentRef} 
+                onClick={(e) => {
+                    e.stopPropagation()
+                    handleAnyClickInside();
+                }}
+            >
                 <div className='diary-modal-header'>
                     <button
                         className='diary-modal-close'
@@ -263,7 +308,10 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                     </button>
                     <button
                         className='diary-modal-save'
-                        onClick={handleSave}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleSave();
+                        }}
                         disabled={isLoading || isUploading}
                     >
                         <CheckIcon width='24' height='24' fill='var(--color-xl)' />
@@ -340,7 +388,10 @@ const DiaryModalBase: React.FC<DiaryModalBaseProps> = ({
                 {isEditMode && (
                     <button
                         className="diary-modal-delete"
-                        onClick={handleDelete}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete();
+                        }}
                         disabled={isLoading}
                     >
                         <TrashBinIcon className="diary-modal-delete-icon" fill="var(--color-xl)" />
