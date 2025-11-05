@@ -55,12 +55,6 @@ export interface Memo {
 
 // === API 응답 관련 타입 추가 ===
 
-// 요청에 실제로 서버가 받는 친구 태그 타입
-export interface DiaryTagRequest {
-  memberId: number;
-}
-
-// 응답으로 내려오는 태그
 export interface FriendTag {
   id: number;
   memberId?: number;
@@ -70,14 +64,9 @@ export interface FriendTag {
   tagStatus: string;
 }
 
-// ui에서 사용하는 친구 태그 타입
-export interface UiSelectedTag {
-  // 검색 결과에서 추가할 때 받는 값들
-  id?: number;          // 검색 결과의 id (== memberId로 변환 대상)
-  loginId: string;      // 화면 표시용
-
-  // 기존에 이미 저장돼 있던 태그는 memberId가 채워져 옴
-  memberId?: number;    // 저장된 태그 구분용(있으면 기존 태그, 없으면 신규 태그)
+export interface DiaryTagRequest {
+  memberId?: number;
+  tagText?: string;
 }
 
 // 콘텐츠 타입별 요청 데이터
@@ -209,6 +198,11 @@ export interface FriendSearchResponse {
   message: string;
   data: FriendItem[];
   status: number;
+}
+
+// 다이어리 태그 요청 타입
+export interface DiaryTagRequest {
+  tagText?: string;
 }
 
 // 락 응답 타입

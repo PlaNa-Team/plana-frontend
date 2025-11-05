@@ -14,7 +14,6 @@ import {
     FriendItem,
     DiaryTagRequest,
     FriendSearchResponse,
-    UiSelectedTag,
     LockAcquireResponse,
     LockRenewResponse
 } from '../../types/diary.types';
@@ -35,7 +34,7 @@ interface DiaryState {
     toastMessage: string | null;
     currentViewMonthAndYear: { year: number; month: number; };
     friendSearchResults: FriendItem[];
-    selectedTags: UiSelectedTag[];
+    selectedTags: DiaryTagRequest[];
     isSearching: boolean;
     searchError: string | null;
     lockToken: string | null;
@@ -294,13 +293,13 @@ const diarySlice = createSlice({
         setCurrentViewMonthAndYear: (state, action: PayloadAction<{ year: number; month: number }>) => {
             state.currentViewMonthAndYear = action.payload;
         },
-        addTag: (state, action: PayloadAction<UiSelectedTag>) => {
-            if (!state.selectedTags.find(tag => tag.loginId === action.payload.loginId)) {
+        addTag: (state, action: PayloadAction<DiaryTagRequest>) => {
+            if (!state.selectedTags.find(tag => tag.tagText === action.payload.tagText)) {
                 state.selectedTags.push(action.payload);
             }
         },
         removeTag: (state, action: PayloadAction<string>) => {
-            state.selectedTags = state.selectedTags.filter(tag => tag.loginId !== action.payload);
+            state.selectedTags = state.selectedTags.filter(tag => tag.tagText !== action.payload);
         },
         clearSearchResults: (state) => {
             state.friendSearchResults = [];
@@ -308,9 +307,6 @@ const diarySlice = createSlice({
         clearAllTags: (state) => {
             state.selectedTags = [];
         },
-        setSelectedTags: (state, action: PayloadAction<UiSelectedTag[]>) => {
-            state.selectedTags = action.payload;
-        }
     },
     extraReducers: (builder) => {
         builder
@@ -487,7 +483,6 @@ export const {
     removeTag,
     clearSearchResults,
     clearAllTags,
-    setSelectedTags,
 } = diarySlice.actions;
 
 export default diarySlice.reducer;
