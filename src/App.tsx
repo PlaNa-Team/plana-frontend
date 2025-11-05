@@ -17,6 +17,7 @@ import { Calendar } from './pages/calendar';    // calendar/index.ts에서 expor
 import { Diary } from './pages/diary';          // diary/index.ts에서 export된 Diary
 import { Project } from './pages/project';      // project/index.ts에서 export된 Project
 import { useStompNotification } from '../src/hooks/useStompNotification'
+import AuthCallback from './pages/auth/AuthCallback';
 
 // 레이아웃 컴포넌트
 import Layout from './components/common/Layout';
@@ -58,6 +59,7 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUpPage/>} />
           <Route path="/passwordsearch" element={<PasswordSearchPage/>}/>
+          <Route path="/auth/callback" element={<AuthCallback />} />
           
           {/* 메인 앱 페이지들 (레이아웃 적용) */}
           <Route path="/calendar" element={
