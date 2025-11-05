@@ -53,7 +53,8 @@ function AppContent() {
       <Router>
         <Routes>
           {/* 공개 페이지들 (레이아웃 없음) */}
-          <Route path="/" element={<Landing />} />
+          {/* <Route path="/" element={<Landing />} /> 랜딩페이지 미사용, 로그인 페이지를 랜딩이자 초기페이지로 */} 
+          <Route path="/" element={<Login />} />  
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUpPage/>} />
           <Route path="/passwordsearch" element={<PasswordSearchPage/>}/>
