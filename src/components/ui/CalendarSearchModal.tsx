@@ -64,6 +64,10 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
     }
   }, [searchQuery, dispatch]);
 
+  useEffect(() => {
+  console.log("검색 결과(searchedEvents):", searchedEvents);
+}, [searchedEvents]);
+
   // 임시 테스트용 더미데이터 (검색 결과가 안 올 때 테스트용)
   const testResults: SearchResult[] = useMemo(() => [
     {
@@ -127,7 +131,7 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
         id: event.id || '',
         title: event.title || '',
         date: dateStr,
-        time: timeStr
+        time: timeStr,
       };
     });
   }, [searchedEvents, searchQuery, testResults]);
@@ -221,7 +225,7 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
                       className={`result-item ${selectedItem?.id === item.id ? 'selected' : ''}`}
                       onClick={() => handleItemClick(item)}
                     >
-                      <div className={`category-icon work`} />
+                      <div className={`category-icon work` } />
                       <div className="event-info">
                         <div className="event-title">{item.title}</div>
                         <div className="event-date">{item.date} {item.time}</div>
