@@ -37,35 +37,48 @@ const MomentContent: React.FC<MomentContentProps> = () => {
         }
     };
 
+    const handleRemoveImage = () => {
+        dispatch(updateMomentData({ imageUrl: '' }));
+    };
+
     return (
         <div className='diary-content'>
             <div className='daliy-content'>
                 <div className='first-row'>
                     <div className='image-upload'>
+                        <input
+                            type='file'
+                            accept='image/*'
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                            className='file-input'
+                            style={{ display: 'none'}}
+                        />
+                        
                         {momentData.imageUrl ? (
-                            <img
-                                src={momentData.imageUrl}
-                                alt="Uploaded Preview"
-                                className="image-upload-preview"
-                            />
-                        ) : (
-                            <>
-                                <input
-                                    type='file'
-                                    accept='image/*'
-                                    onChange={handleFileChange}
-                                    ref={fileInputRef}
-                                    className='file-input'
-                                    style={{ display: 'none'}}
-                                />
-                                <label
-                                    role='button'
+                            <div className='image-upload-wrapper'>
+                                <img
+                                    src={momentData.imageUrl}
+                                    alt="Uploaded Preview"
+                                    className="image-upload-preview"
                                     onClick={handleImageClick}
-                                    className='image-upload-button'
+                                />
+                                <button
+                                    type='button'
+                                    onClick={handleRemoveImage}
+                                    className='image-remove-button'
                                 >
-                                    이미지 업로드
-                                </label>
-                            </>
+                                    삭제
+                                </button>
+                            </div>
+                        ) : (
+                            <label
+                                role='button'
+                                onClick={handleImageClick}
+                                className='image-upload-button'
+                            >
+                                이미지 업로드
+                            </label>
                         )}
                     </div>
 
