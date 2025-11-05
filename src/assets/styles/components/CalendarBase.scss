@@ -1,6 +1,6 @@
 .calendar-base {
   .fc .fc-button-primary {
-    background-color: $tag-white !important;
+    background-color: var(--color-xs) !important;
   }
   
    .fc-event {
@@ -216,6 +216,7 @@
   
   // 헤더 툴바
   .fc-header-toolbar {
+    color: var(--color-lg);
     padding: 16px 20px !important;
     display: flex !important;
     align-items: center !important;
