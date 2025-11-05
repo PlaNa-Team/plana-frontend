@@ -24,6 +24,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: var(--color-xs);
     gap: 3vh;
     padding: 3.5rem;
   }
@@ -33,6 +34,7 @@
     display: flex;
     // flex-direction: column;
     align-items: center;
+    color: var(--color-xs);
     gap: 2vh;
   }
   
@@ -69,20 +71,20 @@
   &__title1 {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #333;
+    color: var(--color-xl);
     margin-bottom: 0.5vh;
   }
   
   &__title2 {
     font-size: 0.9rem;
-    color: #666;
+     color: var(--color-lg);
     margin-bottom: 1vh;
   }
   
   &__title3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color-xl);
     margin-bottom: 1vh;
   }
   
@@ -96,7 +98,7 @@
     &-title {
       font-size: 0.95rem;
       font-weight: 500;
-      color: #333;
+      color: var(--color-xl);
       text-align: left;
     }
     
@@ -140,7 +142,7 @@
     .mypagebtn-modal__inputbox-title {
       font-size: 0.95rem;
       font-weight: 500;
-      color: #333;
+      color: var(--color-xl);
       text-align: left;
     }
     

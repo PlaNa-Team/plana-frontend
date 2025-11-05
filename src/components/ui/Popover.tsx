@@ -12,7 +12,7 @@ import {
     setPopoverOpen,
 } from '../../store/slices/notiSlice'
 import { UnifiedAlarm } from "../../types/Notification.types"; 
-import { BellIcon } from '../../assets/icons'; 
+
 
 
 interface PopoverProps {
@@ -47,7 +47,7 @@ const NotificationItem: React.FC<{ notification: UnifiedAlarm, handleTagResponse
             onClick={handleNotificationClick} 
         >
             <div className="notification-item__icon">
-                <BellIcon fill={isUnread ? "var(--color-primary)" : "var(--color-text-secondary)"} />
+               {isUnread && <span className="notification-dot"></span>}
             </div>
             <div className="notification-item__body">
                 <div className="notification-item__message">{notification.message}</div>
@@ -62,7 +62,7 @@ const NotificationItem: React.FC<{ notification: UnifiedAlarm, handleTagResponse
                                 handleTagResponseClick(notification.id, notification.relatedData!.tagId!, true); 
                             }}
                         >
-                            수락
+                            수락    
                         </button>
                         <button 
                             className="btn btn--reject"
@@ -138,7 +138,10 @@ const CustomPopover: React.FC<PopoverProps> = ({ children }) => {
                             <button 
                                 className="notification-popover__read-all"
                                 // 타입 오류 방지를 위해 dispatchAsync 사용
-                                onClick={() => dispatchAsync(markAllAsRead())} 
+                                onClick={async () => {
+                                    await dispatchAsync(markAllAsRead());
+                                    dispatchAsync(fetchNotifications()); 
+                                    }}
                             >
                                 모두 읽음
                             </button>
