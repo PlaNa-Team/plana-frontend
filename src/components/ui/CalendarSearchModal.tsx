@@ -64,10 +64,6 @@ const CalendarSearchModal: React.FC<CalendarSearchModalProps> = ({
     }
   }, [searchQuery, dispatch]);
 
-  useEffect(() => {
-  console.log("검색 결과(searchedEvents):", searchedEvents);
-}, [searchedEvents]);
-
   // 임시 테스트용 더미데이터 (검색 결과가 안 올 때 테스트용)
   const testResults: SearchResult[] = useMemo(() => [
     {
