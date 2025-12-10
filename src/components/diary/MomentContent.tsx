@@ -1,10 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { LocationIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { updateMomentData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
-interface MomentContentProps {
-}
+interface MomentContentProps {}
 
 const MomentContent: React.FC<MomentContentProps> = () => {
     const dispatch = useAppDispatch();
@@ -13,9 +12,10 @@ const MomentContent: React.FC<MomentContentProps> = () => {
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY'}));
-        }
+        if (!file) return;
+
+        // ✅ 업로드 Thunk 호출 (slice에서 diaryType 별로 imageUrl 세팅)
+        dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY' }));
     };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,9 +52,9 @@ const MomentContent: React.FC<MomentContentProps> = () => {
                             onChange={handleFileChange}
                             ref={fileInputRef}
                             className='file-input'
-                            style={{ display: 'none'}}
+                            style={{ display: 'none' }}
                         />
-                        
+
                         {momentData.imageUrl ? (
                             <div className='image-upload-wrapper'>
                                 <img
