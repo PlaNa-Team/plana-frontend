@@ -17,7 +17,7 @@
 }
 
 .title {
-  font-size: 3rem; // 48px → rem 변환
+  font-size: 1.5rem; // 48px → rem 변환
   font-weight: $font-weight-bold;
   color: var(--color-xl);
   margin-bottom: 0.75rem; // 12px → rem 변환
@@ -29,9 +29,9 @@
 }
 
 .subtitle {
-  font-size: 3rem; // 48px → rem 변환
+  font-size: 3.5rem; // 48px → rem 변환
   color: var(--color-xl);
-  margin-bottom: 1.25rem; // 20px → rem 변환
+  margin: 1rem; // 20px → rem 변환
   font-weight: $font-weight-bold;
   line-height: $line-height-tight;
 
@@ -84,12 +84,12 @@
 .form-title {
   font-size: $font-size-2xl; // 1.5rem (24px)
   font-weight: $font-weight-semibold;
-  margin-bottom: 2.5rem; // 40px → rem 변환
+  margin: 0 0 1.5rem 0; // 40px → rem 변환
   text-align: center;
   color: var(--color-xl);
 
   @media (max-width: 768px) {
-    margin-bottom: 1.25rem; // 20px → rem 변환
+    margin-bottom: 0 0 1rem 0; // 20px → rem 변환
   }
 }
 
@@ -139,28 +139,12 @@
   }
 }
 
-.login-options {
-  @include flex-between;
-  justify-content: flex-end;
-  margin-bottom: 1.25rem; // 20px → rem 변환
-}
-
-.find-account {
-  font-size: 0.8125rem; // 13px → rem 변환
-  color: var(--color-md);
-  text-decoration: none;
-  transition: text-decoration 0.2s ease;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
 .login-button {
   @include flex-center;
   gap: 0.5rem; // 8px → rem 변환
   width: 100%   ;
   height: 3.5rem; // 40px → rem 변환
+  margin-bottom: 2rem;
   background-color: var(--color-md);
   color: var(--color-xs);
   border: none;
@@ -185,14 +169,25 @@
   font-family: $font-family-base;
 }
 
-.signup-section {
-  @include flex-between;
-  justify-content: flex-end;
-  margin-bottom: 1.25rem; // 20px → rem 변환
-  margin-top: 0.5rem;
+.auth-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0.5rem 1rem 0.5rem;
 }
 
 .signup-link {
+  font-size: 0.8125rem; // 13px → rem 변환
+  color: var(--color-md);
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.find-account {
   font-size: 0.8125rem; // 13px → rem 변환
   color: var(--color-md);
   text-decoration: none;
