@@ -1,10 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { LocationIcon } from '../../assets/icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { updateMomentData, uploadTempImageAsync } from '../../store/slices/diarySlice';
 
-interface MomentContentProps {
-}
+interface MomentContentProps {}
 
 const MomentContent: React.FC<MomentContentProps> = () => {
     const dispatch = useAppDispatch();
@@ -13,9 +12,10 @@ const MomentContent: React.FC<MomentContentProps> = () => {
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY'}));
-        }
+        if (!file) return;
+
+        // ✅ 업로드 Thunk 호출 (slice에서 diaryType 별로 imageUrl 세팅)
+        dispatch(uploadTempImageAsync({ file, diaryType: 'DAILY' }));
     };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,35 +37,48 @@ const MomentContent: React.FC<MomentContentProps> = () => {
         }
     };
 
+    const handleRemoveImage = () => {
+        dispatch(updateMomentData({ imageUrl: '' }));
+    };
+
     return (
         <div className='diary-content'>
             <div className='daliy-content'>
                 <div className='first-row'>
                     <div className='image-upload'>
+                        <input
+                            type='file'
+                            accept='image/*'
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                            className='file-input'
+                            style={{ display: 'none' }}
+                        />
+
                         {momentData.imageUrl ? (
-                            <img
-                                src={momentData.imageUrl}
-                                alt="Uploaded Preview"
-                                className="image-upload-preview"
-                            />
-                        ) : (
-                            <>
-                                <input
-                                    type='file'
-                                    accept='image/*'
-                                    onChange={handleFileChange}
-                                    ref={fileInputRef}
-                                    className='file-input'
-                                    style={{ display: 'none'}}
-                                />
-                                <label
-                                    role='button'
+                            <div className='image-upload-wrapper'>
+                                <img
+                                    src={momentData.imageUrl}
+                                    alt="Uploaded Preview"
+                                    className="image-upload-preview"
                                     onClick={handleImageClick}
-                                    className='image-upload-button'
+                                />
+                                <button
+                                    type='button'
+                                    onClick={handleRemoveImage}
+                                    className='image-remove-button'
                                 >
-                                    이미지 업로드
-                                </label>
-                            </>
+                                    삭제
+                                </button>
+                            </div>
+                        ) : (
+                            <label
+                                role='button'
+                                onClick={handleImageClick}
+                                className='image-upload-button'
+                            >
+                                이미지 업로드
+                            </label>
                         )}
                     </div>
 

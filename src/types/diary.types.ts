@@ -204,3 +204,18 @@ export interface FriendSearchResponse {
 export interface DiaryTagRequest {
   tagText?: string;
 }
+
+// 락 응답 타입
+export interface LockAcquireResponse {
+  acquired: boolean;
+  expiresAt: string;
+  token: string;
+  ownerId: number;
+  ttlSeconds: number;
+}
+
+export interface LockRenewResponse {
+  acquired: boolean;
+  expiresAt: string;
+  ttlSeconds: number;
+}

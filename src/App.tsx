@@ -31,7 +31,7 @@ import { hideSuccessToast, clearError } from './store/slices/diarySlice';
 
 function AppContent() {
   const dispatch = useAppDispatch();
-  const { showSuccessToast, error } = useAppSelector( state => state.diary );
+  const { showSuccessToast, toastMessage } = useAppSelector( state => state.diary );
   
   useStompNotification(); // 알림용 커스텀 훅 호출
   // 성공 토스트가 닫힐 때 Redux 상태를 업데이트하는 핸들러
@@ -46,7 +46,7 @@ function AppContent() {
       {/* 성공 토스트: Redux 상태에 따라 표시 */}
       <CustomToast
         title="알림"
-        description="다이어리가 성공적으로 등록되었습니다!"
+        description={toastMessage || ''}
         isOpen={showSuccessToast}
         onOpenChange={handleSuccessToastClose}
       />

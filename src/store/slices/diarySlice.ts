@@ -14,6 +14,8 @@ import {
     FriendItem,
     DiaryTagRequest,
     FriendSearchResponse,
+    LockAcquireResponse,
+    LockRenewResponse
 } from '../../types/diary.types';
 import axios from 'axios';
 import { RootState } from '..';
@@ -29,11 +31,14 @@ interface DiaryState {
     isUploading: boolean;
     error: string | null;
     showSuccessToast: boolean;
+    toastMessage: string | null;
     currentViewMonthAndYear: { year: number; month: number; };
     friendSearchResults: FriendItem[];
     selectedTags: DiaryTagRequest[];
     isSearching: boolean;
     searchError: string | null;
+    lockToken: string | null;
+    lockExpiresAt: string | null;
 }
 
 const initialState: DiaryState = {
@@ -73,19 +78,24 @@ const initialState: DiaryState = {
     isUploading: false,
     error: null,
     showSuccessToast: false,
+    toastMessage: null,
     currentViewMonthAndYear: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
     friendSearchResults: [],
     selectedTags: [],
     isSearching: false,
     searchError: null,
+    lockToken: null,
+    lockExpiresAt: null,
 };
 
 // 이미지 임시 업로드 Thunk
 export const uploadTempImageAsync = createAsyncThunk<
-    TempImageResponse, 
-    { file: File; diaryType: 'DAILY' | 'MOVIE' | 'BOOK'}, 
+    TempImageResponse,
+    { file: File; diaryType: 'DAILY' | 'MOVIE' | 'BOOK' },
     { rejectValue: string }
->('diary/uploadTempImage', async ({ file, diaryType }, { rejectWithValue }) => {
+>(
+    'diary/uploadTempImage',
+    async ({ file }, { rejectWithValue }) => {
         try {
             const response = await diaryAPI.uploadTempImage(file);
             return response;
@@ -111,7 +121,7 @@ export const createDiaryAsync = createAsyncThunk<
             return response;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
-                return rejectWithValue(error.response.data.message ||   '다이어리 등록 실패');
+                return rejectWithValue(error.response.data.message || '다이어리 등록 실패');
             }
             return rejectWithValue('네트워크 오류');
         }
@@ -143,14 +153,73 @@ export const getDiaryDetailAsync = createAsyncThunk<
     DiaryDetail,
     { date: string },
     { rejectValue: string }
->('diary/getDiaryDetail', async ({ date }, { rejectWithValue }) => {
-    try {
-        const response = await diaryAPI.getDiaryDetail(date);
-        return response;
-    } catch (error: any) {
-        return rejectWithValue(error.message);
+>(
+    'diary/getDiaryDetail',
+    async ({ date }, { rejectWithValue }) => {
+        try {
+            const response = await diaryAPI.getDiaryDetail(date);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
     }
-});
+);
+
+// 락 획득 Thunk
+export const lockAcquireAsync = createAsyncThunk<
+    LockAcquireResponse,
+    number,
+    { rejectValue: string }
+>(
+    '/diary/lockAcquire',
+    async (diaryId, { rejectWithValue }) => {
+        try {
+            const response = await diaryAPI.acquireLock(diaryId);
+            localStorage.setItem('lockToken', response.token);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// 락 갱신 Thunk
+export const lockRenewAsync = createAsyncThunk<
+    LockRenewResponse,
+    number,
+    { state: RootState; rejectValue: string }
+>(
+    '/diary/lockRenew',
+    async (diaryId, { getState, rejectWithValue }) => {
+        const { lockToken } = getState().diary;
+        if (!lockToken) return rejectWithValue('락 토큰이 없습니다.');
+        try {
+            const response = await diaryAPI.renewLock(diaryId, lockToken);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// 락 해제 Thunk
+export const lockReleaseAsync = createAsyncThunk<
+    void,
+    number,
+    { state: RootState; rejectValue: string }
+>(
+    '/diary/lockRelease',
+    async (diaryId, { getState, rejectWithValue }) => {
+        const { lockToken } = getState().diary;
+        if (!lockToken) return rejectWithValue('락 토큰이 없습니다.');
+        try {
+            await diaryAPI.releaseLock(diaryId, lockToken);
+            localStorage.removeItem('lockToken');
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 
 // 다이어리 수정 Thunk
 export const updateDiaryAsync = createAsyncThunk<
@@ -173,17 +242,17 @@ export const updateDiaryAsync = createAsyncThunk<
 
 // 다이어리 삭제 Thunk
 export const deleteDiaryAsync = createAsyncThunk<
-    void,
+    string,
     number,
     { rejectValue: string; state: RootState }
 >(
     'diary/deleteDiary',
     async (id, { dispatch, rejectWithValue, getState }) => {
         try {
-            await diaryAPI.deleteDiary(id);
-            // 삭제 후 캘린더를 새로고침
+            const res = await diaryAPI.deleteDiary(id);
             const { year, month } = getState().diary.currentViewMonthAndYear;
             await dispatch(getMonthlyDiariesAsync({ year, month }));
+            return '다이어리가 삭제되었습니다.';
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -234,7 +303,6 @@ const diarySlice = createSlice({
         hideSuccessToast: (state) => {
             state.showSuccessToast = false;
         },
-        // 현재 캘린더의 연월 업데이트 액션
         setCurrentViewMonthAndYear: (state, action: PayloadAction<{ year: number; month: number }>) => {
             state.currentViewMonthAndYear = action.payload;
         },
@@ -255,12 +323,15 @@ const diarySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // 이미지 업로드
             .addCase(uploadTempImageAsync.pending, (state) => {
                 state.isUploading = true;
                 state.error = null;
             })
             .addCase(uploadTempImageAsync.fulfilled, (state, action) => {
                 state.isUploading = false;
+
+                // ✅ 실제 응답 구조 반영
                 const tempUrl = action.payload.data.url;
                 const baseDomain = API_BASE_URL.replace('/api', '');
                 const fullUrl = `${baseDomain}${tempUrl}`;
@@ -283,6 +354,8 @@ const diarySlice = createSlice({
                 state.isUploading = false;
                 state.error = action.payload as string;
             })
+
+            // 다이어리 등록
             .addCase(createDiaryAsync.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -295,23 +368,26 @@ const diarySlice = createSlice({
                 state.currentMovieData = initialState.currentMovieData;
                 state.currentBookData = initialState.currentBookData;
                 state.selectedDate = null;
+                state.toastMessage = '다이어리가 성공적으로 등록되었습니다!';
             })
             .addCase(createDiaryAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
+
+            // 월간 다이어리 조회
             .addCase(getMonthlyDiariesAsync.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
             .addCase(getMonthlyDiariesAsync.fulfilled, (state, action) => {
                 const rawList = action.payload.body.data.diaryList;
-            
+
                 const processedList = rawList.map(d => ({
                     ...d,
                     diaryDate: d.diaryDate.split('T')[0]
                 }));
-              
+
                 state.monthlyDiaries = processedList;
                 state.isLoading = false;
             })
@@ -320,6 +396,8 @@ const diarySlice = createSlice({
                 state.error = action.payload as string;
                 state.monthlyDiaries = [];
             })
+
+            // 상세 조회
             .addCase(getDiaryDetailAsync.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -329,35 +407,74 @@ const diarySlice = createSlice({
                 state.currentDiaryDetail = diaryDetail;
                 state.isLoading = false;
 
-                // 탭 타입에 따라 Redux 상태 업데이트
+                // ✅ 다이어리 타입에 따라 현재 편집 데이터 세팅
                 if (diaryDetail.diaryType === 'DAILY') {
-                    state.currentMomentData = { ...diaryDetail.content, imageUrl: diaryDetail.imageUrl };
+                    state.currentMomentData = {
+                        ...(diaryDetail.content as DailyContent),
+                        imageUrl: diaryDetail.imageUrl || ''
+                    };
                 } else if (diaryDetail.diaryType === 'MOVIE') {
-                    state.currentMovieData = { ...diaryDetail.content, imageUrl: diaryDetail.imageUrl };
+                    state.currentMovieData = {
+                        ...(diaryDetail.content as MovieContent),
+                        imageUrl: diaryDetail.imageUrl || ''
+                    };
                 } else if (diaryDetail.diaryType === 'BOOK') {
-                    state.currentBookData = { ...diaryDetail.content, imageUrl: diaryDetail.imageUrl };
+                    state.currentBookData = {
+                        ...(diaryDetail.content as BookContent),
+                        imageUrl: diaryDetail.imageUrl || ''
+                    };
                 }
+
+                // ✅ 태그도 함께 세팅 (수정 시 전체 필드 전송용)
+                state.selectedTags = diaryDetail.diaryTags || [];
             })
             .addCase(getDiaryDetailAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
+
+            // 락 관련
+            .addCase(lockAcquireAsync.fulfilled, (state, action) => {
+                state.lockToken = action.payload.token;
+                state.lockExpiresAt = action.payload.expiresAt;
+            })
+            .addCase(lockAcquireAsync.rejected, (state, action) => {
+                state.error = action.payload || '락 획득 실패';
+            })
+            .addCase(lockRenewAsync.fulfilled, (state, action) => {
+                state.lockExpiresAt = action.payload.expiresAt;
+            })
+            .addCase(lockRenewAsync.rejected, (state, action) => {
+                state.error = action.payload || '락 갱신 실패';
+            })
+            .addCase(lockReleaseAsync.fulfilled, (state) => {
+                state.lockToken = null;
+                state.lockExpiresAt = null;
+            })
+            .addCase(lockReleaseAsync.rejected, (state, action) => {
+                state.error = action.payload || '락 해제 실패';
+            })
+
+            // 수정
             .addCase(updateDiaryAsync.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
-            .addCase(updateDiaryAsync.fulfilled, (state, action) => {
+            .addCase(updateDiaryAsync.fulfilled, (state) => {
                 state.isLoading = false;
                 state.showSuccessToast = true;
                 state.currentMomentData = initialState.currentMomentData;
                 state.currentMovieData = initialState.currentMovieData;
                 state.currentBookData = initialState.currentBookData;
                 state.selectedDate = null;
+                state.toastMessage = '다이어리가 수정되었습니다.';
             })
             .addCase(updateDiaryAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
+
+            // 삭제
             .addCase(deleteDiaryAsync.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -371,11 +488,14 @@ const diarySlice = createSlice({
                 state.currentMomentData = initialState.currentMomentData;
                 state.currentMovieData = initialState.currentMovieData;
                 state.currentBookData = initialState.currentBookData;
+                state.toastMessage = '다이어리가 삭제되었습니다.';
             })
             .addCase(deleteDiaryAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
             })
+
+            // 친구 검색
             .addCase(searchMembersAsync.pending, (state) => {
                 state.isSearching = true;
                 state.searchError = null;

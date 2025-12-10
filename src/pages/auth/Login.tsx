@@ -187,10 +187,13 @@ const Login: React.FC = () => {
             {loginError && <div className="error-message">{loginError}</div>}
           </div>
 
-          <div className="login-options">
-            <Link to="/passwordsearch" className="find-account">
-              비밀번호 찾기
-            </Link>
+          <div className='auth-link'>
+              <Link to="/signup" className="signup-link">
+                계정 만들기
+              </Link>
+              <Link to="/passwordsearch" className="find-account">
+                비밀번호 찾기
+              </Link>
           </div>
 
           <button 
@@ -201,12 +204,6 @@ const Login: React.FC = () => {
           >
             {isLoading ? '로그인 중...' : '로그인하기'}
           </button>
-
-          <div className="signup-section">
-            <Link to="/signup" className="signup-link">
-              계정 만들기
-            </Link>
-          </div>
         </div>
         
         <div className="social-login-section">

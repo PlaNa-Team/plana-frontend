@@ -61,28 +61,42 @@ const BookContent: React.FC<BookContentProps> = () => {
         }
     };
 
+    const handleRemoveImage = () => {
+        dispatch(updateBookData({ imageUrl: '' }));
+    };
+
     const currentRating = bookData.rating ?? 0;
 
     return (
         <div className='diary-content'>
             <div className='first-row'>
                 <div className='image-upload'>
-                    {bookData.imageUrl ? (
-                        <img
-                            src={bookData.imageUrl}
-                            alt="Uploaded Preview"
-                            className="image-upload-preview"
+                <input
+                            type='file'
+                            accept='image/*'
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                            className='file-input'
+                            style={{ display: 'none'}}
                         />
-                    ) : (
-                        <>
-                            <input
-                                type='file'
-                                accept='image/*'
-                                onChange={handleFileChange}
-                                ref={fileInputRef}
-                                className='file-input'
-                                style={{ display: 'none'}}
-                            />
+                        
+                        {bookData.imageUrl ? (
+                            <div className='image-upload-wrapper'>
+                                <img
+                                    src={bookData.imageUrl}
+                                    alt="Uploaded Preview"
+                                    className="image-upload-preview"
+                                    onClick={handleImageClick}
+                                />
+                                <button
+                                    type='button'
+                                    onClick={handleRemoveImage}
+                                    className='image-remove-button'
+                                >
+                                    삭제
+                                </button>
+                            </div>
+                        ) : (
                             <label
                                 role='button'
                                 onClick={handleImageClick}
@@ -90,8 +104,7 @@ const BookContent: React.FC<BookContentProps> = () => {
                             >
                                 이미지 업로드
                             </label>
-                        </>
-                    )}
+                        )}
                 </div>
                 <div className='input-section'>
                     <input

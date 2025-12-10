@@ -1,7 +1,7 @@
 .diary-calendar-wrapper {
   width: 100%;
   position: absolute;
-  top: 5%;
+  top: 8%;
   font-family: $font-family-base;
   background: transparent;
 
@@ -11,7 +11,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: 220px;
-    padding: $spacing-md $spacing-lg;
+    padding: 0 $spacing-lg $spacing-md $spacing-lg;
     
     .nav-btn {
       width: 40px;
@@ -171,6 +171,7 @@
       display: grid;
       background: var(--color-xs);
       padding: $spacing-2;
+      color: var(--color-xl);
       
       .memo-textarea {
         width: 100%;
